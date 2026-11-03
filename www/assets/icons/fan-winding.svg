@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <!-- Outer Motor Casing -->
+  <circle cx="32" cy="32" r="26" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="2"/>
+  <circle cx="32" cy="32" r="22" fill="#334155"/>
+  <!-- Copper Winding Slots & Coils -->
+  <g fill="#ea580c" stroke="#c2410c" stroke-width="1.5">
+    <!-- 8 Coil segments -->
+    <rect x="29" y="12" width="6" height="8" rx="2" fill="#f97316"/>
+    <rect x="29" y="44" width="6" height="8" rx="2" fill="#f97316"/>
+    <rect x="12" y="29" width="8" height="6" rx="2" fill="#f97316"/>
+    <rect x="44" y="29" width="8" height="6" rx="2" fill="#f97316"/>
+    
+    <rect x="18" y="18" width="6" height="7" rx="2" transform="rotate(-45 21 21.5)" fill="#ea580c"/>
+    <rect x="40" y="18" width="6" height="7" rx="2" transform="rotate(45 43 21.5)" fill="#ea580c"/>
+    <rect x="18" y="40" width="6" height="7" rx="2" transform="rotate(45 21 43.5)" fill="#ea580c"/>
+    <rect x="40" y="40" width="6" height="7" rx="2" transform="rotate(-45 43 43.5)" fill="#ea580c"/>
+  </g>
+  <!-- Rotor Core -->
+  <circle cx="32" cy="32" r="13" fill="#64748b"/>
+  <circle cx="32" cy="32" r="9" fill="#94a3b8"/>
+  <!-- Center Shaft Bearing -->
+  <circle cx="32" cy="32" r="5" fill="#0f172a"/>
+  <circle cx="32" cy="32" r="2" fill="#38bdf8"/>
+  <!-- Quality Copper Badge -->
+  <rect x="40" y="42" width="20" height="18" rx="6" fill="#0284c7"/>
+  <path d="M47 51L49 53L54 47" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

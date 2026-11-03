@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <!-- Ceiling Surface -->
+  <rect x="10" y="4" width="44" height="4" rx="2" fill="#cbd5e1"/>
+  <!-- Heavy Anchor Hook -->
+  <path d="M32 8V16C32 18 30 20 28 20C26 20 24 18 24 16" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <!-- Canopy & Downrod -->
+  <path d="M22 22C22 19 42 19 42 22L40 26H24L22 22Z" fill="#334155"/>
+  <rect x="29" y="26" width="6" height="20" rx="1.5" fill="#64748b"/>
+  <!-- Motor Hub Base -->
+  <ellipse cx="32" cy="48" rx="16" ry="6" fill="#059669"/>
+  <ellipse cx="32" cy="46" rx="14" ry="4" fill="#10b981"/>
+  <circle cx="32" cy="46" r="3" fill="#ffffff"/>
+  <!-- Installation Wrench -->
+  <g transform="translate(36, 26) rotate(25)">
+    <rect x="4" y="14" width="6" height="18" rx="2" fill="#ff6000"/>
+    <path d="M2 14C2 8 12 8 12 14C12 16 11 17 9 17V19H5V17C3 17 2 16 2 14Z" fill="#ea580c"/>
+    <circle cx="7" cy="12" r="3" fill="#ffffff"/>
+  </g>
+</svg>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>GharBijli — My Bookings</title>
+  <link rel="stylesheet" href="../www/css/main.css" />
+  <style>
+    body { background: #fffaf5; }
+    .screen { display: block !important; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="top-nav">
+      <div class="brand-wrapper">
+        <img src="../assets/logo.png" alt="GharBijli" class="brand-logo-img" />
+      </div>
+      <button class="user-status-btn">👤 Profile</button>
+    </header>
+
+    <main class="screen-container" style="padding: 16px;">
+      <div class="section-header">
+        <h2 class="section-title">My Bookings</h2>
+        <p class="section-subtitle">Track and manage your electrical service requests</p>
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+        <button class="btn btn-primary" style="padding: 8px 16px; font-size: 13px; width: auto;">Active Bookings (1)</button>
+        <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 13px; width: auto;">Past / Completed</button>
+      </div>
+
+      <!-- Booking Card Example -->
+      <div class="booking-card">
+        <div class="booking-card-top">
+          <span class="booking-id-tag">GB-2026-89421</span>
+          <span class="status-badge badge-confirmed">Confirmed</span>
+        </div>
+        <div class="booking-card-service">Ceiling Fan Repair & Noise Fix</div>
+        <div class="booking-card-datetime">
+          <span>📅 Today</span> • <span>⏰ 03:00 PM – 06:00 PM</span>
+        </div>
+        <div style="font-size: 12px; color: var(--ink-muted); margin-bottom: 12px;">
+          📍 Flat 302, Green Enclave, Bailey Road, Patna
+        </div>
+        <div class="booking-card-footer">
+          <span style="font-size: 12px; font-weight: 700; color: var(--ink-secondary);">Cash after service</span>
+          <a href="booking_status_tracking.html" class="btn btn-primary" style="width: auto; padding: 6px 14px; font-size: 12px; text-decoration: none;">
+            Track Status →
+          </a>
+        </div>
+      </div>
+    </main>
+
+    <nav class="bottom-nav">
+      <button class="nav-item"><span class="nav-icon">⚡</span><span>Services</span></button>
+      <button class="nav-item active"><span class="nav-icon">📋</span><span>Bookings</span></button>
+      <button class="nav-item"><span class="nav-icon">💬</span><span>Help</span></button>
+      <button class="nav-item"><span class="nav-icon">👤</span><span>Profile</span></button>
+    </nav>
+  </div>
+</body>
+</html>

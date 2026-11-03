@@ -1,0 +1,120 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (request.auth.token.admin == true || 
+         request.auth.token.role == 'admin');
+    }
+
+    function isAssignedTechnician(bookingData) {
+      return isAuthenticated() && 
+        bookingData.assignedTechnician != null && 
+        bookingData.assignedTechnician.technicianId == request.auth.uid;
+    }
+
+    // ==========================================
+    // USERS COLLECTION
+    // ==========================================
+    match /users/{userId} {
+      // Customer can read and write only their own profile
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) 
+        && request.resource.data.uid == userId
+        && request.resource.data.accountStatus in ['active', 'pending'];
+      allow update: if isOwner(userId) 
+        && request.resource.data.uid == userId
+        // Users cannot grant themselves admin status
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isAdmin', 'accountStatus'])
+        || isAdmin();
+      allow delete: if isAdmin();
+
+      // User saved addresses subcollection
+      match /addresses/{addressId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    // ==========================================
+    // SERVICES CATALOG
+    // ==========================================
+    match /services/{serviceId} {
+      // Anyone can read active services
+      allow read: if true;
+      // Only authorized admins can modify the catalog
+      allow write: if isAdmin();
+    }
+
+    // ==========================================
+    // BOOKINGS COLLECTION
+    // ==========================================
+    match /bookings/{bookingId} {
+      // Customer can only read their own bookings; technicians can read assigned jobs; admins can read all
+      allow read: if (isAuthenticated() && resource.data.customerUid == request.auth.uid)
+                  || isAssignedTechnician(resource.data)
+                  || isAdmin();
+
+      // Customer can create a booking with strict initial state
+      allow create: if isAuthenticated()
+        // Must belong to the authenticated user
+        && request.resource.data.customerUid == request.auth.uid
+        // Customer cannot mark as confirmed, assigned, or completed
+        && request.resource.data.bookingStatus == 'PENDING_CONFIRMATION'
+        // Customer cannot manipulate payment status
+        && request.resource.data.paymentStatus in ['PENDING', 'NOT_APPLICABLE']
+        // Payment method must be cash on delivery initially
+        && request.resource.data.paymentMethod in ['CASH_ON_DELIVERY', 'CASH_AFTER_SERVICE']
+        // Cannot assign a technician
+        && (!request.resource.data.keys().hasAny(['assignedTechnician', 'assignedTechnicianId']) 
+            || request.resource.data.assignedTechnician == null)
+        // Must contain essential booking fields
+        && request.resource.data.serviceId is string
+        && request.resource.data.preferredDate is string
+        && request.resource.data.preferredTimeSlot is string;
+
+      // Customer update rules: ONLY permitted to cancel if status permits
+      allow update: if (
+        // Case 1: Customer cancellation
+        isOwner(resource.data.customerUid)
+        && request.resource.data.bookingStatus == 'CANCELLED'
+        // Permitted only if currently pending confirmation or confirmed (before dispatch/technician starts work)
+        && resource.data.bookingStatus in ['PENDING_CONFIRMATION', 'CONFIRMED', 'TECHNICIAN_ASSIGNMENT_PENDING']
+        // Customer cannot alter other privileged fields during cancellation
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'customerUid', 'serviceId', 'paymentStatus', 'paymentMethod', 
+          'assignedTechnician', 'assignedTechnicianId', 'finalAmount'
+        ])
+      ) || (
+        // Case 2: Assigned technician updating work progress
+        isAssignedTechnician(resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'bookingStatus', 'statusHistory', 'updatedAt', 'notes'
+        ])
+        && request.resource.data.bookingStatus in ['ON_THE_WAY', 'IN_PROGRESS', 'COMPLETED']
+        // Technician cannot mark payment as collected unless explicitly permitted by backend policy
+        && request.resource.data.paymentStatus == resource.data.paymentStatus
+      ) || (
+        // Case 3: Admin / Operator full operational management
+        isAdmin()
+      );
+
+      // Bookings cannot be deleted by customers to preserve financial and audit trail
+      allow delete: if isAdmin();
+    }
+
+    // Default deny all other paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

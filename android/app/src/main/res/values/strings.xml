@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">GharBijli</string>
+    <string name="title_activity_main">GharBijli</string>
+    <string name="package_name">me.gharbijli.app</string>
+    <string name="custom_url_scheme">me.gharbijli.app</string>
+</resources>

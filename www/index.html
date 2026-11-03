@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>GharBijli — Home Electrical Services</title>
+  
+  <link rel="icon" type="image/png" href="assets/logo-square.png" />
+  <!-- Google Fonts for crisp modern typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;850&display=swap" rel="stylesheet" />
+  
+  <!-- Interactive Map Styles (Leaflet Local Bundle & Google Maps) -->
+  <link rel="stylesheet" href="lib/leaflet.css" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Offline Alert Banner -->
+    <div id="offline-banner" class="offline-banner">
+      ⚡ You are currently offline. Actions will sync once reconnected.
+    </div>
+
+    <!-- Top App Header (GharBijli Branded + Interactive Spec) -->
+    <header class="top-nav uc-nav-bar">
+      <button id="btn-nav-back-circle" class="uc-circle-btn" title="Menu" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <div class="uc-nav-title-wrap" id="uc-nav-title-wrap">
+        <div class="uc-nav-brand-title">
+          <span class="uc-brand-name">GharBijli</span>
+          <span class="uc-brand-bolt">⚡</span>
+        </div>
+        <button type="button" class="uc-nav-location-btn" id="btn-top-location-picker">
+          <span style="color: #5e35b1;">📍</span>
+          <span id="top-selected-area">Bailey Road, Patna</span>
+          <span style="font-size: 10px; color: #64748b;">▾</span>
+        </button>
+      </div>
+      <div class="uc-nav-right-actions">
+        <button id="btn-nav-search-circle" class="uc-circle-btn" title="Search" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+        <button id="btn-nav-share-circle" class="uc-circle-btn" title="Share" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+        </button>
+        <!-- Retained for DOM test integrity & made prominent and clickable -->
+        <button id="top-user-indicator" class="uc-circle-btn uc-user-btn" title="Account & Profile" type="button">
+          <span id="top-user-label" style="font-size: 15px;">👤</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Screens Container -->
+    <main class="screen-container">
+      
+      <!-- ========================================== -->
+      <!-- 1. HOME SCREEN (screen-home)               -->
+      <!-- ========================================== -->
+      <section id="screen-home" class="screen active">
+        <!-- Live Search Bar Overlay -->
+        <div class="search-bar-wrap" id="search-bar-wrap" style="display: none; margin: 10px 16px;">
+          <span class="search-icon-svg">🔍</span>
+          <input 
+            type="text" 
+            id="search-services-input" 
+            class="search-input" 
+            placeholder="Search fan repair, switch, MCB trip, wiring..." 
+            autocomplete="off"
+          />
+          <button id="btn-clear-search" class="search-clear-btn">✕</button>
+        </div>
+
+        <!-- Doorstep Electrical Services Hero Hub -->
+        <div class="uc-hero-hub">
+          <div class="uc-hero-title-row">
+            <div>
+              <h1 class="uc-hero-title">Electricians in Patna</h1>
+              <p class="uc-hero-sub-text">Doorstep electrical repairs & installations</p>
+            </div>
+            <button type="button" class="uc-earliest-badge" id="btn-hero-earliest-slot" title="View Dispatch Timing">
+              <div class="uc-earliest-top">
+                <span class="uc-clock-icon">🕒</span> Earliest Slot
+              </div>
+              <div class="uc-earliest-bottom">
+                Today, 30-45m ▾
+              </div>
+            </button>
+          </div>
+          <button type="button" class="uc-hero-rating-row" id="btn-hero-reviews" title="View Customer Reviews">
+            <span class="uc-star">★</span>
+            <span class="uc-rating-text">4.88 (12,400+ Patna Homes Serviced)</span>
+            <span class="uc-rating-chevron">▾</span>
+          </button>
+        </div>
+
+        <!-- Visitation Fee Discount Offer Card (Interactive) -->
+        <div class="uc-discount-banner" id="btn-visitation-promo" title="Tap to view special offer">
+          <div class="uc-discount-icon-badge">
+            <img src="assets/icons/discount-badge.png" alt="Offer" class="uc-discount-badge-img" />
+          </div>
+          <div class="uc-discount-text">
+            <div class="uc-discount-title">Get visitation fee off ▾</div>
+            <div class="uc-discount-subtitle">On orders above ₹499 (Tap for details)</div>
+          </div>
+        </div>
+
+        <!-- Section Break -->
+        <div class="uc-section-break"></div>
+
+        <!-- 4-Column Category Grid -->
+        <div class="uc-category-grid" id="uc-category-grid">
+          <div class="uc-cat-card" data-category="switch-socket">
+            <div class="uc-cat-icon-tile">
+              <img src="assets/categories/switch-socket.png" alt="Switch & socket" />
+            </div>
+            <span class="uc-cat-name">Switch & socket</span>
+          </div>
+          <div class="uc-cat-card" data-category="fan">
+            <div class="uc-cat-icon-tile">
+              <img src="assets/categories/fan.png" alt="Fan" />
+            </div>
+            <span class="uc-cat-name">Fan</span>
+          </div>
+          <div class="uc-cat-card" data-category="light">
+            <div class="uc-cat-icon-tile">
+              <img src="assets/categories/light.png" alt="Light" />
+            </div>
+            <span class="uc-cat-name">Light</span>
+          </div>
+          <div class="uc-cat-card" data-category="wiring">
+            <div class="uc-cat-icon-tile">
+              <img src="assets/categories/wiring.png" alt="Wiring" />
+            </div>
+            <span class="uc-cat-name">Wiring</span>
+          </div>
+          <div class="uc-cat-card" data-category="doorbell-security">
+            <div class="uc-cat-icon-tile">
+              <img src="assets/categories/doorbell-security.png" alt="Doorbell & security" />
+            </div>
+            <span class="uc-cat-name">Doorbell & security</span>
+          </div>
+          <div class="uc-cat-card" data-category="mcb-submeter">
+            <div class="uc-cat-icon-tile">
+              <img src="assets/categories/mcb-submeter.png" alt="MCB & submeter" />
+            </div>
+            <span class="uc-cat-name">MCB & submeter</span>
+          </div>
+          <div class="uc-cat-card" data-category="inverter-stabiliser">
+            <div class="uc-cat-icon-tile">
+              <img src="assets/categories/inverter-stabiliser.png" alt="Inverter & stabiliser" />
+            </div>
+            <span class="uc-cat-name">Inverter & stabiliser</span>
+          </div>
+          <div class="uc-cat-card" data-category="appliances">
+            <div class="uc-cat-icon-tile">
+              <img src="assets/categories/appliances.png" alt="TV & other appliances" />
+            </div>
+            <span class="uc-cat-name">TV & other appliances</span>
+          </div>
+          <div class="uc-cat-card" data-category="festive-lights">
+            <div class="uc-cat-icon-tile">
+              <img src="assets/categories/festive-lights.png" alt="Festive lights" />
+            </div>
+            <span class="uc-cat-name">Festive lights</span>
+          </div>
+          <div class="uc-cat-card" data-category="ev-charger">
+            <div class="uc-cat-icon-tile">
+              <img src="assets/categories/ev-charger.png" alt="EV charger installation" />
+            </div>
+            <span class="uc-cat-name">EV charger installation</span>
+          </div>
+          <div class="uc-cat-card" data-category="consultation">
+            <div class="uc-cat-icon-tile">
+              <img src="assets/categories/consultation.png" alt="Book a consultation" />
+            </div>
+            <span class="uc-cat-name">Book a consultation</span>
+          </div>
+        </div>
+
+        <!-- Section Break -->
+        <div class="uc-section-break"></div>
+
+        <!-- Quick Active Booking Card (rendered if user has active bookings) -->
+        <div id="home-active-booking-container" style="padding: 0 16px;"></div>
+
+        <!-- Category Filter Chips (Preserved for compatibility) -->
+        <div class="category-filter-strip" id="category-filter-strip" style="display: none;">
+          <button class="category-chip active" data-category="ALL"><span class="cat-label">All</span></button>
+        </div>
+
+        <!-- Section Header (Preserved) -->
+        <div class="section-header" style="display: none;">
+          <span id="services-count-badge">14 Services</span>
+        </div>
+
+        <!-- Services Grid (Dynamically Populated Category Sections & Service Items) -->
+        <div id="services-grid" class="uc-services-container">
+          <!-- Dynamically populated from services-data.js -->
+        </div>
+
+        <!-- How GharBijli Works -->
+        <div class="how-it-works-box">
+          <div class="how-it-works-header">
+            <h4>
+              <span style="color: #5e35b1;">⚡</span>
+              <span>How GharBijli Works</span>
+            </h4>
+            <span class="how-it-works-tag">100% COD</span>
+          </div>
+          <p class="how-it-works-desc">Transparent, verified doorstep electrical service in Patna</p>
+
+          <div class="step-row">
+            <div class="step-number">1</div>
+            <div class="step-text">
+              <h5>Select Repair Service (60s)</h5>
+              <p>Choose your required electrical fix & pick preferred time slot.</p>
+            </div>
+          </div>
+          <div class="step-row">
+            <div class="step-number">2</div>
+            <div class="step-text">
+              <h5>Instant Confirmation Call</h5>
+              <p>Our Patna operator calls within 10 minutes to verify details and quote.</p>
+            </div>
+          </div>
+          <div class="step-row">
+            <div class="step-number">3</div>
+            <div class="step-text">
+              <h5>Doorstep Inspection & Repair</h5>
+              <p>Police-verified local service partner arrives with tools at your doorstep.</p>
+            </div>
+          </div>
+          <div class="step-row">
+            <div class="step-number">4</div>
+            <div class="step-text">
+              <h5>Cash Payment After Satisfaction</h5>
+              <p>Inspect work completely and pay cash or UPI directly after satisfaction.</p>
+            </div>
+          </div>
+
+          <!-- Trust Badges Row -->
+          <div class="how-it-works-trust-row">
+            <div class="hiw-trust-pill">🛡️ 30-Day Warranty</div>
+            <div class="hiw-trust-pill">💵 Zero Advance Payment</div>
+            <div class="hiw-trust-pill">⚡ Standard Rates</div>
+          </div>
+        </div>
+
+        <!-- Admin Operator Test Drawer Trigger -->
+        <div style="text-align: center; margin-top: 10px; margin-bottom: 20px;">
+          <button id="btn-open-operator-panel" class="btn btn-secondary" style="font-size: 11.5px; padding: 8px 16px; width: auto; border-style: dashed;">
+            🛠️ Operator Simulation & Dispatch Panel
+          </button>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 2. PHONE LOGIN & OTP SCREEN                -->
+      <!-- ========================================== -->
+      <section id="screen-login" class="screen uc-login-screen">
+        <!-- Top Back Bar -->
+        <div class="uc-login-header">
+          <button type="button" id="btn-back-login" class="uc-login-back-btn" aria-label="Go Back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </button>
+          <span class="uc-login-header-badge">⚡ Patna Verified</span>
+        </div>
+
+        <div class="uc-login-hero">
+          <div class="uc-login-logo-wrap">
+            <img src="assets/logo-square.png" alt="GharBijli" class="uc-login-logo" />
+          </div>
+          <h2 class="uc-login-title">Welcome to GharBijli</h2>
+          <p class="uc-login-sub">Enter your mobile number to book, track & manage on-demand electrical services in Patna</p>
+        </div>
+
+        <!-- Step 1: Phone Input -->
+        <div id="auth-step-phone" class="uc-auth-card">
+          <form id="form-phone-login">
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label class="uc-auth-label" for="login-phone-number">Mobile Number (मोबाइल नंबर)</label>
+              <div class="uc-phone-box">
+                <div class="uc-phone-prefix">
+                  <span class="uc-in-badge">IN</span>
+                  <span class="uc-in-code">+91</span>
+                </div>
+                <input 
+                  type="tel" 
+                  id="login-phone-number" 
+                  class="uc-phone-input" 
+                  placeholder="98765 43210" 
+                  maxlength="10" 
+                  pattern="[6-9][0-9]{9}" 
+                  required 
+                  inputmode="numeric" 
+                />
+              </div>
+              
+              <!-- Quick 1-Tap Dev Fill Button -->
+              <div class="uc-dev-fill-row">
+                <span class="uc-dev-tag">⚡ Fast Test Mode</span>
+                <button type="button" id="btn-fill-test-account" class="uc-dev-fill-btn">
+                  1-Tap Fill: 9999999999
+                </button>
+              </div>
+            </div>
+
+            <!-- Invisible Recaptcha Anchor for Live Firebase Auth -->
+            <div id="recaptcha-container"></div>
+
+            <button type="submit" id="btn-send-otp" class="btn uc-auth-btn-primary" style="margin-top: 8px;">
+              Get Verification OTP →
+            </button>
+          </form>
+
+          <!-- Urban Company Micro Trust Badges -->
+          <div class="uc-auth-trust-badges">
+            <div class="uc-auth-trust-item">
+              <span class="uc-att-icon">🔒</span>
+              <span>100% Secure OTP</span>
+            </div>
+            <div class="uc-auth-trust-dot">•</div>
+            <div class="uc-auth-trust-item">
+              <span class="uc-att-icon">⚡</span>
+              <span>Instant Verification</span>
+            </div>
+            <div class="uc-auth-trust-dot">•</div>
+            <div class="uc-auth-trust-item">
+              <span class="uc-att-icon">💵</span>
+              <span>COD Guaranteed</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: OTP Verification -->
+        <div id="auth-step-otp" class="uc-auth-card" style="display: none;">
+          <div class="uc-otp-header">
+            <div class="uc-otp-icon-wrap">🔐</div>
+            <h3 class="uc-otp-title">Verify 6-Digit Code</h3>
+            <p class="uc-otp-sub">
+              Enter code sent to <strong id="otp-sent-to-number" style="color: #111827; font-weight: 800;">+91</strong>
+            </p>
+            <button type="button" id="btn-edit-phone-number" class="uc-edit-phone-link">
+              ✏️ Change Number
+            </button>
+          </div>
+
+          <form id="form-otp-verify">
+            <div class="otp-container uc-otp-grid">
+              <input type="text" class="otp-digit uc-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" required />
+              <input type="text" class="otp-digit uc-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" required />
+              <input type="text" class="otp-digit uc-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" required />
+              <input type="text" class="otp-digit uc-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" required />
+              <input type="text" class="otp-digit uc-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" required />
+              <input type="text" class="otp-digit uc-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" required />
+            </div>
+
+            <button type="submit" id="btn-verify-otp" class="btn uc-auth-btn-primary">
+              Verify & Proceed →
+            </button>
+
+            <div class="uc-otp-resend-row">
+              <span id="otp-timer-text" class="uc-otp-timer"></span>
+              <button type="button" id="btn-resend-otp" class="uc-resend-btn" disabled>
+                Resend OTP
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 3. SERVICE DETAILS & SCHEDULING SCREEN     -->
+      <!-- ========================================== -->
+      <section id="screen-service-details" class="screen">
+        <!-- Back Navigation Bar -->
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+          <button id="btn-back-service-details" style="padding: 8px 12px; background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-full); font-size: 12px; font-weight: 750; color: var(--ink); display: inline-flex; align-items: center; gap: 4px;">
+            ← Back
+          </button>
+          <span style="font-size: 14px; font-weight: 800; color: var(--ink);">Service Details</span>
+        </div>
+
+        <!-- Service Header Banner Card -->
+        <div style="background: #ffffff; border: 1.5px solid var(--border); border-radius: var(--radius-lg); padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow-sm);">
+          <div style="display: flex; align-items: flex-start; gap: 14px;">
+            <div id="detail-service-icon" class="service-icon-box" style="margin: 0; font-size: 26px; width: 52px; height: 52px;">🌪️</div>
+            <div style="flex: 1;">
+              <h3 id="detail-service-title" style="font-size: 17px; font-weight: 850; color: var(--ink); line-height: 1.3;">Service Name</h3>
+              <p id="detail-service-hindi" style="font-size: 12.5px; font-weight: 500; color: var(--ink-muted); margin-top: 2px;">सेवा का नाम</p>
+            </div>
+          </div>
+          <p id="detail-service-desc" style="font-size: 13px; color: var(--ink-secondary); margin-top: 12px; line-height: 1.5;"></p>
+          
+          <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px;" id="detail-common-issues"></div>
+
+          <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; color: var(--ink-muted); font-weight: 600;">Pricing Transparency:</span>
+            <span id="detail-service-price" style="font-size: 12.5px; font-weight: 800; color: var(--primary-dark);">Quote after physical inspection</span>
+          </div>
+          <div style="margin-top: 6px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; color: var(--ink-muted); font-weight: 600;">Estimated Duration:</span>
+            <span id="detail-service-duration" style="font-size: 12px; font-weight: 700; color: var(--ink-secondary);">30 - 45 mins</span>
+          </div>
+        </div>
+
+        <!-- Urban Company Inclusions & Exclusions Card -->
+        <div class="uc-inclusion-box">
+          <div class="uc-inclusion-title">
+            <span>✔</span> <span>What is Included (क्या शामिल है)</span>
+          </div>
+          <ul class="uc-inc-list" id="detail-included-list">
+            <li><span class="uc-green-tick">✓</span> <span>Doorstep diagnosis by verified Patna electrician</span></li>
+            <li><span class="uc-green-tick">✓</span> <span>Multimeter inspection & safety testing</span></li>
+            <li><span class="uc-green-tick">✓</span> <span>Clean up of workspace after repair</span></li>
+          </ul>
+
+          <div class="uc-inclusion-title" style="margin-top: 14px; color: var(--ink-secondary);">
+            <span>✖</span> <span>What is Excluded (क्या शामिल नहीं है)</span>
+          </div>
+          <ul class="uc-inc-list" id="detail-excluded-list">
+            <li><span class="uc-red-cross">✕</span> <span>Cost of spare parts (charged at actual retail MRP)</span></li>
+          </ul>
+
+          <div class="uc-guarantee-strip">
+            <span style="font-size: 22px;">🛡️</span>
+            <div class="uc-guarantee-text">
+              <h5>30-Day GharBijli Guarantee</h5>
+              <p>Free revisit & rework if the repaired issue reoccurs within 30 days.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schedule & Address Form -->
+        <div style="background: #ffffff; border: 1.5px solid var(--border); border-radius: var(--radius-lg); padding: 18px; box-shadow: var(--shadow-sm);">
+          <form id="form-booking-schedule">
+            <!-- Schedule Section -->
+            <h4 style="font-size: 15px; font-weight: 850; margin-bottom: 12px; color: var(--ink); display: flex; align-items: center; gap: 6px;">
+              <span>📅</span> <span>Pick Date & Time Slot</span>
+            </h4>
+
+            <!-- Quick Date Selector Pills -->
+            <div class="date-pills-row" id="quick-date-pills">
+              <!-- Dynamically populated Today, Tomorrow, Day After -->
+            </div>
+
+            <div class="form-group" style="margin-bottom: 12px;">
+              <input type="date" id="booking-date" class="form-control" style="font-weight: 600;" required />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Preferred Time Slot *</label>
+              <div class="slots-grid">
+                <div class="slot-pill active" data-slot="09:00 AM – 12:00 PM">🌅 Morning (9AM–12PM)</div>
+                <div class="slot-pill" data-slot="12:00 PM – 03:00 PM">☀️ Afternoon (12PM–3PM)</div>
+                <div class="slot-pill" data-slot="03:00 PM – 07:00 PM">🌆 Evening (3PM–7PM)</div>
+                <div class="slot-pill" data-slot="URGENT_1HR">⚡ Urgent (Within 1 Hour)</div>
+              </div>
+              <input type="hidden" id="booking-time-slot" value="09:00 AM – 12:00 PM" required />
+            </div>
+
+            <!-- Address Section -->
+            <h4 style="font-size: 15px; font-weight: 850; margin: 20px 0 10px; color: var(--ink); display: flex; align-items: center; gap: 6px;">
+              <span>📍</span> <span>Service Address (सेवा का पता)</span>
+            </h4>
+
+            <!-- Interactive Map Location Trigger Card -->
+            <div class="map-trigger-card" id="btn-open-map-picker">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="map-trigger-icon">📍</div>
+                <div>
+                  <h4 style="font-size: 14.5px; font-weight: 850; color: var(--ink);">Select Exact Location on Map</h4>
+                  <p style="font-size: 12px; color: var(--ink-muted); margin-top: 1px;" id="map-trigger-status-text">Pin your house / building for fast technician dispatch</p>
+                </div>
+              </div>
+              <span class="btn-map-badge">Open Map 🗺️</span>
+            </div>
+
+            <input type="hidden" id="booking-lat" value="25.6093" />
+            <input type="hidden" id="booking-lng" value="85.1235" />
+
+            <div class="form-group">
+              <label class="form-label">Your Name (आपका नाम) *</label>
+              <input type="text" id="booking-customer-name" class="form-control" placeholder="e.g. Rahul Sharma" required />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">House / Flat / Building No. *</label>
+              <input type="text" id="address-house" class="form-control" placeholder="e.g. Flat 302, Green Enclave" required />
+            </div>
+
+            <!-- Quick Patna Locality Selector Chips -->
+            <div class="form-group">
+              <label class="form-label">Street / Colony / Area *</label>
+              <input type="text" id="address-street" class="form-control" placeholder="e.g. Bailey Road, Near Saguna More" required />
+              
+              <div style="margin-top: 6px;">
+                <span style="font-size: 10.5px; font-weight: 700; color: var(--ink-muted);">Quick Select Patna Area:</span>
+                <div class="quick-chips-grid">
+                  <span class="quick-chip" data-area="Bailey Road">Bailey Road</span>
+                  <span class="quick-chip" data-area="Boring Road">Boring Road</span>
+                  <span class="quick-chip" data-area="Kankarbagh">Kankarbagh</span>
+                  <span class="quick-chip" data-area="Danapur">Danapur</span>
+                  <span class="quick-chip" data-area="Patliputra Colony">Patliputra</span>
+                  <span class="quick-chip" data-area="Ashiana Nagar">Ashiana</span>
+                  <span class="quick-chip" data-area="Rajendra Nagar">Rajendra Nagar</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div class="form-group">
+                <label class="form-label">Landmark</label>
+                <input type="text" id="address-landmark" class="form-control" placeholder="e.g. Near Shiv Mandir" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Pincode *</label>
+                <input type="text" id="address-pincode" class="form-control" placeholder="800001" maxlength="6" pattern="[0-9]{6}" value="800001" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">City / State</label>
+              <input type="text" id="address-city" class="form-control" value="Patna, Bihar" readonly style="background: var(--bg-subtle); font-weight: 600;" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Problem Note / Specific Request (Optional)</label>
+              <textarea id="booking-problem-desc" class="form-control" rows="2" placeholder="e.g. Fan makes humming noise on high speed..."></textarea>
+            </div>
+
+            <!-- Transparent Payment Guarantee Box -->
+            <div style="background: var(--primary-light); border: 1.5px solid var(--primary-subtle); border-radius: var(--radius-md); padding: 14px; margin: 18px 0;">
+              <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 13.5px; color: var(--primary-dark);">
+                <span>💵</span> <span>Cash On Delivery Guarantee</span>
+              </div>
+              <p style="font-size: 12px; color: #9a3412; margin-top: 4px; line-height: 1.4;">
+                No online payment needed now. Inspect electrician's work and pay cash directly after satisfactory completion.
+              </p>
+            </div>
+
+            <button type="submit" id="btn-submit-booking" class="btn btn-primary">
+              Schedule Service Visit →
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 4. BOOKING CONFIRMATION SCREEN             -->
+      <!-- ========================================== -->
+      <section id="screen-booking-confirmation" class="screen">
+        <div style="text-align: center; margin: 24px 0 20px;">
+          <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--success); color: #ffffff; display: grid; place-items: center; font-size: 36px; margin: 0 auto 14px; box-shadow: var(--shadow-md);">
+            ✓
+          </div>
+          <h2 style="font-size: 22px; font-weight: 850; letter-spacing: -0.5px; color: var(--ink);">Booking Received!</h2>
+          <p style="font-size: 13px; color: var(--ink-muted); margin-top: 4px;">Our operator will call you shortly to confirm visit</p>
+        </div>
+
+        <div style="background: #ffffff; border: 1.5px solid var(--border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow-sm);">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px dashed var(--border);">
+            <span style="font-size: 12px; color: var(--ink-muted); font-weight: 600;">Booking Reference:</span>
+            <span id="confirm-booking-id" style="font-size: 14px; font-weight: 850; color: var(--primary-dark); font-family: monospace;">GB-2026-00000</span>
+          </div>
+
+          <div style="margin-top: 14px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">Service Booked</div>
+            <div id="confirm-service-name" style="font-size: 15px; font-weight: 800; color: var(--ink); margin-top: 2px;">Service Name</div>
+          </div>
+
+          <div style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+              <div style="font-size: 11px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">Scheduled Date</div>
+              <div id="confirm-date" style="font-size: 13px; font-weight: 750; color: var(--ink); margin-top: 2px;">Date</div>
+            </div>
+            <div>
+              <div style="font-size: 11px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">Time Slot</div>
+              <div id="confirm-time-slot" style="font-size: 13px; font-weight: 750; color: var(--ink); margin-top: 2px;">Slot</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 12px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">Service Address</div>
+            <div id="confirm-address" style="font-size: 13px; color: var(--ink-secondary); margin-top: 2px; line-height: 1.4;">Address</div>
+          </div>
+
+          <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; color: var(--ink-muted); font-weight: 600;">Payment Mode:</span>
+            <span style="font-size: 12px; font-weight: 800; color: var(--success-dark);">Cash After Service</span>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <button id="btn-track-new-booking" class="btn btn-primary">
+            Track Live Service Status →
+          </button>
+          <button id="btn-return-home" class="btn btn-secondary">
+            Return to Home
+          </button>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 5. MY BOOKINGS SCREEN                      -->
+      <!-- ========================================== -->
+      <section id="screen-my-bookings" class="screen">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">My Bookings</h2>
+            <p class="section-subtitle">Track active orders and service history</p>
+          </div>
+        </div>
+
+        <!-- Segmented Control Tabs -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; background: #f1f5f9; padding: 4px; border-radius: var(--radius-md); margin-bottom: 16px;">
+          <button id="tab-active-bookings" class="btn" style="padding: 9px; font-size: 13px; font-weight: 800; border-radius: var(--radius-sm); background: #ffffff; color: #5e35b1; box-shadow: var(--shadow-sm); border: none;">
+            Active Services
+          </button>
+          <button id="tab-past-bookings" class="btn" style="padding: 9px; font-size: 13px; font-weight: 600; border-radius: var(--radius-sm); background: transparent; color: #64748b; border: none;">
+            Completed History
+          </button>
+        </div>
+
+        <!-- Bookings List Container -->
+        <div id="my-bookings-list">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 6. LIVE STATUS TRACKING SCREEN             -->
+      <!-- ========================================== -->
+      <section id="screen-tracking" class="screen">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+          <button id="btn-back-tracking" style="padding: 8px 12px; background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-full); font-size: 12px; font-weight: 750; color: var(--ink); display: inline-flex; align-items: center; gap: 4px;">
+            ← Back
+          </button>
+          <span id="tracking-booking-id-tag" style="font-family: monospace; font-size: 12px; font-weight: 800; color: var(--ink-muted);">GB-2026-00000</span>
+        </div>
+
+        <!-- Hero Tracking Header Card -->
+        <div class="tracking-hero-card">
+          <div class="tracking-hero-status">
+            <span class="status-beacon-circle"></span>
+            <span id="tracking-status-badge" class="status-badge badge-pending">Booking Received</span>
+          </div>
+          <h3 id="tracking-service-title" class="tracking-hero-title">Ceiling Fan Repair</h3>
+          <p id="tracking-status-desc" class="tracking-hero-sub">Our operator will call you shortly to confirm appointment.</p>
+        </div>
+
+        <!-- Electrician Partner Profile Card (Shown when assigned) -->
+        <div id="tracking-partner-container"></div>
+
+        <!-- Canonical 8-Stage Timeline -->
+        <div class="timeline-card">
+          <h4 style="font-size: 14.5px; font-weight: 850; margin-bottom: 16px; color: var(--ink);">Service Timeline</h4>
+          <div id="tracking-timeline-list">
+            <!-- Dynamically populated 8 stages -->
+          </div>
+        </div>
+
+        <!-- Address Snapshot Card -->
+        <div style="background: #ffffff; border: 1.5px solid var(--border); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 16px;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">Service Destination</div>
+          <div id="tracking-address-text" style="font-size: 13px; color: var(--ink-secondary); margin-top: 4px; line-height: 1.4;">
+            Flat 302, Green Enclave, Bailey Road, Patna
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 10px;">
+          <button id="btn-cancel-booking-trigger" class="btn btn-secondary" style="color: var(--urgent); border-color: #fecaca;">
+            Cancel Request
+          </button>
+          <a href="tel:+919876543210" class="btn btn-primary" style="text-decoration: none;">
+            📞 Call Operator
+          </a>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 7. USER PROFILE SCREEN                     -->
+      <!-- ========================================== -->
+      <section id="screen-profile" class="screen uc-profile-screen">
+        <!-- Logged-in View -->
+        <div id="profile-logged-in-view">
+          <div class="section-header" style="margin-bottom: 16px;">
+            <div>
+              <h2 class="section-title">My Account</h2>
+              <p class="section-subtitle">Manage phone number and electrical services</p>
+            </div>
+          </div>
+
+          <!-- User Card -->
+          <div class="uc-profile-card">
+            <div class="uc-profile-avatar">👤</div>
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <h3 id="profile-display-phone" class="uc-profile-phone">+91 9876543210</h3>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+                <span class="uc-verified-badge">✓ Verified Patna Customer</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Account Shortcut Cards -->
+          <div class="uc-profile-menu-card">
+            <div class="uc-profile-menu-item" id="btn-profile-my-bookings">
+              <div class="uc-pmi-left">
+                <span class="uc-pmi-icon">📋</span>
+                <div>
+                  <div class="uc-pmi-title">My Bookings & Track Orders</div>
+                  <div class="uc-pmi-sub">View active electrician visits and service history</div>
+                </div>
+              </div>
+              <span class="uc-pmi-arrow">→</span>
+            </div>
+
+            <div class="uc-profile-menu-item" id="btn-profile-help">
+              <div class="uc-pmi-left">
+                <span class="uc-pmi-icon">🚨</span>
+                <div>
+                  <div class="uc-pmi-title">Help & Customer Support</div>
+                  <div class="uc-pmi-sub">24/7 Electrical assistance & operator call</div>
+                </div>
+              </div>
+              <span class="uc-pmi-arrow">→</span>
+            </div>
+
+            <div class="uc-profile-menu-item" id="btn-profile-about">
+              <div class="uc-pmi-left">
+                <span class="uc-pmi-icon">⚡</span>
+                <div>
+                  <div class="uc-pmi-title">About GharBijli (Patna)</div>
+                  <div class="uc-pmi-sub">Bihar's trusted doorstep electrician network</div>
+                </div>
+              </div>
+              <span class="uc-pmi-arrow">→</span>
+            </div>
+
+            <div class="uc-profile-menu-item" id="btn-profile-terms">
+              <div class="uc-pmi-left">
+                <span class="uc-pmi-icon">🛡️</span>
+                <div>
+                  <div class="uc-pmi-title">Terms & COD Fair Pricing Policy</div>
+                  <div class="uc-pmi-sub">100% Cash on Delivery, pay after satisfaction</div>
+                </div>
+              </div>
+              <span class="uc-pmi-arrow">→</span>
+            </div>
+          </div>
+
+          <!-- Log Out Button with dedicated clearance -->
+          <div class="uc-profile-logout-wrap">
+            <button id="btn-user-logout" class="btn uc-btn-logout">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span>Log Out from Account</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Guest View (Shown when not logged in) -->
+        <div id="profile-guest-view" style="display: none;">
+          <div class="section-header" style="margin-bottom: 16px;">
+            <div>
+              <h2 class="section-title">My Account</h2>
+              <p class="section-subtitle">Sign in to manage your electrical bookings</p>
+            </div>
+          </div>
+
+          <div class="uc-guest-card">
+            <div class="uc-guest-avatar">👤</div>
+            <h3 class="uc-guest-title">Welcome to GharBijli</h3>
+            <p class="uc-guest-sub">
+              Log in with your mobile number to view active bookings, track electrician visits live, and manage service requests across Patna.
+            </p>
+            <button type="button" id="btn-guest-login" class="btn uc-auth-btn-primary" style="margin-top: 18px; width: 100%;">
+              Log In or Sign Up with Mobile →
+            </button>
+          </div>
+
+          <!-- Trust & Value Props -->
+          <div class="uc-guest-perks-box">
+            <div class="uc-guest-perk-item">
+              <span class="uc-gpi-icon">⚡</span>
+              <div>
+                <div class="uc-gpi-title">Verified Electricians</div>
+                <div class="uc-gpi-sub">Police-verified, background-checked Patna specialists</div>
+              </div>
+            </div>
+            <div class="uc-guest-perk-item">
+              <span class="uc-gpi-icon">💵</span>
+              <div>
+                <div class="uc-gpi-title">Cash on Delivery (Pay After Service)</div>
+                <div class="uc-gpi-sub">No advance payment. Inspect work and pay directly</div>
+              </div>
+            </div>
+            <div class="uc-guest-perk-item">
+              <span class="uc-gpi-icon">🛡️</span>
+              <div>
+                <div class="uc-gpi-title">Service Guarantee</div>
+                <div class="uc-gpi-sub">Transparent inspection pricing & genuine parts support</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Guest Action Links -->
+          <div class="uc-profile-menu-card" style="margin-top: 16px;">
+            <div class="uc-profile-menu-item" id="btn-guest-help">
+              <div class="uc-pmi-left">
+                <span class="uc-pmi-icon">🚨</span>
+                <div>
+                  <div class="uc-pmi-title">Emergency Electrical Help</div>
+                  <div class="uc-pmi-sub">Call Patna operator directly</div>
+                </div>
+              </div>
+              <span class="uc-pmi-arrow">→</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 8. HELP & SUPPORT SCREEN                   -->
+      <!-- ========================================== -->
+      <section id="screen-help" class="screen">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Help & Support</h2>
+            <p class="section-subtitle">24/7 Electrical assistance in Patna</p>
+          </div>
+        </div>
+
+        <!-- Quick Contacts -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+          <a href="tel:+919876543210" class="btn uc-auth-btn-primary" style="text-decoration: none; font-size: 13.5px; padding: 12px 14px !important; display: flex !important; align-items: center !important; justify-content: center !important;">
+            📞 Call Operator
+          </a>
+          <a href="https://wa.me/919876543210?text=Hi%20GharBijli,%20I%20need%20an%20electrician" target="_blank" class="btn btn-secondary" style="text-decoration: none; font-size: 13.5px; color: #047857; border-color: #a7f3d0; background: #ecfdf5; font-weight: 800; padding: 12px 14px; display: flex; align-items: center; justify-content: center;">
+            💬 WhatsApp
+          </a>
+        </div>
+
+        <!-- FAQs Accordion -->
+        <div style="background: #ffffff; border: 1.5px solid var(--border); border-radius: var(--radius-lg); padding: 18px; box-shadow: var(--shadow-sm);">
+          <h4 style="font-size: 15px; font-weight: 850; margin-bottom: 14px; color: var(--ink);">Frequently Asked Questions</h4>
+          
+          <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border-light);">
+            <div style="font-size: 13.5px; font-weight: 750; color: var(--ink);">How does payment work?</div>
+            <div style="font-size: 12px; color: var(--ink-muted); margin-top: 4px; line-height: 1.4;">
+              You do not pay upfront online. You pay cash (or UPI) directly to the verified electrician after service completion.
+            </div>
+          </div>
+
+          <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border-light);">
+            <div style="font-size: 13.5px; font-weight: 750; color: var(--ink);">How fast will the electrician arrive?</div>
+            <div style="font-size: 12px; color: var(--ink-muted); margin-top: 4px; line-height: 1.4;">
+              For urgent bookings, our nearest verified partner reaches your doorstep within 30 to 45 minutes across Patna.
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size: 13.5px; font-weight: 750; color: var(--ink);">Are GharBijli electricians verified?</div>
+            <div style="font-size: 12px; color: var(--ink-muted); margin-top: 4px; line-height: 1.4;">
+              Yes, 100% of our service partners undergo police background verification, identity check, and electrical trade test.
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Floating Dark Menu Pill Button (Screenshot_2026-11-02-20-49-02-43) -->
+    <button id="btn-floating-menu" class="uc-floating-menu-btn" type="button">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      <span>Menu</span>
+    </button>
+
+    <!-- Sticky Bottom Discount Bar (Screenshot_2026-11-02-20-49-02-43) -->
+    <div class="uc-sticky-bottom-discount" id="sticky-bottom-discount">
+      <div class="uc-sbd-left">
+        <span class="uc-sbd-badge">%</span>
+        <span class="uc-sbd-text">Get visitation fee off, on orders above ₹499</span>
+      </div>
+      <span class="uc-sbd-chevron">▼</span>
+    </div>
+
+    <!-- Sticky Bottom Cart Bar (Shows when items are added) -->
+    <div class="uc-sticky-cart-bar" id="sticky-cart-bar" style="display: none;">
+      <div class="uc-cart-info">
+        <span class="uc-cart-count" id="cart-item-count">1 item</span>
+        <span class="uc-cart-dot">•</span>
+        <span class="uc-cart-price" id="cart-total-price">₹49</span>
+        <span class="uc-cart-cod-tag">Pay after service</span>
+      </div>
+      <button class="uc-cart-view-btn" id="btn-view-cart" type="button">
+        <span>View Cart</span>
+        <span>→</span>
+      </button>
+    </div>
+
+    <!-- Floating Glass Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-target="home">
+        <span class="nav-icon">⚡</span>
+        <span>Services</span>
+      </button>
+      <button class="nav-item" data-target="myBookings">
+        <span class="nav-icon">📋</span>
+        <span>Bookings</span>
+        <span class="nav-badge-dot" id="nav-booking-badge" style="display: none;"></span>
+      </button>
+      <button class="nav-item" data-target="help">
+        <span class="nav-icon">🚨</span>
+        <span>Emergency</span>
+      </button>
+      <button class="nav-item" data-target="profile">
+        <span class="nav-icon">👤</span>
+        <span>Account</span>
+      </button>
+    </nav>
+
+    <!-- Patna Locality Selector Bottom Sheet Modal -->
+    <div id="area-modal" class="modal-overlay">
+      <div class="modal-sheet">
+        <div class="modal-sheet-handle"></div>
+        <h3 style="font-size: 17px; font-weight: 850; margin-bottom: 6px;">Select Your Patna Area</h3>
+        <p style="font-size: 12.5px; color: var(--ink-muted); margin-bottom: 16px;">We currently dispatch within 30–45 mins across these zones</p>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <button class="btn btn-secondary select-area-btn" data-area="Bailey Road">📍 Bailey Road / Saguna More</button>
+          <button class="btn btn-secondary select-area-btn" data-area="Boring Road">📍 Boring Road / Chauraha</button>
+          <button class="btn btn-secondary select-area-btn" data-area="Kankarbagh">📍 Kankarbagh Colony</button>
+          <button class="btn btn-secondary select-area-btn" data-area="Danapur">📍 Danapur Cantt / Khagaul</button>
+          <button class="btn btn-secondary select-area-btn" data-area="Patliputra Colony">📍 Patliputra Colony</button>
+          <button class="btn btn-secondary select-area-btn" data-area="Ashiana Nagar">📍 Ashiana Nagar / Rukanpura</button>
+          <button class="btn btn-secondary select-area-btn" data-area="Rajendra Nagar">📍 Rajendra Nagar / Kadamkuan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Express Dispatch Timing Modal -->
+    <div id="timing-modal" class="modal-overlay">
+      <div class="modal-sheet">
+        <div class="modal-sheet-handle"></div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <h3 style="font-size: 17px; font-weight: 850; color: #111827;">⚡ Patna Express Dispatch</h3>
+          <button type="button" class="modal-close-btn" id="btn-close-timing-modal">✕</button>
+        </div>
+        <div style="background: #f5f3ff; border: 1.5px solid #ddd6fe; border-radius: 14px; padding: 14px; margin-bottom: 14px;">
+          <div style="font-size: 13px; font-weight: 800; color: #5e35b1; display: flex; align-items: center; gap: 6px;">
+            <span>🕒</span> <span>Next Available Doorstep Visit: Today Within 30–45 Mins</span>
+          </div>
+          <p style="font-size: 12px; color: #4b5563; margin-top: 4px; line-height: 1.4;">
+            We operate verified local hubs across Bailey Road, Boring Road, Kankarbagh, Danapur, and Patliputra.
+          </p>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12.5px; color: #374151;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: #059669; font-weight: 800;">✓</span> <span>10-Minute Phone Confirmation Call</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: #059669; font-weight: 800;">✓</span> <span>Police Background-Verified Electricians</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: #059669; font-weight: 800;">✓</span> <span>Cash on Delivery (Pay Only After Inspection)</span>
+          </div>
+        </div>
+        <button type="button" class="btn uc-auth-btn-primary" id="btn-timing-modal-ok" style="margin-top: 18px; width: 100%;">
+          Got It, Book a Service →
+        </button>
+      </div>
+    </div>
+
+    <!-- Customer Reviews Modal -->
+    <div id="reviews-modal" class="modal-overlay">
+      <div class="modal-sheet">
+        <div class="modal-sheet-handle"></div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <div>
+            <h3 style="font-size: 17px; font-weight: 850; color: #111827;">★ 4.88 / 5 Rating</h3>
+            <p style="font-size: 12px; color: #64748b; margin-top: 2px;">Based on 12,400+ verified Patna households</p>
+          </div>
+          <button type="button" class="modal-close-btn" id="btn-close-reviews-modal">✕</button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px; max-height: 320px; overflow-y: auto;">
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 800; font-size: 13px; color: #111827;">Amit Kumar</span>
+              <span style="color: #f59e0b; font-size: 11px;">★★★★★</span>
+            </div>
+            <div style="font-size: 11px; color: #059669; font-weight: 700; margin-top: 1px;">📍 Bailey Road, Patna</div>
+            <p style="font-size: 12px; color: #4b5563; margin-top: 4px; line-height: 1.35;">
+              "Ceiling fan stopped suddenly at night. Electrician arrived in 35 mins with ladder and tester. Very polite!"
+            </p>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 800; font-size: 13px; color: #111827;">Priya Singh</span>
+              <span style="color: #f59e0b; font-size: 11px;">★★★★★</span>
+            </div>
+            <div style="font-size: 11px; color: #059669; font-weight: 700; margin-top: 1px;">📍 Kankarbagh Colony</div>
+            <p style="font-size: 12px; color: #4b5563; margin-top: 4px; line-height: 1.35;">
+              "MCB tripping was fixed cleanly with proper load test. Paid cash after inspecting everything. 10/10."
+            </p>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 800; font-size: 13px; color: #111827;">Rajesh Verma</span>
+              <span style="color: #f59e0b; font-size: 11px;">★★★★★</span>
+            </div>
+            <div style="font-size: 11px; color: #059669; font-weight: 700; margin-top: 1px;">📍 Boring Road, Patna</div>
+            <p style="font-size: 12px; color: #4b5563; margin-top: 4px; line-height: 1.35;">
+              "Best electrical service in Patna. Transparent quotation, no advance payment needed."
+            </p>
+          </div>
+        </div>
+        <button type="button" class="btn uc-auth-btn-primary" id="btn-reviews-modal-ok" style="margin-top: 16px; width: 100%;">
+          Close Reviews
+        </button>
+      </div>
+    </div>
+
+    <!-- Visitation Discount Offer Modal -->
+    <div id="offer-promo-modal" class="modal-overlay">
+      <div class="modal-sheet">
+        <div class="modal-sheet-handle"></div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <h3 style="font-size: 17px; font-weight: 850; color: #111827;">🎉 Patna Special Offer</h3>
+          <button type="button" class="modal-close-btn" id="btn-close-offer-modal">✕</button>
+        </div>
+        <div style="background: #ecfdf5; border: 1.5px solid #a7f3d0; border-radius: 14px; padding: 16px; text-align: center; margin-bottom: 14px;">
+          <div style="font-size: 28px; margin-bottom: 6px;">⚡</div>
+          <div style="font-size: 16px; font-weight: 850; color: #065f46;">₹50 OFF Visitation Fee</div>
+          <div style="font-size: 12px; color: #047857; margin-top: 4px;">Applied automatically on all repair orders above ₹499</div>
+          <div style="display: inline-block; margin-top: 12px; padding: 4px 14px; background: #ffffff; border: 1.5px dashed #059669; border-radius: 8px; font-family: monospace; font-size: 13.5px; font-weight: 800; color: #047857;">
+            PATNA50
+          </div>
+        </div>
+        <div style="font-size: 12px; color: #64748b; line-height: 1.4; margin-bottom: 16px;">
+          • No promo code needed at booking — discount applied automatically during billing.<br>
+          • 100% Cash on Delivery (Pay only after satisfactory service).<br>
+          • Valid across all Patna zones.
+        </div>
+        <button type="button" class="btn uc-auth-btn-primary" id="btn-offer-modal-ok" style="width: 100%;">
+          Awesome, Continue Shopping →
+        </button>
+      </div>
+    </div>
+
+    <!-- Full-Screen Interactive Google Map Location Modal -->
+    <div id="map-location-modal" class="modal-overlay">
+      <div class="map-modal-content">
+        <!-- Top Map Bar -->
+        <div class="map-modal-header">
+          <button type="button" id="btn-close-map-modal" class="map-header-btn">✕</button>
+          <h3 style="font-size: 16px; font-weight: 850; color: var(--ink);">Select Service Location on Map</h3>
+          <div style="width: 34px;"></div>
+        </div>
+
+        <!-- Map Search Box with Patna Suggestions -->
+        <div class="map-search-wrap">
+          <span style="font-size: 15px;">🔍</span>
+          <input type="text" id="map-search-input" placeholder="Search Patna area (Bailey Rd, Boring Rd)..." autocomplete="off" />
+          <div id="map-suggestions-box" class="map-suggestions-dropdown" style="display: none;"></div>
+        </div>
+
+        <!-- Interactive Map Viewport with Animated Center Pin -->
+        <div class="map-viewport-wrapper">
+          <div id="map-container" class="map-canvas"></div>
+
+          <!-- Fixed Center Pin Dropper (Urban Company / Blinkit style) -->
+          <div class="map-center-pin-container" id="map-center-pin">
+            <div class="pin-marker-body">
+              <div class="pin-marker-circle">⚡</div>
+            </div>
+            <div class="pin-marker-shadow"></div>
+          </div>
+
+          <!-- Locate Me GPS Floating Button -->
+          <button type="button" id="btn-locate-gps" class="btn-locate-me" title="Locate Current Position">
+            <span>🎯</span>
+            <span>Use Current Location</span>
+          </button>
+        </div>
+
+        <!-- Bottom Location Snapshot Sheet -->
+        <div class="map-bottom-sheet">
+          <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px;">
+            <span style="font-size: 22px; color: var(--primary);">📍</span>
+            <div style="flex: 1;">
+              <div id="map-detected-title" style="font-size: 15px; font-weight: 850; color: var(--ink);">Bailey Road, Patna</div>
+              <div id="map-detected-sub" style="font-size: 12px; color: var(--ink-muted); margin-top: 2px;">Saguna More, Patna - 801503</div>
+            </div>
+          </div>
+
+          <button type="button" id="btn-confirm-map-location" class="btn btn-primary">
+            Confirm Location & Fill Address →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cancellation Modal (Required by test_app_integrity) -->
+    <div id="cancel-modal" class="modal-overlay">
+      <div class="modal-sheet">
+        <div class="modal-sheet-handle"></div>
+        <h3 style="font-size: 17px; font-weight: 850; color: var(--urgent); margin-bottom: 6px;">Cancel Booking</h3>
+        <p style="font-size: 13px; color: var(--ink-muted); margin-bottom: 16px;">Please select reason for cancellation:</p>
+
+        <select id="cancel-reason-select" class="form-control" style="margin-bottom: 16px;">
+          <option value="problem_resolved">Problem already resolved / Self-fixed</option>
+          <option value="electrician_delayed">Electrician delayed</option>
+          <option value="booked_by_mistake">Booked by mistake</option>
+          <option value="rescheduling_later">Will reschedule for another date</option>
+          <option value="other">Other reason</option>
+        </select>
+
+        <div style="display: flex; gap: 10px;">
+          <button type="button" id="btn-cancel-close" class="btn btn-secondary">Keep Booking</button>
+          <button type="button" id="btn-cancel-confirm" class="btn btn-danger">Confirm Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin / Operator Simulation Modal (Required by test_app_integrity) -->
+    <div id="admin-modal" class="modal-overlay">
+      <div class="modal-sheet">
+        <div class="modal-sheet-handle"></div>
+        <h3 style="font-size: 17px; font-weight: 850; margin-bottom: 6px;">🛠️ Operator Simulation</h3>
+        <p style="font-size: 12.5px; color: var(--ink-muted); margin-bottom: 16px;">Advance booking status to test customer timeline</p>
+
+        <div class="form-group">
+          <label class="form-label">Active Booking:</label>
+          <select id="admin-booking-select" class="form-control"></select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Set New Status:</label>
+          <select id="admin-status-select" class="form-control">
+            <option value="PENDING_CONFIRMATION">1. PENDING_CONFIRMATION (बुकिंग प्राप्त हुई)</option>
+            <option value="CONFIRMED">2. CONFIRMED (बुकिंग स्वीकृत)</option>
+            <option value="TECHNICIAN_ASSIGNMENT_PENDING">3. TECHNICIAN_ASSIGNMENT_PENDING (खोज रहे हैं)</option>
+            <option value="TECHNICIAN_ASSIGNED">4. TECHNICIAN_ASSIGNED (नियुक्त)</option>
+            <option value="ON_THE_WAY">5. ON_THE_WAY (रास्ते में हैं)</option>
+            <option value="IN_PROGRESS">6. IN_PROGRESS (काम जारी है)</option>
+            <option value="COMPLETED">7. COMPLETED (कार्य पूर्ण / Cash Paid)</option>
+            <option value="CANCELLED">8. CANCELLED (रद्द)</option>
+          </select>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <button type="button" id="btn-admin-close" class="btn btn-secondary">Close</button>
+          <button type="button" id="btn-admin-apply" class="btn btn-primary">Update Status</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Urban Company 3-Column Category Menu Popup Modal (Screenshot_2026-11-02-20-50-30-91) -->
+    <div id="uc-menu-modal" class="uc-menu-modal-overlay">
+      <div class="uc-menu-modal-content">
+        <div class="uc-menu-modal-card">
+          <div class="uc-menu-grid">
+            <div class="uc-menu-item" data-category="switch-socket">
+              <div class="uc-menu-item-tile">
+                <img src="assets/categories/switch-socket.png" alt="Switch & socket" />
+              </div>
+              <span class="uc-menu-item-name">Switch & socket</span>
+            </div>
+            <div class="uc-menu-item" data-category="fan">
+              <div class="uc-menu-item-tile">
+                <img src="assets/categories/fan.png" alt="Fan" />
+              </div>
+              <span class="uc-menu-item-name">Fan</span>
+            </div>
+            <div class="uc-menu-item" data-category="light">
+              <div class="uc-menu-item-tile">
+                <img src="assets/categories/light.png" alt="Light" />
+              </div>
+              <span class="uc-menu-item-name">Light</span>
+            </div>
+            <div class="uc-menu-item" data-category="wiring">
+              <div class="uc-menu-item-tile">
+                <img src="assets/categories/wiring.png" alt="Wiring" />
+              </div>
+              <span class="uc-menu-item-name">Wiring</span>
+            </div>
+            <div class="uc-menu-item" data-category="doorbell-security">
+              <div class="uc-menu-item-tile">
+                <img src="assets/categories/doorbell-security.png" alt="Doorbell & security" />
+              </div>
+              <span class="uc-menu-item-name">Doorbell & security</span>
+            </div>
+            <div class="uc-menu-item" data-category="mcb-submeter">
+              <div class="uc-menu-item-tile">
+                <img src="assets/categories/mcb-submeter.png" alt="MCB & submeter" />
+              </div>
+              <span class="uc-menu-item-name">MCB & submeter</span>
+            </div>
+            <div class="uc-menu-item" data-category="inverter-stabiliser">
+              <div class="uc-menu-item-tile">
+                <img src="assets/categories/inverter-stabiliser.png" alt="Inverter & stabiliser" />
+              </div>
+              <span class="uc-menu-item-name">Inverter & stabiliser</span>
+            </div>
+            <div class="uc-menu-item" data-category="appliances">
+              <div class="uc-menu-item-tile">
+                <img src="assets/categories/appliances.png" alt="TV & other appliances" />
+              </div>
+              <span class="uc-menu-item-name">TV & other appliances</span>
+            </div>
+            <div class="uc-menu-item" data-category="festive-lights">
+              <div class="uc-menu-item-tile">
+                <img src="assets/categories/festive-lights.png" alt="Festive lights" />
+              </div>
+              <span class="uc-menu-item-name">Festive lights</span>
+            </div>
+            <div class="uc-menu-item" data-category="ev-charger">
+              <div class="uc-menu-item-tile">
+                <img src="assets/categories/ev-charger.png" alt="EV charger installation" />
+              </div>
+              <span class="uc-menu-item-name">EV charger installation</span>
+            </div>
+            <div class="uc-menu-item" data-category="consultation">
+              <div class="uc-menu-item-tile">
+                <img src="assets/categories/consultation.png" alt="Book a consultation" />
+              </div>
+              <span class="uc-menu-item-name">Book a consultation</span>
+            </div>
+          </div>
+        </div>
+        <button id="btn-uc-menu-close" class="uc-menu-close-btn" type="button" title="Close Menu">✕</button>
+      </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/services-data.js"></script>
+  <script src="lib/leaflet.js"></script>
+  <script src="js/map-service.js"></script>
+  <script src="js/firebase-service.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

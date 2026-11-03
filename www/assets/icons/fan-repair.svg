@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <!-- Downrod & Canopy -->
+  <rect x="29" y="4" width="6" height="16" rx="2" fill="#475569"/>
+  <path d="M26 6C26 4.89543 26.8954 4 28 4H36C37.1046 4 38 4.89543 38 6V8H26V6Z" fill="#334155"/>
+  <ellipse cx="32" cy="18" rx="8" ry="3" fill="#64748b"/>
+  <!-- Blades -->
+  <!-- Top Right Blade -->
+  <path d="M37 28C44 23 55 22 59 25C62 27 61 32 54 34C47 36 38 32 37 28Z" fill="#38bdf8"/>
+  <path d="M38 29C44 24.5 53 23.5 57 26C55 28 48 31 39 31Z" fill="#0284c7" opacity="0.4"/>
+  <!-- Left Blade -->
+  <path d="M26 29C19 26 8 28 5 32C2 35 4 39 12 39C19 39 26 33 26 29Z" fill="#38bdf8"/>
+  <path d="M25 30C19 27.5 10 29.5 7 33C9 35 17 35 24 32Z" fill="#0284c7" opacity="0.4"/>
+  <!-- Bottom Blade -->
+  <path d="M32 37C32 46 37 56 34 59C31 62 26 59 26 52C26 45 30 38 32 37Z" fill="#38bdf8"/>
+  <path d="M31 38C31 45.5 35 53.5 33 56C31 54 28 48 29 40Z" fill="#0284c7" opacity="0.4"/>
+  <!-- Center Motor Hub -->
+  <circle cx="32" cy="32" r="11" fill="#0284c7"/>
+  <circle cx="32" cy="32" r="8" fill="#0369a1"/>
+  <circle cx="32" cy="32" r="4" fill="#f8fafc"/>
+  <!-- Repair Spark Badge -->
+  <circle cx="48" cy="48" r="13" fill="#ff6000"/>
+  <path d="M49 39L44 48H48L46 56L53 46H48L51 39H49Z" fill="#ffffff"/>
+</svg>

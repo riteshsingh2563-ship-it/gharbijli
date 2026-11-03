@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>GharBijli — Booking Status Tracking</title>
+  <link rel="stylesheet" href="../www/css/main.css" />
+  <style>
+    body { background: #fffaf5; }
+    .screen { display: block !important; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="top-nav">
+      <div class="brand-wrapper">
+        <img src="../assets/logo.png" alt="GharBijli" class="brand-logo-img" />
+      </div>
+      <a href="my_bookings.html" class="user-status-btn" style="text-decoration:none;">← My Bookings</a>
+    </header>
+
+    <main class="screen-container" style="padding: 16px;">
+      <div class="section-header">
+        <h2 class="section-title">Booking Status Tracking</h2>
+        <p class="section-subtitle">Real-time status updates & technician dispatch</p>
+      </div>
+
+      <!-- Current Status Card -->
+      <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span class="booking-id-tag">GB-2026-89421</span>
+          <span class="status-badge badge-assigned">Technician Assigned</span>
+        </div>
+        <h3 style="font-size: 18px; font-weight: 850; color: var(--ink);">Ceiling Fan Repair & Noise Fix</h3>
+        <p style="font-size: 13px; color: var(--ink-secondary); margin-top: 4px;">
+          A verified electrician partner has been assigned to your service.
+        </p>
+      </div>
+
+      <!-- Progressive Timeline -->
+      <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow-sm);">
+        <h4 style="font-size: 14px; font-weight: 800; color: var(--ink); margin-bottom: 12px;">Service Milestones</h4>
+        
+        <div class="timeline">
+          <div class="timeline-item completed">
+            <div class="timeline-dot">✓</div>
+            <div class="timeline-title">Booking Requested</div>
+            <div class="timeline-desc">Request submitted by customer via app.</div>
+            <div class="timeline-time">Today, 02:15 PM</div>
+          </div>
+
+          <div class="timeline-item completed">
+            <div class="timeline-dot">✓</div>
+            <div class="timeline-title">Phone Confirmation Completed</div>
+            <div class="timeline-desc">Operator verified availability and address.</div>
+            <div class="timeline-time">Today, 02:22 PM</div>
+          </div>
+
+          <div class="timeline-item active">
+            <div class="timeline-dot">3</div>
+            <div class="timeline-title">Electrician Assigned</div>
+            <div class="timeline-desc">Freelance service partner assigned.</div>
+            <div class="timeline-time">Today, 02:30 PM</div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot">4</div>
+            <div class="timeline-title">Electrician On The Way</div>
+            <div class="timeline-desc">Partner en route to your service location.</div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot">5</div>
+            <div class="timeline-title">Service In Progress</div>
+            <div class="timeline-desc">Inspection, testing, and repair active.</div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot">6</div>
+            <div class="timeline-title">Service Completed & Cash Paid</div>
+            <div class="timeline-desc">Work tested and cash collected after service.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Assigned Partner Card -->
+      <div class="tech-card">
+        <div class="tech-avatar">⚡</div>
+        <div class="tech-info">
+          <h4>Ramesh Kumar (Freelance Partner)</h4>
+          <p>Ceiling Fan & Motor Winding Specialist</p>
+          <span class="tech-badge">✓ Verified Partner</span>
+        </div>
+      </div>
+
+      <!-- Address & Booking Summary -->
+      <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow-sm); font-size: 13px; line-height: 1.7;">
+        <h4 style="font-size: 14px; font-weight: 800; color: var(--ink); margin-bottom: 10px;">Booking Details</h4>
+        <div><strong>Date & Slot:</strong> Today, 03:00 PM – 06:00 PM</div>
+        <div><strong>Service Address:</strong> Flat 302, Green Enclave, Bailey Road, Patna - 800001</div>
+        <div><strong>Payment Mode:</strong> Cash on Delivery (Pay after service)</div>
+      </div>
+
+      <!-- Cancellation Action (Permitted only before technician starts work) -->
+      <button class="btn btn-danger" onclick="alert('Cancellation confirmation dialog opens.')">
+        Cancel Booking
+      </button>
+    </main>
+  </div>
+</body>
+</html>

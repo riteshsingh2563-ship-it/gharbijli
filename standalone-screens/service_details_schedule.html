@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>GharBijli — Service Details & Schedule</title>
+  <link rel="stylesheet" href="../www/css/main.css" />
+  <style>
+    body { background: #fffaf5; }
+    .screen { display: block !important; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="top-nav">
+      <div class="brand-wrapper">
+        <img src="../assets/logo.png" alt="GharBijli" class="brand-logo-img" />
+      </div>
+      <button class="user-status-btn" onclick="history.back()">← Back</button>
+    </header>
+
+    <main class="screen-container" style="padding: 16px;">
+      <!-- Service Header -->
+      <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; align-items: flex-start; gap: 14px;">
+          <div class="service-icon-box" style="margin: 0; font-size: 24px; width: 50px; height: 50px;">🌀</div>
+          <div>
+            <h3 style="font-size: 17px; font-weight: 850; color: var(--ink);">Ceiling Fan Repair & Noise Fix</h3>
+            <p style="font-size: 12px; color: var(--ink-muted); margin-top: 2px;">सीलिंग पंखा रिपेयर व आवाज ठीक करना</p>
+          </div>
+        </div>
+        <p style="font-size: 13px; color: var(--ink-secondary); margin-top: 12px; line-height: 1.5;">
+          Inspection of capacitor, bearing noise, slow speed, humming sound, and unmounting/mounting service.
+        </p>
+        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 12px; color: var(--ink-muted);">Pricing Transparency:</span>
+          <span style="font-size: 12px; font-weight: 750; color: var(--primary-dark);">Quote after physical inspection</span>
+        </div>
+      </div>
+
+      <!-- Schedule & Address Form -->
+      <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; box-shadow: var(--shadow-sm);">
+        <form>
+          <h4 style="font-size: 15px; font-weight: 800; margin-bottom: 14px; color: var(--ink);">Service Address</h4>
+
+          <div class="form-group">
+            <label class="form-label">House / Flat / Building No. *</label>
+            <input type="text" class="form-control" placeholder="Flat 302, Green Enclave" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Street / Area *</label>
+            <input type="text" class="form-control" placeholder="Bailey Road, Near Saguna More" required />
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="form-group">
+              <label class="form-label">Landmark</label>
+              <input type="text" class="form-control" placeholder="Near Shiv Mandir" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Pincode *</label>
+              <input type="text" class="form-control" placeholder="800001" maxlength="6" required />
+            </div>
+          </div>
+
+          <h4 style="font-size: 15px; font-weight: 800; margin: 18px 0 14px; color: var(--ink);">Select Preferred Date & Time</h4>
+
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input type="date" class="form-control" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Time Slot *</label>
+            <div class="slots-grid">
+              <div class="slot-pill selected">09:00 AM – 12:00 PM<br><small style="font-size:10px;">Morning</small></div>
+              <div class="slot-pill">12:00 PM – 03:00 PM<br><small style="font-size:10px;">Afternoon</small></div>
+              <div class="slot-pill">03:00 PM – 06:00 PM<br><small style="font-size:10px;">Evening</small></div>
+              <div class="slot-pill">06:00 PM – 08:00 PM<br><small style="font-size:10px;">Night</small></div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 14px;">
+            <label class="form-label">Describe Problem (समस्या)</label>
+            <textarea class="form-control" placeholder="Fan running slow, humming noise..."></textarea>
+          </div>
+
+          <div style="background: var(--bg-paper); border: 1px dashed var(--border); border-radius: var(--radius-md); padding: 14px; margin: 16px 0;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700;">
+              <span>Payment Mode:</span>
+              <span style="color: var(--primary);">Cash on Delivery</span>
+            </div>
+            <p style="font-size: 11px; color: var(--ink-muted); margin-top: 4px;">
+              Pay cash after service completion. No advance required.
+            </p>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="margin-top: 8px;">
+            Confirm & Request Service
+          </button>
+        </form>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
