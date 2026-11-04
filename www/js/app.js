@@ -1919,8 +1919,8 @@
       };
       updateUserNavIndicator();
     }
-    if (urlParams.has("search")) {
-      const q = urlParams.get("search");
+    if (urlParams.has("search") || urlParams.has("q")) {
+      const q = urlParams.get("search") || urlParams.get("q");
       const searchInput = document.getElementById("search-services-input");
       const clearSearchBtn = document.getElementById("btn-clear-search");
       if (searchInput) searchInput.value = q;
