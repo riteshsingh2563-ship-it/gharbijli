@@ -64,8 +64,8 @@
       <!-- 1. HOME SCREEN (screen-home)               -->
       <!-- ========================================== -->
       <section id="screen-home" class="screen active">
-        <!-- Live Search Bar Overlay -->
-        <div class="search-bar-wrap" id="search-bar-wrap" style="display: none; margin: 10px 16px;">
+        <!-- Modern Always-Visible Search Bar -->
+        <div class="search-bar-wrap" id="search-bar-wrap">
           <span class="search-icon-svg">🔍</span>
           <input 
             type="text" 
@@ -74,7 +74,7 @@
             placeholder="Search fan repair, switch, MCB trip, wiring..." 
             autocomplete="off"
           />
-          <button id="btn-clear-search" class="search-clear-btn">✕</button>
+          <button id="btn-clear-search" class="search-clear-btn" type="button" title="Clear Search">✕</button>
         </div>
 
         <!-- Doorstep Electrical Services Hero Hub -->
@@ -198,6 +198,12 @@
         <!-- Section Header (Preserved) -->
         <div class="section-header" style="display: none;">
           <span id="services-count-badge">14 Services</span>
+        </div>
+
+        <!-- Live Search Results Meta Strip -->
+        <div id="search-live-meta" class="search-live-meta" style="display: none;">
+          <span id="search-live-meta-text">⚡ Showing matching services</span>
+          <button type="button" id="btn-quick-clear-search" class="search-clear-chip">Clear ✕</button>
         </div>
 
         <!-- Services Grid (Dynamically Populated Category Sections & Service Items) -->
@@ -540,12 +546,12 @@
             </div>
 
             <!-- Transparent Payment Guarantee Box -->
-            <div style="background: var(--primary-light); border: 1.5px solid var(--primary-subtle); border-radius: var(--radius-md); padding: 14px; margin: 18px 0;">
-              <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 13.5px; color: var(--primary-dark);">
-                <span>💵</span> <span>Cash On Delivery Guarantee</span>
+            <div style="background: #ecfdf5; border: 1.5px solid #a7f3d0; border-radius: 14px; padding: 14px; margin: 18px 0;">
+              <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 13.5px; color: #065f46;">
+                <span>💵</span> <span>Cash On Delivery Guarantee (100% COD)</span>
               </div>
-              <p style="font-size: 12px; color: #9a3412; margin-top: 4px; line-height: 1.4;">
-                No online payment needed now. Inspect electrician's work and pay cash directly after satisfactory completion.
+              <p style="font-size: 12px; color: #047857; margin-top: 4px; line-height: 1.4;">
+                Zero advance payment. Inspect electrician's work completely and pay cash or UPI only after satisfactory repair.
               </p>
             </div>
 

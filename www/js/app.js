@@ -283,9 +283,25 @@
     }
   }
 
+  function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
   function renderServicesGrid() {
     const grid = document.getElementById("services-grid");
     const countBadge = document.getElementById("services-count-badge");
+    const heroHub = document.querySelector(".uc-hero-hub");
+    const promoCard = document.getElementById("btn-visitation-promo");
+    const sectionBreak = document.querySelector(".uc-section-break");
+    const categoryGrid = document.getElementById("uc-category-grid");
+    const searchLiveMeta = document.getElementById("search-live-meta");
+    const searchLiveMetaText = document.getElementById("search-live-meta-text");
     if (!grid) return;
 
     grid.innerHTML = "";
@@ -309,9 +325,31 @@
       activeServices = GharBijliServices.filter(s => 
         s.name.toLowerCase().includes(q) ||
         (s.hindiName && s.hindiName.toLowerCase().includes(q)) ||
+        (s.categoryId && s.categoryId.toLowerCase().includes(q)) ||
         (s.categoryLabel && s.categoryLabel.toLowerCase().includes(q)) ||
-        s.description.toLowerCase().includes(q)
+        (s.description && s.description.toLowerCase().includes(q)) ||
+        (s.highlights && s.highlights.some(h => h.toLowerCase().includes(q))) ||
+        (s.commonIssues && s.commonIssues.some(ci => ci.toLowerCase().includes(q)))
       );
+
+      // Hide upper promotional/category blocks so search results appear immediately under search bar
+      if (heroHub) heroHub.classList.add("hidden-by-search");
+      if (promoCard) promoCard.classList.add("hidden-by-search");
+      if (sectionBreak) sectionBreak.classList.add("hidden-by-search");
+      if (categoryGrid) categoryGrid.classList.add("hidden-by-search");
+      if (searchLiveMeta) {
+        searchLiveMeta.style.display = "flex";
+        if (searchLiveMetaText) {
+          searchLiveMetaText.innerHTML = `⚡ Found <strong>${activeServices.length}</strong> service(s) for "<strong>${escapeHtml(currentSearchQuery)}</strong>"`;
+        }
+      }
+    } else {
+      // Restore standard home sections
+      if (heroHub) heroHub.classList.remove("hidden-by-search");
+      if (promoCard) promoCard.classList.remove("hidden-by-search");
+      if (sectionBreak) sectionBreak.classList.remove("hidden-by-search");
+      if (categoryGrid) categoryGrid.classList.remove("hidden-by-search");
+      if (searchLiveMeta) searchLiveMeta.style.display = "none";
     }
 
     if (countBadge) {
@@ -320,11 +358,11 @@
 
     if (activeServices.length === 0) {
       grid.innerHTML = `
-        <div style="text-align: center; padding: 36px 16px; background: #ffffff; border-radius: 16px; border: 1.5px dashed var(--border); margin: 20px 0;">
-          <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
-          <h4 style="font-size: 15px; font-weight: 800; color: var(--ink);">No services matching "${currentSearchQuery}"</h4>
-          <p style="font-size: 12px; color: var(--ink-muted); margin-top: 4px;">Try searching for "fan", "switch", "wiring", or "MCB"</p>
-          <button id="btn-reset-search-empty" class="btn btn-secondary" style="width: auto; padding: 8px 18px; margin-top: 14px; font-size: 12px;">
+        <div style="text-align: center; padding: 40px 18px; background: #ffffff; border-radius: 18px; border: 1.5px dashed #e2e8f0; margin: 16px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
+          <div style="font-size: 38px; margin-bottom: 8px;">🔍</div>
+          <h4 style="font-size: 16px; font-weight: 850; color: #111827;">No services matching "${escapeHtml(currentSearchQuery)}"</h4>
+          <p style="font-size: 12.5px; color: #64748b; margin-top: 4px;">Try searching for "fan", "switch", "wiring", "mcb", or "inverter"</p>
+          <button id="btn-reset-search-empty" class="btn btn-secondary" style="width: auto !important; padding: 9px 22px; margin: 16px auto 0; font-size: 13px; font-weight: 750; border-radius: 9999px;">
             Show All Services
           </button>
         </div>
@@ -333,8 +371,10 @@
       if (resetBtn) {
         resetBtn.addEventListener("click", () => {
           const searchInput = document.getElementById("search-services-input");
+          const clearSearchBtn = document.getElementById("btn-clear-search");
           if (searchInput) searchInput.value = "";
           currentSearchQuery = "";
+          if (clearSearchBtn) clearSearchBtn.style.display = "none";
           renderServicesGrid();
         });
       }
@@ -1209,15 +1249,16 @@
 
     // Top Navigation Search Button Circle
     const navSearchBtn = document.getElementById("btn-nav-search-circle");
-    const searchWrap = document.getElementById("search-bar-wrap");
-    if (navSearchBtn && searchWrap) {
+    if (navSearchBtn) {
       navSearchBtn.addEventListener("click", () => {
-        if (searchWrap.style.display === "none" || !searchWrap.style.display) {
-          searchWrap.style.display = "flex";
-          const input = document.getElementById("search-services-input");
-          if (input) input.focus();
-        } else {
-          searchWrap.style.display = "none";
+        if (currentScreen !== "home") {
+          navigateTo("home");
+        }
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        const input = document.getElementById("search-services-input");
+        if (input) {
+          input.focus();
+          input.select();
         }
       });
     }
@@ -1409,6 +1450,16 @@
         if (searchInput) searchInput.value = "";
         currentSearchQuery = "";
         clearSearchBtn.style.display = "none";
+        renderServicesGrid();
+      });
+    }
+
+    const quickClearBtn = document.getElementById("btn-quick-clear-search");
+    if (quickClearBtn) {
+      quickClearBtn.addEventListener("click", () => {
+        if (searchInput) searchInput.value = "";
+        currentSearchQuery = "";
+        if (clearSearchBtn) clearSearchBtn.style.display = "none";
         renderServicesGrid();
       });
     }
@@ -1852,11 +1903,11 @@
     initCapacitorHooks();
     bindEvents();
     const bottomNav = document.querySelector(".bottom-nav");
-    if (bottomNav) bottomNav.style.display = "none";
+    if (bottomNav) bottomNav.style.display = "flex";
     const floatMenu = document.getElementById("btn-floating-menu");
     const stickyDiscount = document.getElementById("sticky-bottom-discount");
     if (floatMenu) floatMenu.style.display = "inline-flex";
-    if (stickyDiscount) stickyDiscount.style.display = "flex";
+    if (stickyDiscount) stickyDiscount.style.display = "none";
     renderHomeScreen();
 
     // Query parameter triggers for automated testing
@@ -1867,6 +1918,53 @@
         phoneNumber: "+919876543210"
       };
       updateUserNavIndicator();
+    }
+    if (urlParams.has("search")) {
+      const q = urlParams.get("search");
+      const searchInput = document.getElementById("search-services-input");
+      const clearSearchBtn = document.getElementById("btn-clear-search");
+      if (searchInput) searchInput.value = q;
+      currentSearchQuery = q;
+      if (clearSearchBtn) clearSearchBtn.style.display = "flex";
+      renderServicesGrid();
+    }
+    if (urlParams.has("trackStatus")) {
+      const targetStatus = urlParams.get("trackStatus");
+      const testUser = {
+        uid: "test-user-patna-123",
+        phoneNumber: "+919876543210"
+      };
+      if (window.GharBijliFirebase) {
+        window.GharBijliFirebase.currentUser = testUser;
+      }
+      const mockBooking = {
+        bookingId: "GB-2026-PAT-108",
+        customerUid: "test-user-patna-123",
+        serviceId: "regular-fan-installation",
+        serviceNameSnapshot: "Regular Ceiling Fan Installation",
+        bookingStatus: targetStatus,
+        customerName: "Ritesh Singh",
+        customerPhone: "+919876543210",
+        preferredDate: "2026-11-05",
+        preferredTimeSlot: "12:00 PM – 03:00 PM",
+        addressSnapshot: {
+          fullAddress: "Flat 302, Green Enclave, Bailey Road, Patna",
+          area: "Bailey Road, Patna"
+        },
+        technicianName: "Manoj Kumar",
+        technicianRating: "4.9 ★ (142 repairs)",
+        technicianPhone: "+919876543210"
+      };
+      try {
+        const existing = JSON.parse(localStorage.getItem("gb_bookings_db") || "[]");
+        const idx = existing.findIndex(b => b.bookingId === mockBooking.bookingId);
+        if (idx >= 0) existing[idx] = mockBooking;
+        else existing.unshift(mockBooking);
+        localStorage.setItem("gb_bookings_db", JSON.stringify(existing));
+      } catch (e) {}
+
+      activeTrackingBookingId = mockBooking.bookingId;
+      navigateTo("tracking", false);
     }
     if (urlParams.has("stepOtp")) {
       const pStep = document.getElementById("auth-step-phone");
