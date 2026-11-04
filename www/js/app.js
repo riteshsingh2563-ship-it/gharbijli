@@ -11,6 +11,8 @@
   let screenHistory = ["home"];
   let selectedService = null;
   let activeTrackingBookingId = null;
+  let trackingPollTimer = null;
+  let lastObservedTrackingStatus = null;
   let activeTab = "active";
   let isSubmitting = false;
   let currentSearchQuery = "";
@@ -85,6 +87,11 @@
     if (stickyDiscount) stickyDiscount.style.display = (screenId === "home" && getCartCount() === 0) ? "flex" : "none";
     if (stickyCart && screenId === "login") stickyCart.style.display = "none";
     updateBottomNav(screenId);
+
+    if (screenId !== "tracking" && trackingPollTimer) {
+      clearInterval(trackingPollTimer);
+      trackingPollTimer = null;
+    }
 
     // Screen specific lifecycle renders
     if (screenId === "home") {
@@ -1061,22 +1068,53 @@
 
   async function openTracking(bookingId) {
     activeTrackingBookingId = bookingId;
+    lastObservedTrackingStatus = null;
     navigateTo("tracking");
   }
 
-  async function renderTrackingScreen() {
+  async function renderTrackingScreen(isBackgroundPoll = false) {
     if (!activeTrackingBookingId) {
+      if (trackingPollTimer) {
+        clearInterval(trackingPollTimer);
+        trackingPollTimer = null;
+      }
       navigateTo("myBookings");
       return;
+    }
+
+    if (!trackingPollTimer) {
+      trackingPollTimer = setInterval(() => {
+        if (currentScreen === "tracking" && activeTrackingBookingId) {
+          renderTrackingScreen(true);
+        }
+      }, 3000);
     }
 
     try {
       const booking = await window.GharBijliFirebase.getBookingById(activeTrackingBookingId);
       if (!booking) {
-        showToast("Booking record not found.", "error");
-        navigateTo("myBookings");
+        if (!isBackgroundPoll) {
+          showToast("Booking record not found.", "error");
+          navigateTo("myBookings");
+        }
         return;
       }
+
+      if (lastObservedTrackingStatus && lastObservedTrackingStatus !== booking.bookingStatus) {
+        const techName = booking.technicianName || "Electrician";
+        if (booking.bookingStatus === "CONFIRMED") {
+          showToast("⚡ Booking Confirmed by Patna Operations!", "success");
+        } else if (booking.bookingStatus === "TECHNICIAN_ASSIGNED") {
+          showToast(`👷‍♂️ Partner ${techName} assigned to your booking!`, "success");
+        } else if (booking.bookingStatus === "ON_THE_WAY") {
+          showToast(`🛵 Partner ${techName} is en route on ${booking.technicianVehicle || 'bike'}!`, "info");
+        } else if (booking.bookingStatus === "IN_PROGRESS") {
+          showToast("⚡ Service inspection started at your doorstep.", "info");
+        } else if (booking.bookingStatus === "COMPLETED") {
+          showToast("✅ Electrical service completed! Thank you.", "success");
+        }
+      }
+      lastObservedTrackingStatus = booking.bookingStatus;
 
       document.getElementById("tracking-booking-id-tag").textContent = booking.bookingId;
       document.getElementById("tracking-service-title").textContent = booking.serviceNameSnapshot;
@@ -1891,6 +1929,37 @@
         if (stepPhone) stepPhone.style.display = "block";
         const phoneInput = document.getElementById("login-phone-number");
         if (phoneInput) phoneInput.focus();
+      });
+    }
+
+    // Emergency SOS Trigger
+    const emergencySosBtn = document.getElementById("btn-trigger-emergency-sos");
+    if (emergencySosBtn) {
+      emergencySosBtn.addEventListener("click", async () => {
+        try {
+          emergencySosBtn.disabled = true;
+          emergencySosBtn.textContent = "Dispatched Priority Operator...";
+          const user = window.GharBijliFirebase.currentUser;
+          const userPhone = user ? user.phoneNumber : "+919876543210";
+          const userName = user ? (user.displayName || "Emergency Customer") : "Patna Resident";
+          
+          const result = await window.GharBijliFirebase.submitEmergencySos({
+            name: userName,
+            phone: userPhone,
+            address: currentSelectedArea || "Bailey Road, Patna",
+            issueType: "Urgent Electrical Breakdown / Spark / MCB Failure"
+          });
+
+          const techName = result && result.ticket && result.ticket.dispatchedTechnician ? result.ticket.dispatchedTechnician.name : "Manoj Kumar";
+          const techPhone = result && result.ticket && result.ticket.dispatchedTechnician ? result.ticket.dispatchedTechnician.phone : "+919876543210";
+          
+          showToast(`🚨 SOS Dispatched! Partner ${techName} allocated (15-Min SLA). Operator is calling your phone!`, "success");
+        } catch (sosErr) {
+          showToast("Failed to dispatch SOS: " + sosErr.message, "error");
+        } finally {
+          emergencySosBtn.disabled = false;
+          emergencySosBtn.textContent = "⚡ Dispatch Emergency Electrician Now";
+        }
       });
     }
   }

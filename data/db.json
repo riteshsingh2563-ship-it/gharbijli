@@ -1,0 +1,297 @@
+{
+  "bookings": [
+    {
+      "bookingId": "GB-2026-PAT-998",
+      "customerUid": "gb_user_919876543210",
+      "customerPhone": "+919876543210",
+      "customerName": "Customer",
+      "serviceId": "regular-fan-installation",
+      "serviceNameSnapshot": "Test Cancellation",
+      "pricingTypeSnapshot": "inspection_based",
+      "addressSnapshot": {
+        "fullAddress": "Kankarbagh, Patna"
+      },
+      "preferredDate": "2026-11-04",
+      "preferredTimeSlot": "Today (30-45 mins)",
+      "issueDescription": "",
+      "customerNotes": "",
+      "paymentMethod": "CASH_ON_DELIVERY",
+      "paymentStatus": "PENDING",
+      "bookingStatus": "CANCELLED",
+      "assignedTechnician": null,
+      "technicianName": "Rajesh Sharma",
+      "technicianPhone": "+919876543212",
+      "technicianRating": "4.94 ★ (320 repairs)",
+      "technicianVehicle": "TVS Jupiter (BR-01-ZZ-9012)",
+      "estimatedEta": "30-45 mins",
+      "finalAmount": null,
+      "createdAt": "2026-11-04T12:03:26.844Z",
+      "updatedAt": "2026-11-04T12:03:26.877Z",
+      "confirmedAt": null,
+      "assignedAt": null,
+      "completedAt": null,
+      "cancelledAt": "2026-11-04T12:03:26.877Z",
+      "cancellationReason": "Found another local electrician",
+      "statusHistory": [
+        {
+          "status": "PENDING_CONFIRMATION",
+          "timestamp": "2026-11-04T12:03:26.844Z",
+          "note": "Booking submitted. Operator confirmation call will arrive shortly."
+        },
+        {
+          "status": "CANCELLED",
+          "timestamp": "2026-11-04T12:03:26.877Z",
+          "note": "Customer cancellation: Found another local electrician"
+        }
+      ]
+    },
+    {
+      "bookingId": "GB-2026-PAT-177",
+      "customerUid": "gb_user_919876543210",
+      "customerPhone": "+919876543210",
+      "customerName": "Ritesh Singh",
+      "serviceId": "regular-fan-installation",
+      "serviceNameSnapshot": "Regular Ceiling Fan Installation",
+      "pricingTypeSnapshot": "inspection_based",
+      "addressSnapshot": {
+        "street": "Green Enclave, Bailey Road",
+        "landmark": "Near Pillar 62",
+        "houseNo": "Flat 302",
+        "fullAddress": "Flat 302, Green Enclave, Bailey Road, Near Pillar 62, Patna, Bihar - 800014",
+        "city": "Patna, Bihar",
+        "pincode": "800014"
+      },
+      "preferredDate": "2026-11-05",
+      "preferredTimeSlot": "12:00 PM - 03:00 PM",
+      "issueDescription": "Fan wobbling and making noise",
+      "customerNotes": "",
+      "paymentMethod": "CASH_ON_DELIVERY",
+      "paymentStatus": "PENDING",
+      "bookingStatus": "ON_THE_WAY",
+      "assignedTechnician": {
+        "id": "GB-TECH-01",
+        "name": "Manoj Kumar",
+        "phone": "+919876543210",
+        "rating": "4.92 ★ (142 repairs)",
+        "vehicle": "Honda Activa (BR-01-XX-1234)"
+      },
+      "technicianName": "Manoj Kumar",
+      "technicianPhone": "+919876543210",
+      "technicianRating": "4.92 ★ (142 repairs)",
+      "technicianVehicle": "Honda Activa (BR-01-XX-1234)",
+      "estimatedEta": "30-45 mins",
+      "finalAmount": null,
+      "createdAt": "2026-11-04T12:02:33.850Z",
+      "updatedAt": "2026-11-04T12:03:09.873Z",
+      "confirmedAt": "2026-11-04T12:02:41.854Z",
+      "assignedAt": "2026-11-04T12:02:51.869Z",
+      "completedAt": null,
+      "cancelledAt": null,
+      "cancellationReason": null,
+      "statusHistory": [
+        {
+          "status": "PENDING_CONFIRMATION",
+          "timestamp": "2026-11-04T12:02:33.850Z",
+          "note": "Booking submitted. Operator confirmation call will arrive shortly."
+        },
+        {
+          "status": "CONFIRMED",
+          "timestamp": "2026-11-04T12:02:41.854Z",
+          "note": "Operator verified booking with customer"
+        },
+        {
+          "status": "TECHNICIAN_ASSIGNED",
+          "timestamp": "2026-11-04T12:02:51.869Z",
+          "note": "Assigned verified partner Manoj Kumar (4.92 ★ (142 repairs))"
+        },
+        {
+          "status": "ON_THE_WAY",
+          "timestamp": "2026-11-04T12:03:09.873Z",
+          "note": "Manoj Kumar has departed and is en route on Honda Activa (BR-01-XX-1234)"
+        }
+      ]
+    }
+  ],
+  "technicians": [
+    {
+      "id": "GB-TECH-01",
+      "name": "Manoj Kumar",
+      "phone": "+919876543210",
+      "rating": "4.92 ★ (142 repairs)",
+      "ratingScore": 4.92,
+      "completedJobs": 142,
+      "avatar": "👷‍♂️",
+      "vehicle": "Honda Activa (BR-01-XX-1234)",
+      "primaryAreas": [
+        "bailey road",
+        "raja bazar",
+        "rukanpura",
+        "ashiana",
+        "khajpura",
+        "jagdeo path"
+      ],
+      "specialties": [
+        "Fan installation",
+        "Switchboard repair",
+        "MCB wiring",
+        "Short circuit triage"
+      ],
+      "active": true,
+      "isAvailable": true
+    },
+    {
+      "id": "GB-TECH-02",
+      "name": "Amit Verma",
+      "phone": "+919876543211",
+      "rating": "4.87 ★ (210 repairs)",
+      "ratingScore": 4.87,
+      "completedJobs": 210,
+      "avatar": "👨‍🔧",
+      "vehicle": "Hero Splendor (BR-01-YY-5678)",
+      "primaryAreas": [
+        "boring road",
+        "patliputra",
+        "kidwaipuri",
+        "sk puri",
+        "anandpuri",
+        "alpana"
+      ],
+      "specialties": [
+        "Smart BLDC fans",
+        "Inverter setup",
+        "Chandelier lighting",
+        "Submeter installation"
+      ],
+      "active": true,
+      "isAvailable": true
+    },
+    {
+      "id": "GB-TECH-03",
+      "name": "Rajesh Sharma",
+      "phone": "+919876543212",
+      "rating": "4.94 ★ (320 repairs)",
+      "ratingScore": 4.94,
+      "completedJobs": 320,
+      "avatar": "⚡",
+      "vehicle": "TVS Jupiter (BR-01-ZZ-9012)",
+      "primaryAreas": [
+        "kankarbagh",
+        "hanuman nagar",
+        "pc colony",
+        "kumhrar",
+        "bhootnath road",
+        "tiwari bechar"
+      ],
+      "specialties": [
+        "Complete home rewiring",
+        "Phase load balancing",
+        "Heavy appliance lines"
+      ],
+      "active": true,
+      "isAvailable": true
+    },
+    {
+      "id": "GB-TECH-04",
+      "name": "Sunil Paswan",
+      "phone": "+919876543213",
+      "rating": "4.82 ★ (98 repairs)",
+      "ratingScore": 4.82,
+      "completedJobs": 98,
+      "avatar": "🔧",
+      "vehicle": "Bajaj Pulsar (BR-01-AB-3456)",
+      "primaryAreas": [
+        "danapur",
+        "saguna more",
+        "khagaul",
+        "gola road",
+        "rupaspur",
+        "cantt"
+      ],
+      "specialties": [
+        "Motor starters",
+        "Water pump wiring",
+        "Socket replacement",
+        "Geyser wiring"
+      ],
+      "active": true,
+      "isAvailable": true
+    },
+    {
+      "id": "GB-TECH-05",
+      "name": "Deepak Kumar",
+      "phone": "+919876543214",
+      "rating": "4.89 ★ (165 repairs)",
+      "ratingScore": 4.89,
+      "completedJobs": 165,
+      "avatar": "🧰",
+      "vehicle": "Honda Shine (BR-01-CD-7890)",
+      "primaryAreas": [
+        "rajendra nagar",
+        "kadamkuan",
+        "exhibition road",
+        "nala road",
+        "machhua toli"
+      ],
+      "specialties": [
+        "Emergency outage",
+        "Switchboard sparks",
+        "Earthing installation"
+      ],
+      "active": true,
+      "isAvailable": true
+    },
+    {
+      "id": "GB-TECH-06",
+      "name": "Vikash Singh",
+      "phone": "+919876543215",
+      "rating": "4.96 ★ (410 repairs)",
+      "ratingScore": 4.96,
+      "completedJobs": 410,
+      "avatar": "👷‍♂️",
+      "vehicle": "Hero Passion (BR-01-EF-2345)",
+      "primaryAreas": [
+        "fraser road",
+        "gandhi maidan",
+        "dak bungalow",
+        "station road",
+        "ashok rajpath"
+      ],
+      "specialties": [
+        "Commercial setup",
+        "Distribution boxes",
+        "3-phase panel boards"
+      ],
+      "active": true,
+      "isAvailable": true
+    }
+  ],
+  "users": {
+    "gb_user_919876543210": {
+      "uid": "gb_user_919876543210",
+      "phoneNumber": "+919876543210",
+      "displayName": "",
+      "role": "customer",
+      "createdAt": "2026-11-04T12:02:23.962Z",
+      "updatedAt": "2026-11-04T12:02:23.962Z"
+    }
+  },
+  "emergencyTickets": [
+    {
+      "ticketId": "GB-SOS-7496",
+      "customerPhone": "+919876543210",
+      "customerName": "Ritesh Singh",
+      "location": "Boring Road Crossing, Patna",
+      "issueType": "Main MCB sparking continuously",
+      "status": "DISPATCHED_PRIORITY",
+      "priority": "CRITICAL",
+      "dispatchedTechnician": {
+        "name": "Amit Verma",
+        "phone": "+919876543211",
+        "rating": "4.87 ★ (210 repairs)",
+        "vehicle": "Hero Splendor (BR-01-YY-5678)"
+      },
+      "targetSlaMinutes": 15,
+      "createdAt": "2026-11-04T12:03:14.128Z"
+    }
+  ]
+}

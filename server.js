@@ -1,6 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { handleApiRequest } = require('./backend/api');
 
 const WWW = path.join(__dirname, 'www');
 const PORT = 3000;
@@ -15,7 +16,19 @@ const MIME = {
   '.svg': 'image/svg+xml'
 };
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
+  // Handle API Requests First
+  if (req.url && req.url.startsWith('/api')) {
+    try {
+      const handled = await handleApiRequest(req, res);
+      if (handled) return;
+    } catch (apiErr) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: apiErr.message }));
+      return;
+    }
+  }
+
   let reqPath = req.url.split('?')[0];
   if (reqPath === '/') reqPath = '/index.html';
   
@@ -44,5 +57,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, '127.0.0.1', () => {
-  console.log(`GharBijli live preview running at http://localhost:${PORT}`);
+  console.log(`GharBijli live preview and API running at http://localhost:${PORT}`);
 });

@@ -1,3 +1,6 @@
 {
-  "outputDirectory": "www"
+  "outputDirectory": "www",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" }
+  ]
 }
