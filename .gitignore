@@ -17,6 +17,8 @@ Thumbs.db
 *.log
 *.tmp
 *.apk
+!GharBijli.apk
+!www/GharBijli.apk
 
 # Environment & Secrets
 .env
