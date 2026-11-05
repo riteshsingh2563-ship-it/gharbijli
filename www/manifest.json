@@ -1,0 +1,25 @@
+{
+  "name": "GharBijli: Doorstep Electrician (Bhilai & Durg)",
+  "short_name": "GharBijli",
+  "description": "Doorstep verified electricians in Bhilai & Durg (Chhattisgarh). Fast 30-45m arrival, COD, standard transparent pricing.",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fffaf5",
+  "theme_color": "#ff6b35",
+  "icons": [
+    {
+      "src": "assets/logo-square.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/logo-square.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
