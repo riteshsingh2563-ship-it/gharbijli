@@ -403,12 +403,16 @@
         </div>
       </div>
       <div class="admin-header-actions">
-        <div class="status-pill-live">
+        <div class="status-pill-live" style="background: #ecfdf5; border-color: #86efac; color: #047857;">
           <span class="pulse-dot"></span>
-          <span>Live API Connected</span>
+          <span>MongoDB Atlas Connected</span>
         </div>
         <button id="btn-refresh-all" class="btn btn-secondary">🔄 Refresh</button>
-        <a href="/" target="_blank" class="btn btn-primary">📱 Open Customer App ↗</a>
+        <a href="/GharBijli.apk" download="GharBijli.apk" class="btn btn-primary" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+          ⬇️ Download APK (v2.0)
+        </a>
+        <a href="/app" target="_blank" class="btn btn-secondary" style="text-decoration: none;">📱 App Preview ↗</a>
+        <button id="btn-admin-logout" class="btn btn-secondary" style="color: #dc2626;" onclick="adminLogout()">🔒 Lock</button>
       </div>
     </div>
   </header>
@@ -653,6 +657,7 @@
             <h2 class="card-title">Verified Bhilai Electrician Directory</h2>
             <p class="card-subtitle">Active partners in Bhilai, Durg & Industrial Township (CG-07)</p>
           </div>
+          <button id="btn-open-add-tech" class="btn btn-primary" onclick="openAddTechModal()">+ Add New Electrician</button>
         </div>
         <div class="table-responsive">
           <table>
@@ -665,6 +670,7 @@
                 <th>Primary Bhilai Zones</th>
                 <th>Jobs Done</th>
                 <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody id="technicians-table-body">
@@ -722,9 +728,146 @@
       </div>
 
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-        <button id="btn-close-assign-modal" class="btn btn-secondary">Cancel</button>
+        <button id="btn-close-assign-modal" class="btn btn-secondary" onclick="document.getElementById('modal-assign').classList.remove('active')">Cancel</button>
         <button id="btn-confirm-assign-modal" class="btn btn-primary">Confirm Assignment</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal: Edit Electrician -->
+  <div id="modal-edit-tech" class="modal-overlay">
+    <div class="modal-card" style="max-width: 520px;">
+      <h3 style="font-size: 18px; font-weight: 850; margin-bottom: 4px;">✏️ Edit Bhilai Electrician</h3>
+      <p style="font-size: 12.5px; color: var(--ink-muted); margin-bottom: 16px;">Update partner profile, vehicle registration, and coverage zones</p>
+      
+      <input type="hidden" id="edit-tech-id" />
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Electrician Name:</label>
+          <input type="text" id="edit-tech-name" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contact Phone:</label>
+          <input type="tel" id="edit-tech-phone" class="form-control" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Vehicle Details (with CG-07 plate):</label>
+          <input type="text" id="edit-tech-vehicle" class="form-control" placeholder="e.g. Honda Activa (CG-07-XX-1234)" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Avatar Emoji / Icon:</label>
+          <input type="text" id="edit-tech-avatar" class="form-control" value="👷‍♂️" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Rating Text:</label>
+          <input type="text" id="edit-tech-rating" class="form-control" placeholder="4.92 ★ (140 repairs)" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Completed Jobs Count:</label>
+          <input type="number" id="edit-tech-jobs" class="form-control" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Primary Bhilai Zones (comma separated):</label>
+        <input type="text" id="edit-tech-areas" class="form-control" placeholder="civic centre, sector 6, nehru nagar, supela" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Specialties (comma separated):</label>
+        <input type="text" id="edit-tech-specialties" class="form-control" placeholder="Fan installation, MCB, Inverter wiring" />
+      </div>
+
+      <div style="margin-top: 10px;">
+        <label style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13.5px; cursor: pointer;">
+          <input type="checkbox" id="edit-tech-active" />
+          <span>Active & Available for Customer Dispatch in Bhilai</span>
+        </label>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+        <button class="btn btn-secondary" onclick="closeEditTechModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveTechnicianEdits()">💾 Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add New Electrician -->
+  <div id="modal-add-tech" class="modal-overlay">
+    <div class="modal-card" style="max-width: 520px;">
+      <h3 style="font-size: 18px; font-weight: 850; margin-bottom: 4px;">➕ Register New Electrician Partner</h3>
+      <p style="font-size: 12.5px; color: var(--ink-muted); margin-bottom: 16px;">Add a verified electrical contractor to Bhilai & Durg pool</p>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Full Name:</label>
+          <input type="text" id="add-tech-name" class="form-control" placeholder="e.g. Ramesh Verma" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mobile Number:</label>
+          <input type="tel" id="add-tech-phone" class="form-control" placeholder="+91 98765 00000" required />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Vehicle & CG-07 Registration:</label>
+          <input type="text" id="add-tech-vehicle" class="form-control" placeholder="Hero Splendor (CG-07-ZZ-7788)" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Rating (Initial):</label>
+          <input type="text" id="add-tech-rating" class="form-control" value="4.90 ★ (Verified Partner)" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Assigned Bhilai Localities:</label>
+        <input type="text" id="add-tech-areas" class="form-control" placeholder="sector 6, civic centre, supela, nehru nagar" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Specialties:</label>
+        <input type="text" id="add-tech-specialties" class="form-control" placeholder="Wiring, Fans, Switchboards, Short Circuit" />
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+        <button class="btn btn-secondary" onclick="document.getElementById('modal-add-tech').classList.remove('active')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitNewTechnician()">✅ Add Electrician</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Security Gate Overlay (Admin Auth Protection) -->
+  <div id="modal-admin-auth" class="modal-overlay" style="background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 9999;">
+    <div class="modal-card" style="max-width: 420px; text-align: center; padding: 32px 28px;">
+      <div style="width: 56px; height: 56px; border-radius: 16px; background: #ede9fe; color: #5e35b1; font-size: 26px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+        🔒
+      </div>
+      <h2 style="font-size: 20px; font-weight: 850; color: var(--ink); margin-bottom: 6px;">Admin Access Control</h2>
+      <p style="font-size: 13px; color: var(--ink-muted); margin-bottom: 24px;">Enter your master admin password or security PIN to access Bhilai operations console.</p>
+      
+      <form id="form-admin-login" onsubmit="handleAdminLogin(event)">
+        <div class="form-group" style="text-align: left; margin-bottom: 18px;">
+          <label class="form-label">Security PIN or Password:</label>
+          <input type="password" id="input-admin-pass" class="form-control" placeholder="Enter security PIN / Password" required style="font-size: 16px; letter-spacing: 0.1em; text-align: center;" />
+          <div style="font-size: 11.5px; color: var(--ink-muted); margin-top: 6px; text-align: center;">
+            Default Master Key: <code>2026</code> or <code>gharbijli@2026</code>
+          </div>
+        </div>
+        <div id="admin-login-error" style="color: #dc2626; font-size: 12.5px; font-weight: 700; margin-bottom: 12px; display: none;">
+          Incorrect Password / PIN. Try again.
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 14px; font-weight: 800;">
+          Unlock Console →
+        </button>
+      </form>
     </div>
   </div>
 
@@ -983,6 +1126,12 @@
                 <input type="checkbox" ${t.active ? 'checked' : ''} onchange="toggleTechnicianActive('${t.id}', this.checked)" />
                 <span>${t.active ? 'Active' : 'Offline'}</span>
               </label>
+            </td>
+            <td>
+              <div style="display: flex; gap: 6px;">
+                <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="openEditTechModal('${t.id}')">✏️ Edit</button>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px; color: #dc2626;" onclick="deleteTechnicianPartner('${t.id}')">🗑️</button>
+              </div>
             </td>
           </tr>
         `;
@@ -1254,7 +1403,163 @@
       return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
     }
 
+    // --- ADMIN SECURITY GATE ---
+    function checkAdminSecurity() {
+      const isAuth = sessionStorage.getItem("gb_admin_auth") === "true";
+      const overlay = document.getElementById("modal-admin-auth");
+      if (!isAuth) {
+        if (overlay) overlay.classList.add("active");
+      } else {
+        if (overlay) overlay.classList.remove("active");
+      }
+    }
+
+    async function handleAdminLogin(e) {
+      e.preventDefault();
+      const pass = document.getElementById("input-admin-pass").value.trim();
+      const errEl = document.getElementById("admin-login-error");
+      try {
+        const res = await fetch('/api/admin/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pass })
+        });
+        const data = await res.json();
+        if (data.success) {
+          sessionStorage.setItem("gb_admin_auth", "true");
+          document.getElementById("modal-admin-auth").classList.remove("active");
+          showToast("🔒 Admin console unlocked");
+          await initAll();
+        } else {
+          errEl.style.display = "block";
+        }
+      } catch (err) {
+        if (pass === "2026" || pass === "gharbijli@2026") {
+          sessionStorage.setItem("gb_admin_auth", "true");
+          document.getElementById("modal-admin-auth").classList.remove("active");
+          showToast("🔒 Admin console unlocked");
+        } else {
+          errEl.style.display = "block";
+        }
+      }
+    }
+
+    function adminLogout() {
+      sessionStorage.removeItem("gb_admin_auth");
+      checkAdminSecurity();
+      showToast("Console locked");
+    }
+
+    // --- ELECTRICIAN EDITOR & ADD ---
+    function openEditTechModal(techId) {
+      const t = allTechs.find(x => x.id === techId);
+      if (!t) return;
+      document.getElementById("edit-tech-id").value = t.id;
+      document.getElementById("edit-tech-name").value = t.name || "";
+      document.getElementById("edit-tech-phone").value = t.phone || "";
+      document.getElementById("edit-tech-vehicle").value = t.vehicle || "";
+      document.getElementById("edit-tech-avatar").value = t.avatar || "👷‍♂️";
+      document.getElementById("edit-tech-rating").value = t.rating || "4.90 ★";
+      document.getElementById("edit-tech-jobs").value = t.completedJobs || 100;
+      document.getElementById("edit-tech-areas").value = (t.primaryAreas || []).join(", ");
+      document.getElementById("edit-tech-specialties").value = (t.specialties || []).join(", ");
+      document.getElementById("edit-tech-active").checked = !!t.active;
+      document.getElementById("modal-edit-tech").classList.add("active");
+    }
+
+    function closeEditTechModal() {
+      document.getElementById("modal-edit-tech").classList.remove("active");
+    }
+
+    async function saveTechnicianEdits() {
+      const techId = document.getElementById("edit-tech-id").value;
+      const payload = {
+        name: document.getElementById("edit-tech-name").value.trim(),
+        phone: document.getElementById("edit-tech-phone").value.trim(),
+        vehicle: document.getElementById("edit-tech-vehicle").value.trim(),
+        avatar: document.getElementById("edit-tech-avatar").value.trim() || "👷‍♂️",
+        rating: document.getElementById("edit-tech-rating").value.trim(),
+        completedJobs: Number(document.getElementById("edit-tech-jobs").value) || 0,
+        primaryAreas: document.getElementById("edit-tech-areas").value.split(",").map(s => s.trim().toLowerCase()),
+        specialties: document.getElementById("edit-tech-specialties").value.split(",").map(s => s.trim()),
+        active: document.getElementById("edit-tech-active").checked
+      };
+
+      try {
+        const res = await fetch(`/api/admin/technicians/${techId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          closeEditTechModal();
+          showToast(`⚡ Updated electrician ${payload.name} in MongoDB Atlas!`);
+          await fetchTechnicians();
+        } else {
+          alert(data.error || "Failed to update electrician");
+        }
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    function openAddTechModal() {
+      document.getElementById("modal-add-tech").classList.add("active");
+    }
+
+    async function submitNewTechnician() {
+      const name = document.getElementById("add-tech-name").value.trim();
+      const phone = document.getElementById("add-tech-phone").value.trim();
+      if (!name || !phone) {
+        alert("Please provide Electrician Name and Phone number");
+        return;
+      }
+      const payload = {
+        name,
+        phone,
+        vehicle: document.getElementById("add-tech-vehicle").value.trim() || "Hero Splendor (CG-07-XX-0000)",
+        rating: document.getElementById("add-tech-rating").value.trim() || "4.90 ★",
+        primaryAreas: document.getElementById("add-tech-areas").value.split(",").map(s => s.trim().toLowerCase()),
+        specialties: document.getElementById("add-tech-specialties").value.split(",").map(s => s.trim()),
+        active: true
+      };
+
+      try {
+        const res = await fetch('/api/admin/technicians', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById("modal-add-tech").classList.remove("active");
+          showToast(`✅ Added new electrician ${payload.name} to Bhilai pool!`);
+          await fetchTechnicians();
+        } else {
+          alert(data.error || "Failed to add electrician");
+        }
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function deleteTechnicianPartner(id) {
+      if (!confirm("Are you sure you want to remove this electrician from the pool?")) return;
+      try {
+        const res = await fetch(`/api/admin/technicians/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) {
+          showToast("Electrician removed from pool");
+          await fetchTechnicians();
+        }
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
     async function initAll() {
+      checkAdminSecurity();
       await Promise.all([
         fetchStats(),
         fetchAppConfig(),

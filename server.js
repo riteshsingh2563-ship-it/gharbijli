@@ -13,7 +13,8 @@ const MIME = {
   '.json': 'application/json',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
-  '.svg': 'image/svg+xml'
+  '.svg': 'image/svg+xml',
+  '.apk': 'application/vnd.android.package-archive'
 };
 
 const server = http.createServer(async (req, res) => {
@@ -30,13 +31,13 @@ const server = http.createServer(async (req, res) => {
   }
 
   let reqPath = req.url.split('?')[0];
-  if (reqPath === '/') reqPath = '/index.html';
-  if (reqPath === '/admin') reqPath = '/admin.html';
+  if (reqPath === '/' || reqPath === '/admin') reqPath = '/admin.html';
+  if (reqPath === '/app' || reqPath === '/customer' || reqPath === '/preview') reqPath = '/index.html';
   
   let filePath = path.join(WWW, reqPath);
   
   if (!fs.existsSync(filePath)) {
-    filePath = path.join(WWW, 'index.html');
+    filePath = path.join(WWW, 'admin.html');
   }
 
   const ext = path.extname(filePath);

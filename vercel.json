@@ -2,6 +2,10 @@
   "outputDirectory": "www",
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/admin", "destination": "/admin.html" }
+    { "source": "/", "destination": "/admin.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/app", "destination": "/index.html" },
+    { "source": "/customer", "destination": "/index.html" },
+    { "source": "/preview", "destination": "/index.html" }
   ]
 }

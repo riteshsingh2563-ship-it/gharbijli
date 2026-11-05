@@ -474,9 +474,59 @@ class BackendStore {
   updateTechnician(id, updates) {
     const tech = this.data.technicians.find(t => t.id === id);
     if (!tech) throw new Error("Technician not found");
-    Object.assign(tech, updates);
+    if (updates.name !== undefined) tech.name = updates.name;
+    if (updates.phone !== undefined) tech.phone = updates.phone;
+    if (updates.vehicle !== undefined) tech.vehicle = updates.vehicle;
+    if (updates.rating !== undefined) tech.rating = updates.rating;
+    if (updates.ratingScore !== undefined) tech.ratingScore = Number(updates.ratingScore);
+    if (updates.completedJobs !== undefined) tech.completedJobs = Number(updates.completedJobs);
+    if (updates.primaryAreas !== undefined) {
+      tech.primaryAreas = Array.isArray(updates.primaryAreas)
+        ? updates.primaryAreas
+        : updates.primaryAreas.split(',').map(s => s.trim().toLowerCase());
+    }
+    if (updates.specialties !== undefined) {
+      tech.specialties = Array.isArray(updates.specialties)
+        ? updates.specialties
+        : updates.specialties.split(',').map(s => s.trim());
+    }
+    if (updates.active !== undefined) tech.active = Boolean(updates.active);
+    if (updates.avatar !== undefined) tech.avatar = updates.avatar;
+
     this.save();
     return tech;
+  }
+
+  addTechnician(payload) {
+    if (!payload.name || !payload.phone) {
+      throw new Error("Name and phone number are required");
+    }
+    const id = payload.id || ("GB-TECH-0" + (this.data.technicians.length + 1));
+    const newTech = {
+      id: id,
+      name: payload.name,
+      phone: payload.phone,
+      rating: payload.rating || "4.90 ★ (0 repairs)",
+      ratingScore: Number(payload.ratingScore) || 4.90,
+      completedJobs: Number(payload.completedJobs) || 0,
+      avatar: payload.avatar || "👷‍♂️",
+      vehicle: payload.vehicle || "Hero Splendor (CG-07-XX-0000)",
+      primaryAreas: Array.isArray(payload.primaryAreas) ? payload.primaryAreas : (payload.primaryAreas ? payload.primaryAreas.split(',').map(s=>s.trim().toLowerCase()) : ["bhilai"]),
+      specialties: Array.isArray(payload.specialties) ? payload.specialties : (payload.specialties ? payload.specialties.split(',').map(s=>s.trim()) : ["General Electrical"]),
+      active: payload.active !== undefined ? Boolean(payload.active) : true,
+      isAvailable: true
+    };
+    this.data.technicians.push(newTech);
+    this.save();
+    return newTech;
+  }
+
+  deleteTechnician(id) {
+    const idx = this.data.technicians.findIndex(t => t.id === id);
+    if (idx === -1) throw new Error("Technician not found");
+    const removed = this.data.technicians.splice(idx, 1)[0];
+    this.save();
+    return removed;
   }
 
   matchTechnician(addressText, preferredArea = "") {
@@ -850,7 +900,80 @@ class BackendStore {
       Object.assign(this.data.users[uid], updates, { updatedAt: new Date().toISOString() });
     }
     this.save();
+    if (mongoDb && typeof mongoDb.syncUserToMongo === 'function') {
+      mongoDb.syncUserToMongo(this.data.users[uid]);
+    }
     return this.data.users[uid];
+  }
+
+  upsertGoogleUser({ email, name, picture, sub, googleId }) {
+    if (!email) throw new Error("Google email is required");
+    const idKey = sub || googleId || email.replace(/[^a-zA-Z0-9]/g, '_');
+    const uid = "gb_google_" + idKey;
+
+    if (!this.data.users[uid]) {
+      this.data.users[uid] = {
+        uid: uid,
+        authProvider: "google",
+        email: email,
+        displayName: name || email.split('@')[0],
+        photoURL: picture || "",
+        phoneNumber: "",
+        role: "customer",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+    } else {
+      Object.assign(this.data.users[uid], {
+        email: email,
+        displayName: name || this.data.users[uid].displayName,
+        photoURL: picture || this.data.users[uid].photoURL,
+        updatedAt: new Date().toISOString()
+      });
+    }
+
+    this.save();
+    if (mongoDb && typeof mongoDb.syncUserToMongo === 'function') {
+      mongoDb.syncUserToMongo(this.data.users[uid]);
+    }
+    return this.data.users[uid];
+  }
+
+  upsertPhoneDirect({ phone, name, address }) {
+    if (!phone) throw new Error("Phone number is required");
+    const cleaned = phone.replace(/\D/g, '');
+    let normalized = cleaned;
+    if (cleaned.length === 10) normalized = "+91" + cleaned;
+    else if (cleaned.length === 12 && cleaned.startsWith("91")) normalized = "+" + cleaned;
+    else if (!phone.startsWith("+91")) normalized = "+91" + cleaned.slice(-10);
+
+    const uid = "gb_user_" + normalized.replace("+", "");
+    if (!this.data.users[uid]) {
+      this.data.users[uid] = {
+        uid: uid,
+        authProvider: "phone",
+        phoneNumber: normalized,
+        displayName: name || "Bhilai Customer",
+        savedAddress: address || "",
+        role: "customer",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+    } else {
+      if (name) this.data.users[uid].displayName = name;
+      if (address) this.data.users[uid].savedAddress = address;
+      this.data.users[uid].updatedAt = new Date().toISOString();
+    }
+
+    this.save();
+    if (mongoDb && typeof mongoDb.syncUserToMongo === 'function') {
+      mongoDb.syncUserToMongo(this.data.users[uid]);
+    }
+    return this.data.users[uid];
+  }
+
+  getAllUsers() {
+    return Object.values(this.data.users || {});
   }
 }
 

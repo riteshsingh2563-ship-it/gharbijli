@@ -7,13 +7,21 @@ const GharBijliConfig = {
     name: "GharBijli",
     hindiName: "घरबिजली",
     tagline: "घर की हर बिजली समस्या का पक्का हल",
-    version: "1.2.0",
+    version: "2.0.0",
     serviceArea: "Bhilai & Durg (Chhattisgarh)",
     currency: "₹",
     supportEmail: "support@gharbijli.me",
     supportPhone: "+919876543210",
     supportWhatsApp: "919876543210",
     supportHours: "8:00 AM – 9:00 PM (Monday – Sunday)",
+  },
+
+  api: {
+    baseUrl: (typeof window !== 'undefined' && (window.location.hostname === 'localhost' && window.location.port === '3000'))
+      ? ''
+      : (typeof window !== 'undefined' && window.location.hostname.endsWith('vercel.app'))
+        ? ''
+        : 'https://gharbijli-fwnz.vercel.app'
   },
 
   /**

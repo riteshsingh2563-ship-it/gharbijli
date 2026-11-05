@@ -919,10 +919,22 @@
     "gb_user_919876543210": {
       "uid": "gb_user_919876543210",
       "phoneNumber": "+919876543210",
-      "displayName": "",
+      "displayName": "Ritesh Singh",
       "role": "customer",
       "createdAt": "2026-11-04T12:02:23.962Z",
-      "updatedAt": "2026-11-04T12:02:23.962Z"
+      "updatedAt": "2026-11-05T11:49:52.179Z",
+      "savedAddress": "Civic Centre Bhilai"
+    },
+    "gb_google_goog_12345": {
+      "uid": "gb_google_goog_12345",
+      "authProvider": "google",
+      "email": "ritesh.test@gmail.com",
+      "displayName": "Ritesh Singh",
+      "photoURL": "",
+      "phoneNumber": "",
+      "role": "customer",
+      "createdAt": "2026-11-05T11:49:52.177Z",
+      "updatedAt": "2026-11-05T11:49:52.178Z"
     }
   },
   "emergencyTickets": []

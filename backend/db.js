@@ -61,13 +61,14 @@ async function loadAllFromMongo() {
     const database = await getDb();
     if (!database) return null;
 
-    const [appConfigDoc, categories, services, technicians, bookings, emergencyTickets] = await Promise.all([
+    const [appConfigDoc, categories, services, technicians, bookings, emergencyTickets, users] = await Promise.all([
       database.collection('app_config').findOne({ _id: 'global_config' }),
       database.collection('categories').find({}).sort({ order: 1 }).toArray(),
       database.collection('services').find({}).toArray(),
       database.collection('technicians').find({}).toArray(),
       database.collection('bookings').find({}).sort({ createdAt: -1 }).toArray(),
-      database.collection('emergency_tickets').find({}).sort({ createdAt: -1 }).toArray()
+      database.collection('emergency_tickets').find({}).sort({ createdAt: -1 }).toArray(),
+      database.collection('users').find({}).toArray()
     ]);
 
     // Clean internal mongo _id fields for clean json delivery if needed
@@ -77,13 +78,22 @@ async function loadAllFromMongo() {
       return rest;
     };
 
+    const usersMap = {};
+    if (users && users.length) {
+      users.forEach(u => {
+        const cleaned = cleanDoc(u);
+        if (cleaned.uid) usersMap[cleaned.uid] = cleaned;
+      });
+    }
+
     return {
       appConfig: appConfigDoc ? cleanDoc(appConfigDoc) : null,
       categories: categories && categories.length ? categories.map(cleanDoc) : null,
       services: services && services.length ? services.map(cleanDoc) : null,
       technicians: technicians && technicians.length ? technicians.map(cleanDoc) : null,
       bookings: bookings ? bookings.map(cleanDoc) : [],
-      emergencyTickets: emergencyTickets ? emergencyTickets.map(cleanDoc) : []
+      emergencyTickets: emergencyTickets ? emergencyTickets.map(cleanDoc) : [],
+      users: usersMap
     };
   } catch (err) {
     console.error('[MongoDB] loadAllFromMongo failed:', err.message);
@@ -173,6 +183,20 @@ async function syncEmergencyTicketToMongo(ticket) {
   }
 }
 
+async function syncUserToMongo(user) {
+  try {
+    const database = await getDb();
+    if (!database || !user || !user.uid) return;
+    await database.collection('users').updateOne(
+      { uid: user.uid },
+      { $set: user },
+      { upsert: true }
+    );
+  } catch (err) {
+    console.warn('[MongoDB] syncUser error:', err.message);
+  }
+}
+
 async function syncAllToMongo(data) {
   try {
     const database = await getDb();
@@ -208,6 +232,12 @@ async function syncAllToMongo(data) {
         await syncEmergencyTicketToMongo(em);
       }
     }
+    if (data.users && typeof data.users === 'object') {
+      const uList = Object.values(data.users);
+      for (const u of uList) {
+        await syncUserToMongo(u);
+      }
+    }
     console.log('[MongoDB] Complete initial database sync succeeded!');
     return true;
   } catch (err) {
@@ -225,5 +255,6 @@ module.exports = {
   deleteServiceFromMongo,
   syncBookingToMongo,
   syncEmergencyTicketToMongo,
+  syncUserToMongo,
   syncAllToMongo
 };

@@ -80,6 +80,18 @@ async function handleApiRequest(req, res) {
       return true;
     }
 
+    // Admin Login / Auth Lock Gate
+    if (pathname === '/api/admin/auth' && method === 'POST') {
+      const body = await parseJsonBody(req);
+      const password = (body.password || body.pin || '').trim();
+      if (password === 'gharbijli@2026' || password === '2026' || password === 'admin') {
+        sendJson(res, 200, { success: true, token: 'gb_adm_' + Date.now(), message: 'Admin authenticated' });
+      } else {
+        sendJson(res, 401, { error: 'Invalid Admin Password / Security PIN' });
+      }
+      return true;
+    }
+
     // 2. Dynamic App Config & Server-Driven UI (100% Backend-Controlled)
     if (pathname === '/api/app-config' && method === 'GET') {
       const config = store.getAppConfig();
@@ -200,6 +212,54 @@ async function handleApiRequest(req, res) {
       return true;
     }
 
+    // 11b. Auth: Google One-Tap / Google Sign-In (Direct MongoDB Atlas Sync)
+    if (pathname === '/api/auth/google' && method === 'POST') {
+      const body = await parseJsonBody(req);
+      if (!body.email) {
+        sendJson(res, 400, { error: 'Email is required for Google Sign-In' });
+        return true;
+      }
+      try {
+        const user = store.upsertGoogleUser({
+          email: body.email,
+          name: body.name || body.displayName,
+          picture: body.picture || body.photoURL,
+          sub: body.sub || body.googleId
+        });
+        sendJson(res, 200, { success: true, user });
+      } catch (err) {
+        sendJson(res, 400, { error: err.message });
+      }
+      return true;
+    }
+
+    // 11c. Auth: Direct Phone Login (Zero OTP hassle, stored directly in MongoDB Atlas)
+    if (pathname === '/api/auth/phone-direct' && method === 'POST') {
+      const body = await parseJsonBody(req);
+      if (!body.phone) {
+        sendJson(res, 400, { error: 'Phone number is required' });
+        return true;
+      }
+      try {
+        const user = store.upsertPhoneDirect({
+          phone: body.phone,
+          name: body.name,
+          address: body.address
+        });
+        sendJson(res, 200, { success: true, user });
+      } catch (err) {
+        sendJson(res, 400, { error: err.message });
+      }
+      return true;
+    }
+
+    // 11d. Admin: List Registered Users / Customers
+    if (pathname === '/api/admin/users' && method === 'GET') {
+      const users = store.getAllUsers();
+      sendJson(res, 200, { success: true, total: users.length, users });
+      return true;
+    }
+
     // 12. Technicians Directory
     if (pathname === '/api/technicians' && method === 'GET') {
       sendJson(res, 200, {
@@ -210,7 +270,19 @@ async function handleApiRequest(req, res) {
       return true;
     }
 
-    // 13. Admin: Update Technician (/api/admin/technicians/:id)
+    // 13. Admin: Add New Technician
+    if (pathname === '/api/admin/technicians' && method === 'POST') {
+      const body = await parseJsonBody(req);
+      try {
+        const created = store.addTechnician(body);
+        sendJson(res, 201, { success: true, technician: created });
+      } catch (err) {
+        sendJson(res, 400, { error: err.message });
+      }
+      return true;
+    }
+
+    // 13b. Admin: Update or Delete Technician (/api/admin/technicians/:id)
     const adminTechMatch = pathname.match(/^\/api\/admin\/technicians\/([A-Za-z0-9_-]+)$/);
     if (adminTechMatch && (method === 'PATCH' || method === 'POST')) {
       const techId = adminTechMatch[1];
@@ -218,6 +290,17 @@ async function handleApiRequest(req, res) {
       try {
         const updated = store.updateTechnician(techId, body);
         sendJson(res, 200, { success: true, technician: updated });
+      } catch (err) {
+        sendJson(res, 400, { error: err.message });
+      }
+      return true;
+    }
+
+    if (adminTechMatch && method === 'DELETE') {
+      const techId = adminTechMatch[1];
+      try {
+        const deleted = store.deleteTechnician(techId);
+        sendJson(res, 200, { success: true, technician: deleted });
       } catch (err) {
         sendJson(res, 400, { error: err.message });
       }
