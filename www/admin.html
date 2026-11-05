@@ -504,8 +504,9 @@
             <h2 class="card-title">All Customer Bookings</h2>
             <p class="card-subtitle">Manage lifecycle, manual dispatch & Cash on Delivery collection</p>
           </div>
-          <div style="display: flex; gap: 8px;">
-            <select id="filter-booking-status" class="form-control" style="width: 200px;">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <input type="text" id="search-bookings-input" class="form-control" placeholder="🔍 Search ID, phone, name, sector..." style="width: 250px;" oninput="renderBookingsTables()" />
+            <select id="filter-booking-status" class="form-control" style="width: 190px;" onchange="renderBookingsTables()">
               <option value="ALL">All Statuses</option>
               <option value="PENDING_CONFIRMATION">Pending Confirmation</option>
               <option value="CONFIRMED">Confirmed</option>
@@ -1030,7 +1031,21 @@
 
     function renderBookingsTables() {
       const filter = document.getElementById("filter-booking-status").value;
-      const filtered = filter === "ALL" ? allBookings : allBookings.filter(b => b.bookingStatus === filter);
+      const searchEl = document.getElementById("search-bookings-input");
+      const query = (searchEl ? searchEl.value.trim().toLowerCase() : "");
+
+      let filtered = filter === "ALL" ? allBookings : allBookings.filter(b => b.bookingStatus === filter);
+      if (query) {
+        filtered = filtered.filter(b => {
+          const matchId = (b.bookingId || "").toLowerCase().includes(query);
+          const matchName = (b.customerName || "").toLowerCase().includes(query);
+          const matchPhone = (b.customerPhone || "").replace(/\D/g, "").includes(query.replace(/\D/g, ""));
+          const matchService = (b.serviceNameSnapshot || "").toLowerCase().includes(query);
+          const matchAddr = (b.addressSnapshot ? b.addressSnapshot.fullAddress : "").toLowerCase().includes(query);
+          const matchTech = (b.technicianName || "").toLowerCase().includes(query);
+          return matchId || matchName || matchPhone || matchService || matchAddr || matchTech;
+        });
+      }
 
       // 1. Overview recent table (top 5)
       const ovBody = document.getElementById("overview-recent-table-body");
