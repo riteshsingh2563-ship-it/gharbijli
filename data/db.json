@@ -811,6 +811,67 @@
   ],
   "bookings": [
     {
+      "bookingId": "GB-2026-BHL-805",
+      "addressSnapshot": {
+        "fullAddress": "House 14, Street 7, Sector 6, Bhilai"
+      },
+      "assignedAt": "2026-11-05T15:24:14.381Z",
+      "assignedTechnician": {
+        "id": "GB-TECH-01",
+        "name": "Manoj Kumar",
+        "phone": "+919876543210",
+        "rating": "4.92 ★ (142 repairs)",
+        "vehicle": "Honda Activa (CG-07-XX-1234)"
+      },
+      "bookingStatus": "ON_THE_WAY",
+      "cancellationReason": null,
+      "cancelledAt": null,
+      "completedAt": null,
+      "confirmedAt": "2026-11-05T15:24:04.371Z",
+      "createdAt": "2026-11-05T15:23:56.254Z",
+      "customerName": "Ritesh Singh",
+      "customerNotes": "",
+      "customerPhone": "+919876543210",
+      "customerUid": "gb_user_919876543210",
+      "estimatedEta": "30-45 mins",
+      "finalAmount": null,
+      "issueDescription": "",
+      "paymentMethod": "CASH_ON_DELIVERY",
+      "paymentStatus": "PENDING",
+      "preferredDate": "2026-11-05",
+      "preferredTimeSlot": "Today (30-45 mins)",
+      "pricingTypeSnapshot": "inspection_based",
+      "serviceId": "regular-fan-installation",
+      "serviceNameSnapshot": "Electrical Service Visit",
+      "statusHistory": [
+        {
+          "status": "PENDING_CONFIRMATION",
+          "timestamp": "2026-11-05T15:23:56.254Z",
+          "note": "Booking submitted. Bhilai operator confirmation call will arrive shortly."
+        },
+        {
+          "status": "CONFIRMED",
+          "timestamp": "2026-11-05T15:24:04.371Z",
+          "note": "Bhilai Operations verified booking with customer"
+        },
+        {
+          "status": "TECHNICIAN_ASSIGNED",
+          "timestamp": "2026-11-05T15:24:14.381Z",
+          "note": "Assigned verified Bhilai partner Manoj Kumar (4.92 ★ (142 repairs))"
+        },
+        {
+          "status": "ON_THE_WAY",
+          "timestamp": "2026-11-05T15:24:32.726Z",
+          "note": "Manoj Kumar has departed and is en route on Honda Activa (CG-07-XX-1234)"
+        }
+      ],
+      "technicianName": "Manoj Kumar",
+      "technicianPhone": "+919876543210",
+      "technicianRating": "4.92 ★ (142 repairs)",
+      "technicianVehicle": "Honda Activa (CG-07-XX-1234)",
+      "updatedAt": "2026-11-05T15:24:32.726Z"
+    },
+    {
       "bookingId": "GB-2026-BHL-458",
       "addressSnapshot": {
         "fullAddress": "Civic Centre, Bhilai"
@@ -1099,8 +1160,8 @@
       "displayName": "Ritesh Singh",
       "role": "customer",
       "createdAt": "2026-11-04T12:02:23.962Z",
-      "updatedAt": "2026-11-05T11:49:52.179Z",
-      "savedAddress": "Civic Centre Bhilai"
+      "updatedAt": "2026-11-05T15:23:56.164Z",
+      "savedAddress": "Plot 42, Sector 6, Bhilai"
     },
     "gb_google_goog_12345": {
       "uid": "gb_google_goog_12345",
@@ -1125,5 +1186,24 @@
       "updatedAt": "2026-11-05T15:18:18.270Z"
     }
   },
-  "emergencyTickets": []
+  "emergencyTickets": [
+    {
+      "ticketId": "GB-SOS-1741",
+      "customerPhone": "+919876543210",
+      "customerName": "Emergency Test",
+      "location": "Nehru Nagar, Bhilai",
+      "issueType": "Sparks in main switchboard",
+      "status": "DISPATCHED_PRIORITY",
+      "priority": "CRITICAL",
+      "dispatchedTechnician": {
+        "id": "GB-TECH-01",
+        "name": "Manoj Kumar",
+        "phone": "+919876543210",
+        "rating": "4.92 ★ (142 repairs)",
+        "vehicle": "Honda Activa (CG-07-XX-1234)"
+      },
+      "targetSlaMinutes": 15,
+      "createdAt": "2026-11-05T15:23:56.310Z"
+    }
+  ]
 }
