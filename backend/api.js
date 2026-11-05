@@ -71,6 +71,7 @@ async function handleApiRequest(req, res) {
         service: 'GharBijli Bhilai Backend Engine',
         version: '2.0.0',
         city: 'Bhilai, Chhattisgarh',
+        database: 'MongoDB Atlas (Cluster: ghar-bijli)',
         timestamp: new Date().toISOString(),
         totalBookings: store.data.bookings.length,
         techniciansActive: store.data.technicians.filter(t => t.active).length,

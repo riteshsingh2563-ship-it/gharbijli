@@ -17,3 +17,9 @@ Thumbs.db
 *.log
 *.tmp
 *.apk
+
+# Environment & Secrets
+.env
+.env.*
+.env.local
+

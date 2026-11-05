@@ -5,6 +5,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const mongoDb = require('./db');
 
 const DB_PATH = process.env.VERCEL
   ? path.join('/tmp', 'gharbijli_db.json')
@@ -166,6 +167,28 @@ class BackendStore {
     };
     this.activeSimulators = new Map();
     this.load();
+    this.initMongoSync();
+  }
+
+  async initMongoSync() {
+    try {
+      if (!mongoDb) return;
+      const remoteData = await mongoDb.loadAllFromMongo();
+      if (remoteData && (remoteData.appConfig || remoteData.services)) {
+        if (remoteData.appConfig) this.data.appConfig = remoteData.appConfig;
+        if (remoteData.categories && remoteData.categories.length) this.data.categories = remoteData.categories;
+        if (remoteData.services && remoteData.services.length) this.data.services = remoteData.services;
+        if (remoteData.technicians && remoteData.technicians.length) this.data.technicians = remoteData.technicians;
+        if (remoteData.bookings && remoteData.bookings.length) this.data.bookings = remoteData.bookings;
+        if (remoteData.emergencyTickets && remoteData.emergencyTickets.length) this.data.emergencyTickets = remoteData.emergencyTickets;
+        console.log('[BackendStore] Hydrated in-memory cache from MongoDB Atlas cloud!');
+      } else {
+        console.log('[BackendStore] MongoDB empty, syncing baseline data to Atlas...');
+        await mongoDb.syncAllToMongo(this.data);
+      }
+    } catch (err) {
+      console.warn('[BackendStore] MongoDB init sync warning:', err.message);
+    }
   }
 
   load() {
@@ -324,6 +347,13 @@ class BackendStore {
       }, null, 2), 'utf8');
     } catch (e) {
       console.error("[BackendStore] Failed to write database:", e.message);
+    }
+
+    // Mirror to MongoDB Atlas asynchronously
+    if (mongoDb && typeof mongoDb.syncAllToMongo === 'function') {
+      mongoDb.syncAllToMongo(this.data).catch(e => {
+        console.warn("[BackendStore] MongoDB async sync error:", e.message);
+      });
     }
   }
 
