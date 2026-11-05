@@ -8,7 +8,7 @@ const GharBijliConfig = {
     hindiName: "घरबिजली",
     tagline: "घर की हर बिजली समस्या का पक्का हल",
     version: "1.2.0",
-    serviceArea: "Patna & Local Suburbs",
+    serviceArea: "Bhilai & Durg (Chhattisgarh)",
     currency: "₹",
     supportEmail: "support@gharbijli.me",
     supportPhone: "+919876543210",
@@ -23,9 +23,9 @@ const GharBijliConfig = {
   maps: {
     googleMapsApiKey: "GOOGLE_MAPS_API_KEY_PLACEHOLDER",
     defaultCenter: {
-      lat: 25.6093, // Patna Bailey Road / High Court center
-      lng: 85.1235,
-      areaName: "Bailey Road, Patna"
+      lat: 21.2120, // Bhilai Civic Centre / Nehru Nagar center
+      lng: 81.3733,
+      areaName: "Civic Centre, Bhilai"
     },
     defaultZoom: 15
   },
@@ -69,7 +69,7 @@ const GharBijliConfig = {
       label: "Matching Electrician",
       hindiLabel: "इलेक्ट्रीशियन खोज रहे हैं",
       badgeClass: "badge-assigned",
-      description: "Finding the nearest verified electrical partner in Patna."
+      description: "Finding the nearest verified electrical partner in Bhilai."
     },
     TECHNICIAN_ASSIGNED: {
       key: "TECHNICIAN_ASSIGNED",

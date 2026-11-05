@@ -1,6 +1,6 @@
 /**
- * GharBijli Central Backend Store & Dispatch Engine
- * Provides persistent storage, technician assignment, and booking lifecycle state machine.
+ * GharBijli Central Backend Store & Dynamic CMS Engine (Bhilai, Chhattisgarh)
+ * Controls 100% of the UI, catalog pricing, banners, categories, bookings, and dispatch.
  */
 
 const fs = require('fs');
@@ -9,6 +9,61 @@ const path = require('path');
 const DB_PATH = process.env.VERCEL
   ? path.join('/tmp', 'gharbijli_db.json')
   : path.join(__dirname, '..', 'data', 'db.json');
+
+const INITIAL_APP_CONFIG = {
+  app: {
+    name: "GharBijli",
+    hindiName: "घरबिजली",
+    tagline: "घर की हर बिजली समस्या का पक्का हल",
+    version: "2.0.0",
+    serviceArea: "Bhilai & Durg (Chhattisgarh)",
+    currency: "₹",
+    supportPhone: "+919876543210",
+    supportWhatsApp: "919876543210",
+    supportEmail: "support@gharbijli.me",
+    supportHours: "8:00 AM – 9:00 PM (Monday – Sunday)"
+  },
+  hero: {
+    title: "Electricians in Bhilai",
+    subtitle: "Doorstep electrical repairs & installations in Bhilai",
+    ratingText: "4.88 (12,400+ Bhilai Homes Serviced)",
+    earliestSlot: "Today, 30–45m"
+  },
+  visitationPromo: {
+    title: "Get visitation fee off",
+    subtext: "On orders above ₹499 (Tap for details)",
+    couponCode: "BHILAI50",
+    discountAmount: 50,
+    minOrderAmount: 499,
+    active: true
+  },
+  defaultArea: "Civic Centre, Bhilai",
+  localities: [
+    { id: "civic-centre", name: "Civic Centre, Bhilai", pincode: "490006", active: true },
+    { id: "nehru-nagar", name: "Nehru Nagar, Bhilai", pincode: "490020", active: true },
+    { id: "sector-6", name: "Sector 6, Bhilai", pincode: "490006", active: true },
+    { id: "sector-7", name: "Sector 7 & 8, Bhilai", pincode: "490006", active: true },
+    { id: "sector-9-10", name: "Sector 9 & 10 (HUDCO), Bhilai", pincode: "490006", active: true },
+    { id: "supela", name: "Supela & Power House, Bhilai", pincode: "490023", active: true },
+    { id: "vaishali-nagar", name: "Vaishali Nagar, Bhilai", pincode: "490023", active: true },
+    { id: "smriti-nagar", name: "Smriti Nagar & Junwani, Bhilai", pincode: "490020", active: true },
+    { id: "risali", name: "Risali & Ruabandha, Bhilai", pincode: "490006", active: true }
+  ]
+};
+
+const INITIAL_CATEGORIES = [
+  { id: "switch-socket", name: "Switch & socket", icon: "assets/categories/switch-socket.png", order: 1, active: true },
+  { id: "fan", name: "Fan", icon: "assets/categories/fan.png", order: 2, active: true },
+  { id: "light", name: "Light", icon: "assets/categories/light.png", order: 3, active: true },
+  { id: "wiring", name: "Wiring", icon: "assets/categories/wiring.png", order: 4, active: true },
+  { id: "doorbell-security", name: "Doorbell & security", icon: "assets/categories/doorbell-security.png", order: 5, active: true },
+  { id: "mcb-submeter", name: "MCB & submeter", icon: "assets/categories/mcb-submeter.png", order: 6, active: true },
+  { id: "inverter-stabiliser", name: "Inverter & stabiliser", icon: "assets/categories/inverter-stabiliser.png", order: 7, active: true },
+  { id: "appliances", name: "TV & other appliances", icon: "assets/categories/appliances.png", order: 8, active: true },
+  { id: "festive-lights", name: "Festive lights", icon: "assets/categories/festive-lights.png", order: 9, active: true },
+  { id: "ev-charger", name: "EV charger installation", icon: "assets/categories/ev-charger.png", order: 10, active: true },
+  { id: "consultation", name: "Book a consultation", icon: "assets/categories/consultation.png", order: 11, active: true }
+];
 
 const INITIAL_TECHNICIANS = [
   {
@@ -19,8 +74,8 @@ const INITIAL_TECHNICIANS = [
     ratingScore: 4.92,
     completedJobs: 142,
     avatar: "👷‍♂️",
-    vehicle: "Honda Activa (BR-01-XX-1234)",
-    primaryAreas: ["bailey road", "raja bazar", "rukanpura", "ashiana", "khajpura", "jagdeo path"],
+    vehicle: "Honda Activa (CG-07-XX-1234)",
+    primaryAreas: ["civic centre", "sector 6", "sector 7", "sector 1", "sector 4", "bhilai"],
     specialties: ["Fan installation", "Switchboard repair", "MCB wiring", "Short circuit triage"],
     active: true,
     isAvailable: true
@@ -33,8 +88,8 @@ const INITIAL_TECHNICIANS = [
     ratingScore: 4.87,
     completedJobs: 210,
     avatar: "👨‍🔧",
-    vehicle: "Hero Splendor (BR-01-YY-5678)",
-    primaryAreas: ["boring road", "patliputra", "kidwaipuri", "sk puri", "anandpuri", "alpana"],
+    vehicle: "Hero Splendor (CG-07-YY-5678)",
+    primaryAreas: ["nehru nagar", "smriti nagar", "junwani", "priyadarshini", "bhilai"],
     specialties: ["Smart BLDC fans", "Inverter setup", "Chandelier lighting", "Submeter installation"],
     active: true,
     isAvailable: true
@@ -47,8 +102,8 @@ const INITIAL_TECHNICIANS = [
     ratingScore: 4.94,
     completedJobs: 320,
     avatar: "⚡",
-    vehicle: "TVS Jupiter (BR-01-ZZ-9012)",
-    primaryAreas: ["kankarbagh", "hanuman nagar", "pc colony", "kumhrar", "bhootnath road", "tiwari bechar"],
+    vehicle: "TVS Jupiter (CG-07-ZZ-9012)",
+    primaryAreas: ["supela", "power house", "kohka", "radhika nagar", "bhilai"],
     specialties: ["Complete home rewiring", "Phase load balancing", "Heavy appliance lines"],
     active: true,
     isAvailable: true
@@ -61,8 +116,8 @@ const INITIAL_TECHNICIANS = [
     ratingScore: 4.82,
     completedJobs: 98,
     avatar: "🔧",
-    vehicle: "Bajaj Pulsar (BR-01-AB-3456)",
-    primaryAreas: ["danapur", "saguna more", "khagaul", "gola road", "rupaspur", "cantt"],
+    vehicle: "Bajaj Pulsar (CG-07-AB-3456)",
+    primaryAreas: ["vaishali nagar", "milestone", "kurud", "camp 1", "camp 2", "bhilai"],
     specialties: ["Motor starters", "Water pump wiring", "Socket replacement", "Geyser wiring"],
     active: true,
     isAvailable: true
@@ -75,8 +130,8 @@ const INITIAL_TECHNICIANS = [
     ratingScore: 4.89,
     completedJobs: 165,
     avatar: "🧰",
-    vehicle: "Honda Shine (BR-01-CD-7890)",
-    primaryAreas: ["rajendra nagar", "kadamkuan", "exhibition road", "nala road", "machhua toli"],
+    vehicle: "Honda Shine (CG-07-CD-7890)",
+    primaryAreas: ["sector 9", "sector 10", "hudco", "hospital sector", "bhilai"],
     specialties: ["Emergency outage", "Switchboard sparks", "Earthing installation"],
     active: true,
     isAvailable: true
@@ -89,8 +144,8 @@ const INITIAL_TECHNICIANS = [
     ratingScore: 4.96,
     completedJobs: 410,
     avatar: "👷‍♂️",
-    vehicle: "Hero Passion (BR-01-EF-2345)",
-    primaryAreas: ["fraser road", "gandhi maidan", "dak bungalow", "station road", "ashok rajpath"],
+    vehicle: "Hero Passion (CG-07-EF-2345)",
+    primaryAreas: ["risali", "ruabandha", "maroda", "durg", "bhilai"],
     specialties: ["Commercial setup", "Distribution boxes", "3-phase panel boards"],
     active: true,
     isAvailable: true
@@ -100,8 +155,11 @@ const INITIAL_TECHNICIANS = [
 class BackendStore {
   constructor() {
     this.data = {
-      bookings: [],
+      appConfig: INITIAL_APP_CONFIG,
+      categories: INITIAL_CATEGORIES,
+      services: [],
       technicians: INITIAL_TECHNICIANS,
+      bookings: [],
       users: {},
       otpSessions: {},
       emergencyTickets: []
@@ -115,17 +173,138 @@ class BackendStore {
       if (fs.existsSync(DB_PATH)) {
         const raw = fs.readFileSync(DB_PATH, 'utf8');
         const parsed = JSON.parse(raw);
+        this.data.appConfig = parsed.appConfig || INITIAL_APP_CONFIG;
+        this.data.categories = (parsed.categories && parsed.categories.length) ? parsed.categories : INITIAL_CATEGORIES;
+        this.data.services = (parsed.services && parsed.services.length) ? parsed.services : this.loadInitialServices();
+        this.data.technicians = (parsed.technicians && parsed.technicians.length) ? parsed.technicians : INITIAL_TECHNICIANS;
         this.data.bookings = parsed.bookings || [];
         this.data.users = parsed.users || {};
         this.data.emergencyTickets = parsed.emergencyTickets || [];
-        this.data.technicians = (parsed.technicians && parsed.technicians.length) ? parsed.technicians : INITIAL_TECHNICIANS;
       } else {
-        this.save();
+        this.seedDemoData();
       }
     } catch (e) {
-      console.warn("[BackendStore] Error loading database, initializing fresh:", e.message);
-      this.save();
+      console.warn("[BackendStore] Loading error, seeding clean:", e.message);
+      this.seedDemoData();
     }
+  }
+
+  loadInitialServices() {
+    try {
+      const servicesPath = path.join(__dirname, '..', 'www', 'js', 'services-data.js');
+      const loaded = require(servicesPath);
+      return loaded.map(s => ({
+        ...s,
+        active: true
+      }));
+    } catch (e) {
+      console.warn("[BackendStore] Could not load services-data.js:", e.message);
+      return [];
+    }
+  }
+
+  seedDemoData() {
+    this.data.appConfig = INITIAL_APP_CONFIG;
+    this.data.categories = INITIAL_CATEGORIES;
+    this.data.services = this.loadInitialServices();
+    this.data.technicians = INITIAL_TECHNICIANS;
+    this.data.emergencyTickets = [];
+
+    const nowIso = new Date().toISOString();
+    this.data.bookings = [
+      {
+        bookingId: "GB-2026-BHL-108",
+        customerUid: "gb_user_919876543210",
+        customerPhone: "+919876543210",
+        customerName: "Ritesh Singh",
+        serviceId: "regular-fan-installation",
+        serviceNameSnapshot: "Regular Ceiling Fan Installation",
+        pricingTypeSnapshot: "inspection_based",
+        addressSnapshot: {
+          houseNo: "Plot 42",
+          street: "Near Civic Centre Park, Sector 6",
+          landmark: "Opposite Kala Mandir",
+          pincode: "490006",
+          city: "Bhilai, Chhattisgarh",
+          fullAddress: "Plot 42, Near Civic Centre Park, Sector 6, Bhilai, Chhattisgarh - 490006"
+        },
+        preferredDate: "2026-11-05",
+        preferredTimeSlot: "12:00 PM – 03:00 PM",
+        issueDescription: "Fan speed regulation and blade balancing",
+        customerNotes: "Please bring ladder",
+        paymentMethod: "CASH_ON_DELIVERY",
+        paymentStatus: "PENDING",
+        bookingStatus: "TECHNICIAN_ASSIGNED",
+        assignedTechnician: {
+          id: "GB-TECH-01",
+          name: "Manoj Kumar",
+          phone: "+919876543210",
+          rating: "4.92 ★ (142 repairs)",
+          vehicle: "Honda Activa (CG-07-XX-1234)"
+        },
+        technicianName: "Manoj Kumar",
+        technicianPhone: "+919876543210",
+        technicianRating: "4.92 ★ (142 repairs)",
+        technicianVehicle: "Honda Activa (CG-07-XX-1234)",
+        estimatedEta: "30-45 mins",
+        finalAmount: null,
+        createdAt: nowIso,
+        updatedAt: nowIso,
+        confirmedAt: nowIso,
+        assignedAt: nowIso,
+        completedAt: null,
+        cancelledAt: null,
+        cancellationReason: null,
+        statusHistory: [
+          { status: "PENDING_CONFIRMATION", timestamp: nowIso, note: "Booking submitted by customer" },
+          { status: "CONFIRMED", timestamp: nowIso, note: "Verified by Bhilai Operations" },
+          { status: "TECHNICIAN_ASSIGNED", timestamp: nowIso, note: "Manoj Kumar assigned" }
+        ]
+      },
+      {
+        bookingId: "GB-2026-BHL-109",
+        customerUid: "gb_user_919999999999",
+        customerPhone: "+919999999999",
+        customerName: "Pooja Verma",
+        serviceId: "smart-bldc-fan",
+        serviceNameSnapshot: "Smart/BLDC ceiling fan replace/install",
+        pricingTypeSnapshot: "fixed_quote",
+        addressSnapshot: {
+          houseNo: "B-12, Surya Enclave",
+          street: "Nehru Nagar West",
+          landmark: "Near Apollo Hospital",
+          pincode: "490020",
+          city: "Bhilai, Chhattisgarh",
+          fullAddress: "B-12, Surya Enclave, Nehru Nagar West, Bhilai - 490020"
+        },
+        preferredDate: "2026-11-05",
+        preferredTimeSlot: "09:00 AM – 12:00 PM",
+        issueDescription: "Installing 2 Atomberg smart fans with remote",
+        customerNotes: "",
+        paymentMethod: "CASH_ON_DELIVERY",
+        paymentStatus: "PENDING",
+        bookingStatus: "PENDING_CONFIRMATION",
+        assignedTechnician: null,
+        technicianName: "Amit Verma",
+        technicianPhone: "+919876543211",
+        technicianRating: "4.87 ★ (210 repairs)",
+        technicianVehicle: "Hero Splendor (CG-07-YY-5678)",
+        estimatedEta: "30-45 mins",
+        finalAmount: null,
+        createdAt: nowIso,
+        updatedAt: nowIso,
+        confirmedAt: null,
+        assignedAt: null,
+        completedAt: null,
+        cancelledAt: null,
+        cancellationReason: null,
+        statusHistory: [
+          { status: "PENDING_CONFIRMATION", timestamp: nowIso, note: "Booking received online" }
+        ]
+      }
+    ];
+
+    this.save();
   }
 
   save() {
@@ -135,13 +314,430 @@ class BackendStore {
         fs.mkdirSync(dir, { recursive: true });
       }
       fs.writeFileSync(DB_PATH, JSON.stringify({
-        bookings: this.data.bookings,
+        appConfig: this.data.appConfig,
+        categories: this.data.categories,
+        services: this.data.services,
         technicians: this.data.technicians,
+        bookings: this.data.bookings,
         users: this.data.users,
         emergencyTickets: this.data.emergencyTickets
       }, null, 2), 'utf8');
     } catch (e) {
       console.error("[BackendStore] Failed to write database:", e.message);
+    }
+  }
+
+  // --- DYNAMIC APP CONFIG & CMS ---
+  getAppConfig() {
+    return {
+      ...this.data.appConfig,
+      categories: this.data.categories.filter(c => c.active),
+      services: this.data.services.filter(s => s.active)
+    };
+  }
+
+  updateAppConfig(updates) {
+    if (updates.app) Object.assign(this.data.appConfig.app, updates.app);
+    if (updates.hero) Object.assign(this.data.appConfig.hero, updates.hero);
+    if (updates.visitationPromo) Object.assign(this.data.appConfig.visitationPromo, updates.visitationPromo);
+    if (updates.defaultArea) this.data.appConfig.defaultArea = updates.defaultArea;
+    if (updates.localities) this.data.appConfig.localities = updates.localities;
+    this.save();
+    return this.data.appConfig;
+  }
+
+  // --- SERVICES & PRICING CONTROLLER ---
+  getServices(all = false) {
+    if (all) return this.data.services;
+    return this.data.services.filter(s => s.active);
+  }
+
+  getServiceById(id) {
+    return this.data.services.find(s => s.id === id) || null;
+  }
+
+  updateService(id, updates) {
+    const service = this.getServiceById(id);
+    if (!service) throw new Error("Service not found");
+
+    if (updates.priceNumber !== undefined) {
+      service.priceNumber = Number(updates.priceNumber);
+      service.priceTag = `Starts at ₹${service.priceNumber}`;
+    }
+    if (updates.name !== undefined) service.name = updates.name;
+    if (updates.hindiName !== undefined) service.hindiName = updates.hindiName;
+    if (updates.estimatedDuration !== undefined) service.estimatedDuration = updates.estimatedDuration;
+    if (updates.active !== undefined) service.active = Boolean(updates.active);
+    if (updates.description !== undefined) service.description = updates.description;
+    if (updates.mrp !== undefined) service.mrp = updates.mrp;
+    if (updates.discountBadge !== undefined) service.discountBadge = updates.discountBadge;
+
+    this.save();
+    return service;
+  }
+
+  addService(payload) {
+    if (!payload.id || !payload.name) {
+      throw new Error("Service ID and Name are required");
+    }
+    if (this.getServiceById(payload.id)) {
+      throw new Error("Service ID already exists");
+    }
+
+    const newService = {
+      id: payload.id,
+      categoryId: payload.categoryId || "switch-socket",
+      category: payload.category || "Electrical",
+      categoryLabel: payload.categoryLabel || "General",
+      name: payload.name,
+      hindiName: payload.hindiName || payload.name,
+      icon: payload.icon || "⚡",
+      image: payload.image || "assets/images/switch-repair.jpg",
+      badge: payload.badge || "Standard",
+      rating: Number(payload.rating) || 4.85,
+      reviews: payload.reviews || "10+ reviews",
+      mrp: payload.mrp || `₹${(Number(payload.priceNumber) || 99) + 40}`,
+      priceTag: `Starts at ₹${Number(payload.priceNumber) || 99}`,
+      priceNumber: Number(payload.priceNumber) || 99,
+      discountBadge: payload.discountBadge || "Special Offer",
+      warranty: payload.warranty || "30-Day Guarantee",
+      description: payload.description || "Certified doorstep electrical repair in Bhilai",
+      pricingType: payload.pricingType || "standard",
+      estimatedDuration: payload.estimatedDuration || "30 mins",
+      highlights: payload.highlights || ["Pay cash after service", "Bhilai certified partner"],
+      included: payload.included || ["Safety check", "Doorstep visit"],
+      excluded: payload.excluded || ["Parts at actuals"],
+      active: true
+    };
+
+    this.data.services.push(newService);
+    this.save();
+    return newService;
+  }
+
+  deleteService(id) {
+    const idx = this.data.services.findIndex(s => s.id === id);
+    if (idx === -1) throw new Error("Service not found");
+    const removed = this.data.services.splice(idx, 1)[0];
+    this.save();
+    return removed;
+  }
+
+  // --- CATEGORIES CONTROLLER ---
+  getCategories() {
+    return this.data.categories;
+  }
+
+  updateCategory(id, updates) {
+    const cat = this.data.categories.find(c => c.id === id);
+    if (!cat) throw new Error("Category not found");
+    Object.assign(cat, updates);
+    this.save();
+    return cat;
+  }
+
+  // --- BHILAI TECHNICIANS ---
+  getTechnicians() {
+    return this.data.technicians;
+  }
+
+  updateTechnician(id, updates) {
+    const tech = this.data.technicians.find(t => t.id === id);
+    if (!tech) throw new Error("Technician not found");
+    Object.assign(tech, updates);
+    this.save();
+    return tech;
+  }
+
+  matchTechnician(addressText, preferredArea = "") {
+    const query = `${addressText} ${preferredArea}`.toLowerCase();
+    
+    let matched = null;
+    for (const tech of this.data.technicians) {
+      if (!tech.active) continue;
+      const hit = tech.primaryAreas.some(area => query.includes(area));
+      if (hit) {
+        matched = tech;
+        break;
+      }
+    }
+
+    if (!matched) {
+      const activeTechs = this.data.technicians.filter(t => t.active);
+      matched = activeTechs.sort((a, b) => b.ratingScore - a.ratingScore)[0] || this.data.technicians[0];
+    }
+
+    return matched;
+  }
+
+  // --- BOOKINGS ENGINE ---
+  createBooking(payload) {
+    const now = new Date();
+    const nowIso = now.toISOString();
+    const bookingId = payload.bookingId || ("GB-2026-BHL-" + Math.floor(100 + Math.random() * 900));
+
+    const addressFull = payload.addressSnapshot ? payload.addressSnapshot.fullAddress : (payload.address || "Bhilai, Chhattisgarh");
+    const matchedTech = this.matchTechnician(addressFull, payload.preferredArea || "");
+
+    const booking = {
+      bookingId: bookingId,
+      customerUid: payload.customerUid || "guest",
+      customerPhone: payload.customerPhone || "+919876543210",
+      customerName: payload.customerName || "Customer",
+      serviceId: payload.serviceId || "regular-fan-installation",
+      serviceNameSnapshot: payload.serviceNameSnapshot || "Electrical Service Visit",
+      pricingTypeSnapshot: payload.pricingTypeSnapshot || "inspection_based",
+      addressSnapshot: payload.addressSnapshot || { fullAddress: addressFull },
+      preferredDate: payload.preferredDate || nowIso.split('T')[0],
+      preferredTimeSlot: payload.preferredTimeSlot || "Today (30-45 mins)",
+      issueDescription: payload.issueDescription || "",
+      customerNotes: payload.customerNotes || "",
+      paymentMethod: "CASH_ON_DELIVERY",
+      paymentStatus: "PENDING",
+      bookingStatus: "PENDING_CONFIRMATION",
+      assignedTechnician: null,
+      technicianName: matchedTech.name,
+      technicianPhone: matchedTech.phone,
+      technicianRating: matchedTech.rating,
+      technicianVehicle: matchedTech.vehicle,
+      estimatedEta: "30-45 mins",
+      finalAmount: null,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+      confirmedAt: null,
+      assignedAt: null,
+      completedAt: null,
+      cancelledAt: null,
+      cancellationReason: null,
+      statusHistory: [
+        {
+          status: "PENDING_CONFIRMATION",
+          timestamp: nowIso,
+          note: "Booking submitted. Bhilai operator confirmation call will arrive shortly."
+        }
+      ]
+    };
+
+    this.data.bookings.unshift(booking);
+    this.save();
+
+    this.startAutoDispatchSimulator(booking.bookingId, matchedTech);
+    return booking;
+  }
+
+  startAutoDispatchSimulator(bookingId, tech) {
+    if (this.activeSimulators.has(bookingId)) {
+      clearTimeout(this.activeSimulators.get(bookingId));
+    }
+
+    const t1 = setTimeout(() => {
+      this.updateBookingStatus(bookingId, "CONFIRMED", "Bhilai Operations verified booking with customer");
+
+      const t2 = setTimeout(() => {
+        this.updateBookingStatus(bookingId, "TECHNICIAN_ASSIGNED", `Assigned verified Bhilai partner ${tech.name} (${tech.rating})`, {
+          assignedTechnician: {
+            id: tech.id,
+            name: tech.name,
+            phone: tech.phone,
+            rating: tech.rating,
+            vehicle: tech.vehicle
+          },
+          technicianName: tech.name,
+          technicianPhone: tech.phone,
+          technicianRating: tech.rating
+        });
+
+        const t3 = setTimeout(() => {
+          this.updateBookingStatus(bookingId, "ON_THE_WAY", `${tech.name} has departed and is en route on ${tech.vehicle}`);
+        }, 18000);
+
+        this.activeSimulators.set(bookingId + "_step3", t3);
+      }, 10000);
+
+      this.activeSimulators.set(bookingId + "_step2", t2);
+    }, 8000);
+
+    this.activeSimulators.set(bookingId, t1);
+  }
+
+  getBookings(filter = {}) {
+    let result = this.data.bookings;
+    if (filter.customerUid) {
+      result = result.filter(b => b.customerUid === filter.customerUid);
+    }
+    if (filter.customerPhone) {
+      const cleanPhone = filter.customerPhone.replace(/\D/g, '').slice(-10);
+      result = result.filter(b => {
+        const bPhone = (b.customerPhone || '').replace(/\D/g, '').slice(-10);
+        return bPhone === cleanPhone;
+      });
+    }
+    if (filter.bookingStatus) {
+      result = result.filter(b => b.bookingStatus === filter.bookingStatus);
+    }
+    return result;
+  }
+
+  getBookingById(bookingId) {
+    return this.data.bookings.find(b => b.bookingId === bookingId) || null;
+  }
+
+  updateBookingStatus(bookingId, newStatus, note = "", extraFields = {}) {
+    const booking = this.getBookingById(bookingId);
+    if (!booking) return null;
+
+    if (newStatus === "CANCELLED") {
+      this.stopSimulator(bookingId);
+    }
+
+    const nowIso = new Date().toISOString();
+    booking.bookingStatus = newStatus;
+    booking.updatedAt = nowIso;
+
+    if (newStatus === "CONFIRMED" && !booking.confirmedAt) booking.confirmedAt = nowIso;
+    if (newStatus === "TECHNICIAN_ASSIGNED" && !booking.assignedAt) booking.assignedAt = nowIso;
+    if (newStatus === "COMPLETED" && !booking.completedAt) {
+      booking.completedAt = nowIso;
+      booking.paymentStatus = "COLLECTED";
+    }
+    if (newStatus === "CANCELLED" && !booking.cancelledAt) {
+      booking.cancelledAt = nowIso;
+      booking.cancellationReason = extraFields.cancellationReason || note || "Cancelled";
+    }
+
+    Object.assign(booking, extraFields);
+
+    booking.statusHistory.push({
+      status: newStatus,
+      timestamp: nowIso,
+      note: note || `Status progressed to ${newStatus}`
+    });
+
+    this.save();
+    return booking;
+  }
+
+  assignTechnician(bookingId, technicianId) {
+    const booking = this.getBookingById(bookingId);
+    if (!booking) throw new Error("Booking not found");
+
+    const tech = this.data.technicians.find(t => t.id === technicianId);
+    if (!tech) throw new Error("Technician not found");
+
+    this.stopSimulator(bookingId);
+
+    const nowIso = new Date().toISOString();
+    return this.updateBookingStatus(bookingId, "TECHNICIAN_ASSIGNED", `Admin assigned ${tech.name} (${tech.rating})`, {
+      assignedTechnician: {
+        id: tech.id,
+        name: tech.name,
+        phone: tech.phone,
+        rating: tech.rating,
+        vehicle: tech.vehicle
+      },
+      technicianName: tech.name,
+      technicianPhone: tech.phone,
+      technicianRating: tech.rating,
+      technicianVehicle: tech.vehicle,
+      assignedAt: nowIso
+    });
+  }
+
+  cancelBooking(bookingId, reason, customerUid) {
+    const booking = this.getBookingById(bookingId);
+    if (!booking) throw new Error("Booking not found");
+
+    if (customerUid && booking.customerUid !== customerUid && booking.customerUid !== "guest") {
+      throw new Error("Unauthorized to modify this booking");
+    }
+
+    const nonCancellable = ["ON_THE_WAY", "IN_PROGRESS", "COMPLETED", "CANCELLED"];
+    if (nonCancellable.includes(booking.bookingStatus)) {
+      throw new Error("Cannot cancel booking once partner is dispatched or work is in progress. Please call GharBijli Bhilai support.");
+    }
+
+    return this.updateBookingStatus(bookingId, "CANCELLED", `Customer cancellation: ${reason || 'Customer request'}`, {
+      cancellationReason: reason || "Customer request"
+    });
+  }
+
+  submitReview(bookingId, rating, feedback) {
+    const booking = this.getBookingById(bookingId);
+    if (!booking) throw new Error("Booking not found");
+
+    booking.review = {
+      rating: Number(rating) || 5,
+      feedback: feedback || "",
+      submittedAt: new Date().toISOString()
+    };
+    this.save();
+    return booking;
+  }
+
+  // --- EMERGENCY SOS DISPATCH (BHILAI) ---
+  createEmergencyTicket(payload) {
+    const nowIso = new Date().toISOString();
+    const ticketId = "GB-SOS-" + Math.floor(1000 + Math.random() * 9000);
+    const tech = this.matchTechnician(payload.address || "Bhilai", payload.area || "");
+
+    const ticket = {
+      ticketId: ticketId,
+      customerPhone: payload.phone || "+919876543210",
+      customerName: payload.name || "Emergency Customer",
+      location: payload.address || "Bhilai, Chhattisgarh",
+      issueType: payload.issueType || "Short Circuit / Spark / Fire Hazard",
+      status: "DISPATCHED_PRIORITY",
+      priority: "CRITICAL",
+      dispatchedTechnician: {
+        id: tech.id,
+        name: tech.name,
+        phone: tech.phone,
+        rating: tech.rating,
+        vehicle: tech.vehicle
+      },
+      targetSlaMinutes: 15,
+      createdAt: nowIso
+    };
+
+    this.data.emergencyTickets.unshift(ticket);
+    this.save();
+    return ticket;
+  }
+
+  getAdminStats() {
+    const bookings = this.data.bookings;
+    const pending = bookings.filter(b => b.bookingStatus === 'PENDING_CONFIRMATION').length;
+    const assigned = bookings.filter(b => ['TECHNICIAN_ASSIGNED', 'ON_THE_WAY', 'IN_PROGRESS'].includes(b.bookingStatus)).length;
+    const completed = bookings.filter(b => b.bookingStatus === 'COMPLETED').length;
+    const cancelled = bookings.filter(b => b.bookingStatus === 'CANCELLED').length;
+    const emergencies = this.data.emergencyTickets.length;
+    const activeTechs = this.data.technicians.filter(t => t.active).length;
+    const totalRevenue = completed * 249;
+
+    return {
+      totalBookings: bookings.length,
+      pendingCount: pending,
+      activeDispatchCount: assigned,
+      completedCount: completed,
+      cancelledCount: cancelled,
+      activeTechnicians: activeTechs,
+      emergencyCount: emergencies,
+      totalRevenue: totalRevenue
+    };
+  }
+
+  stopSimulator(bookingId) {
+    if (this.activeSimulators.has(bookingId)) {
+      clearTimeout(this.activeSimulators.get(bookingId));
+      this.activeSimulators.delete(bookingId);
+    }
+    if (this.activeSimulators.has(bookingId + "_step2")) {
+      clearTimeout(this.activeSimulators.get(bookingId + "_step2"));
+      this.activeSimulators.delete(bookingId + "_step2");
+    }
+    if (this.activeSimulators.has(bookingId + "_step3")) {
+      clearTimeout(this.activeSimulators.get(bookingId + "_step3"));
+      this.activeSimulators.delete(bookingId + "_step3");
     }
   }
 
@@ -153,12 +749,10 @@ class BackendStore {
     else if (cleaned.length === 12 && cleaned.startsWith("91")) normalized = "+" + cleaned;
     else if (!phone.startsWith("+91")) normalized = "+91" + cleaned.slice(-10);
 
-    // Default test numbers use deterministic code, others generate 6 digit OTP
     let code = "123456";
     if (normalized === "+919876543210") code = "654321";
     else if (normalized === "+919999999999") code = "123456";
     else {
-      // Deterministic dev-friendly OTP or random
       code = Math.floor(100000 + Math.random() * 900000).toString();
     }
 
@@ -166,7 +760,7 @@ class BackendStore {
       phone: normalized,
       code: code,
       createdAt: Date.now(),
-      expiresAt: Date.now() + 10 * 60 * 1000 // 10 minutes
+      expiresAt: Date.now() + 10 * 60 * 1000
     };
 
     this.data.otpSessions[normalized] = session;
@@ -174,7 +768,7 @@ class BackendStore {
       success: true,
       phone: normalized,
       cooldown: 30,
-      debugCode: code // Returned for testing / smooth dev experience
+      debugCode: code
     };
   }
 
@@ -228,265 +822,7 @@ class BackendStore {
     this.save();
     return this.data.users[uid];
   }
-
-  // --- TECHNICIAN MATCHING ENGINE ---
-  matchTechnician(addressText, preferredArea = "") {
-    const query = `${addressText} ${preferredArea}`.toLowerCase();
-    
-    // Find closest area match
-    let matched = null;
-    for (const tech of this.data.technicians) {
-      if (!tech.active) continue;
-      const hit = tech.primaryAreas.some(area => query.includes(area));
-      if (hit) {
-        matched = tech;
-        break;
-      }
-    }
-
-    // Fallback: pick highest rated available technician
-    if (!matched) {
-      const activeTechs = this.data.technicians.filter(t => t.active);
-      matched = activeTechs.sort((a, b) => b.ratingScore - a.ratingScore)[0] || this.data.technicians[0];
-    }
-
-    return matched;
-  }
-
-  getTechnicians() {
-    return this.data.technicians;
-  }
-
-  // --- BOOKINGS ENGINE ---
-  createBooking(payload) {
-    const now = new Date();
-    const nowIso = now.toISOString();
-    const bookingId = payload.bookingId || ("GB-2026-PAT-" + Math.floor(100 + Math.random() * 900));
-
-    const addressFull = payload.addressSnapshot ? payload.addressSnapshot.fullAddress : (payload.address || "Patna, Bihar");
-    const matchedTech = this.matchTechnician(addressFull, payload.preferredArea || "");
-
-    const booking = {
-      bookingId: bookingId,
-      customerUid: payload.customerUid || "guest",
-      customerPhone: payload.customerPhone || "+919876543210",
-      customerName: payload.customerName || "Customer",
-      serviceId: payload.serviceId || "regular-fan-installation",
-      serviceNameSnapshot: payload.serviceNameSnapshot || "Electrical Service Visit",
-      pricingTypeSnapshot: payload.pricingTypeSnapshot || "inspection_based",
-      addressSnapshot: payload.addressSnapshot || { fullAddress: addressFull },
-      preferredDate: payload.preferredDate || nowIso.split('T')[0],
-      preferredTimeSlot: payload.preferredTimeSlot || "Today (30-45 mins)",
-      issueDescription: payload.issueDescription || "",
-      customerNotes: payload.customerNotes || "",
-      paymentMethod: "CASH_ON_DELIVERY",
-      paymentStatus: "PENDING",
-      bookingStatus: "PENDING_CONFIRMATION",
-      assignedTechnician: null,
-      technicianName: matchedTech.name,
-      technicianPhone: matchedTech.phone,
-      technicianRating: matchedTech.rating,
-      technicianVehicle: matchedTech.vehicle,
-      estimatedEta: "30-45 mins",
-      finalAmount: null,
-      createdAt: nowIso,
-      updatedAt: nowIso,
-      confirmedAt: null,
-      assignedAt: null,
-      completedAt: null,
-      cancelledAt: null,
-      cancellationReason: null,
-      statusHistory: [
-        {
-          status: "PENDING_CONFIRMATION",
-          timestamp: nowIso,
-          note: "Booking submitted. Operator confirmation call will arrive shortly."
-        }
-      ]
-    };
-
-    // Store in DB
-    this.data.bookings.unshift(booking);
-    this.save();
-
-    // Trigger auto-dispatch lifecycle simulator (urban company real-time experience)
-    this.startAutoDispatchSimulator(booking.bookingId, matchedTech);
-
-    return booking;
-  }
-
-  startAutoDispatchSimulator(bookingId, tech) {
-    if (this.activeSimulators.has(bookingId)) {
-      clearTimeout(this.activeSimulators.get(bookingId));
-    }
-
-    // Step 1: Confirm after 8 seconds
-    const t1 = setTimeout(() => {
-      this.updateBookingStatus(bookingId, "CONFIRMED", "Operator verified booking with customer");
-
-      // Step 2: Assign Technician after another 10 seconds
-      const t2 = setTimeout(() => {
-        this.updateBookingStatus(bookingId, "TECHNICIAN_ASSIGNED", `Assigned verified partner ${tech.name} (${tech.rating})`, {
-          assignedTechnician: {
-            id: tech.id,
-            name: tech.name,
-            phone: tech.phone,
-            rating: tech.rating,
-            vehicle: tech.vehicle
-          },
-          technicianName: tech.name,
-          technicianPhone: tech.phone,
-          technicianRating: tech.rating
-        });
-
-        // Step 3: On The Way after another 18 seconds
-        const t3 = setTimeout(() => {
-          this.updateBookingStatus(bookingId, "ON_THE_WAY", `${tech.name} has departed and is en route on ${tech.vehicle}`);
-        }, 18000);
-
-        this.activeSimulators.set(bookingId + "_step3", t3);
-      }, 10000);
-
-      this.activeSimulators.set(bookingId + "_step2", t2);
-    }, 8000);
-
-    this.activeSimulators.set(bookingId, t1);
-  }
-
-  getBookings(filter = {}) {
-    let result = this.data.bookings;
-    if (filter.customerUid) {
-      result = result.filter(b => b.customerUid === filter.customerUid);
-    }
-    if (filter.customerPhone) {
-      const cleanPhone = filter.customerPhone.replace(/\D/g, '').slice(-10);
-      result = result.filter(b => {
-        const bPhone = (b.customerPhone || '').replace(/\D/g, '').slice(-10);
-        return bPhone === cleanPhone;
-      });
-    }
-    if (filter.bookingStatus) {
-      result = result.filter(b => b.bookingStatus === filter.bookingStatus);
-    }
-    return result;
-  }
-
-  getBookingById(bookingId) {
-    return this.data.bookings.find(b => b.bookingId === bookingId) || null;
-  }
-
-  updateBookingStatus(bookingId, newStatus, note = "", extraFields = {}) {
-    const booking = this.getBookingById(bookingId);
-    if (!booking) return null;
-
-    // If cancelled, stop any auto simulators
-    if (newStatus === "CANCELLED") {
-      this.stopSimulator(bookingId);
-    }
-
-    const nowIso = new Date().toISOString();
-    booking.bookingStatus = newStatus;
-    booking.updatedAt = nowIso;
-
-    if (newStatus === "CONFIRMED" && !booking.confirmedAt) booking.confirmedAt = nowIso;
-    if (newStatus === "TECHNICIAN_ASSIGNED" && !booking.assignedAt) booking.assignedAt = nowIso;
-    if (newStatus === "COMPLETED" && !booking.completedAt) {
-      booking.completedAt = nowIso;
-      booking.paymentStatus = "COLLECTED";
-    }
-    if (newStatus === "CANCELLED" && !booking.cancelledAt) {
-      booking.cancelledAt = nowIso;
-      booking.cancellationReason = extraFields.cancellationReason || note || "Cancelled";
-    }
-
-    Object.assign(booking, extraFields);
-
-    booking.statusHistory.push({
-      status: newStatus,
-      timestamp: nowIso,
-      note: note || `Status progressed to ${newStatus}`
-    });
-
-    this.save();
-    return booking;
-  }
-
-  cancelBooking(bookingId, reason, customerUid) {
-    const booking = this.getBookingById(bookingId);
-    if (!booking) throw new Error("Booking not found");
-
-    if (customerUid && booking.customerUid !== customerUid && booking.customerUid !== "guest") {
-      throw new Error("Unauthorized to modify this booking");
-    }
-
-    const nonCancellable = ["ON_THE_WAY", "IN_PROGRESS", "COMPLETED", "CANCELLED"];
-    if (nonCancellable.includes(booking.bookingStatus)) {
-      throw new Error("Cannot cancel booking once partner is dispatched or work is in progress. Please call GharBijli support.");
-    }
-
-    return this.updateBookingStatus(bookingId, "CANCELLED", `Customer cancellation: ${reason || 'Customer request'}`, {
-      cancellationReason: reason || "Customer request"
-    });
-  }
-
-  submitReview(bookingId, rating, feedback) {
-    const booking = this.getBookingById(bookingId);
-    if (!booking) throw new Error("Booking not found");
-
-    booking.review = {
-      rating: Number(rating) || 5,
-      feedback: feedback || "",
-      submittedAt: new Date().toISOString()
-    };
-    this.save();
-    return booking;
-  }
-
-  // --- EMERGENCY SOS DISPATCH ---
-  createEmergencyTicket(payload) {
-    const nowIso = new Date().toISOString();
-    const ticketId = "GB-SOS-" + Math.floor(1000 + Math.random() * 9000);
-    const tech = this.matchTechnician(payload.address || "Patna", payload.area || "");
-
-    const ticket = {
-      ticketId: ticketId,
-      customerPhone: payload.phone || "+919876543210",
-      customerName: payload.name || "Emergency Customer",
-      location: payload.address || "Patna, Bihar",
-      issueType: payload.issueType || "Short Circuit / Spark / Fire Hazard",
-      status: "DISPATCHED_PRIORITY",
-      priority: "CRITICAL",
-      dispatchedTechnician: {
-        name: tech.name,
-        phone: tech.phone,
-        rating: tech.rating,
-        vehicle: tech.vehicle
-      },
-      targetSlaMinutes: 15,
-      createdAt: nowIso
-    };
-
-    this.data.emergencyTickets.unshift(ticket);
-    this.save();
-    return ticket;
-  }
-
-  stopSimulator(bookingId) {
-    if (this.activeSimulators.has(bookingId)) {
-      clearTimeout(this.activeSimulators.get(bookingId));
-      this.activeSimulators.delete(bookingId);
-    }
-    if (this.activeSimulators.has(bookingId + "_step2")) {
-      clearTimeout(this.activeSimulators.get(bookingId + "_step2"));
-      this.activeSimulators.delete(bookingId + "_step2");
-    }
-    if (this.activeSimulators.has(bookingId + "_step3")) {
-      clearTimeout(this.activeSimulators.get(bookingId + "_step3"));
-      this.activeSimulators.delete(bookingId + "_step3");
-    }
-  }
 }
 
-// Singleton backend instance
 const backendStore = new BackendStore();
 module.exports = backendStore;

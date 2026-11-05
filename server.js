@@ -31,6 +31,7 @@ const server = http.createServer(async (req, res) => {
 
   let reqPath = req.url.split('?')[0];
   if (reqPath === '/') reqPath = '/index.html';
+  if (reqPath === '/admin') reqPath = '/admin.html';
   
   let filePath = path.join(WWW, reqPath);
   

@@ -1,3 +1,7 @@
 {
-  "outputDirectory": "www"
+  "outputDirectory": "www",
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/admin", "destination": "/admin.html" }
+  ]
 }

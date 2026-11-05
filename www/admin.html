@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GharBijli Operations & Dispatch Console | Bhilai Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;850&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #5e35b1;
+      --primary-dark: #4527a0;
+      --primary-subtle: #ede9fe;
+      --emerald: #059669;
+      --emerald-subtle: #ecfdf5;
+      --amber: #f59e0b;
+      --amber-subtle: #fef3c7;
+      --rose: #dc2626;
+      --rose-subtle: #fef2f2;
+      --ink: #0f172a;
+      --ink-muted: #64748b;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --radius: 14px;
+      --shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Admin Bar */
+    .admin-header {
+      background: #ffffff;
+      border-bottom: 1.5px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+    .admin-header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .admin-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .admin-logo-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #5e35b1 0%, #4527a0 100%);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(94, 53, 177, 0.25);
+    }
+    .admin-title-wrap h1 {
+      font-size: 18px;
+      font-weight: 850;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    .admin-title-wrap p {
+      font-size: 12px;
+      color: var(--ink-muted);
+      font-weight: 600;
+    }
+    .admin-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .status-pill-live {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--emerald-subtle);
+      border: 1.5px solid #a7f3d0;
+      color: var(--emerald);
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 12.5px;
+      font-weight: 750;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7);
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7); }
+      70% { box-shadow: 0 0 0 8px rgba(5, 150, 105, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 750;
+      border: 1.5px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(94, 53, 177, 0.2);
+    }
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: #ffffff;
+      border-color: var(--border);
+      color: var(--ink);
+    }
+    .btn-secondary:hover {
+      background: var(--bg);
+      border-color: #cbd5e1;
+    }
+    .btn-danger {
+      background: var(--rose-subtle);
+      color: var(--rose);
+      border-color: #fecaca;
+    }
+
+    /* Navigation Tabs */
+    .admin-nav {
+      background: #ffffff;
+      border-bottom: 1.5px solid var(--border);
+      padding: 0 24px;
+    }
+    .admin-nav-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .admin-nav-tab {
+      padding: 14px 18px;
+      border: none;
+      background: none;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--ink-muted);
+      cursor: pointer;
+      position: relative;
+      white-space: nowrap;
+      transition: color 0.15s ease;
+    }
+    .admin-nav-tab.active {
+      color: var(--primary);
+      font-weight: 850;
+    }
+    .admin-nav-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 3px 3px 0 0;
+    }
+
+    /* Main Container */
+    .admin-main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .kpi-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+    }
+    .kpi-value {
+      font-size: 28px;
+      font-weight: 850;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+    }
+    .kpi-sub {
+      font-size: 12px;
+      color: var(--emerald);
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    /* Cards & Containers */
+    .card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .card-title {
+      font-size: 16.5px;
+      font-weight: 850;
+      letter-spacing: -0.01em;
+    }
+    .card-subtitle {
+      font-size: 12.5px;
+      color: var(--ink-muted);
+      margin-top: 2px;
+    }
+
+    /* Tables */
+    .table-responsive {
+      overflow-x: auto;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13.5px;
+    }
+    th {
+      background: #f1f5f9;
+      color: var(--ink-muted);
+      font-weight: 800;
+      padding: 12px 16px;
+      text-transform: uppercase;
+      font-size: 11.5px;
+      letter-spacing: 0.04em;
+      border-bottom: 1.5px solid var(--border);
+    }
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fbfcfe; }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 11.5px;
+      font-weight: 800;
+    }
+    .badge-pending { background: #fef3c7; color: #b45309; }
+    .badge-confirmed { background: #f5f3ff; color: #5e35b1; }
+    .badge-assigned { background: #ede9fe; color: #4527a0; }
+    .badge-ontheway { background: #e0e7ff; color: #3730a3; }
+    .badge-inprogress { background: #fef3c7; color: #b45309; }
+    .badge-completed { background: #ecfdf5; color: #047857; }
+    .badge-cancelled { background: #fee2e2; color: #b91c1c; }
+
+    /* Inputs & Forms */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 750;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: #ffffff;
+      font-family: inherit;
+      font-size: 13.5px;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(94, 53, 177, 0.12);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-card {
+      background: #ffffff;
+      border-radius: 18px;
+      max-width: 560px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+      animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalPop { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    /* Toast */
+    #admin-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      font-weight: 700;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      z-index: 2000;
+      display: none;
+      animation: toastIn 0.25s ease;
+    }
+    @keyframes toastIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  </style>
+</head>
+<body>
+
+  <!-- Top Admin Bar -->
+  <header class="admin-header">
+    <div class="admin-header-inner">
+      <div class="admin-brand">
+        <div class="admin-logo-badge">⚡</div>
+        <div class="admin-title-wrap">
+          <h1>GharBijli Operations & Dispatch Console</h1>
+          <p>Bhilai & Durg Central Management Hub (Chhattisgarh)</p>
+        </div>
+      </div>
+      <div class="admin-header-actions">
+        <div class="status-pill-live">
+          <span class="pulse-dot"></span>
+          <span>Live API Connected</span>
+        </div>
+        <button id="btn-refresh-all" class="btn btn-secondary">🔄 Refresh</button>
+        <a href="/" target="_blank" class="btn btn-primary">📱 Open Customer App ↗</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="admin-nav">
+    <div class="admin-nav-inner">
+      <button class="admin-nav-tab active" data-tab="tab-overview">📊 Dashboard</button>
+      <button class="admin-nav-tab" data-tab="tab-bookings">📋 Live Bookings & Dispatch</button>
+      <button class="admin-nav-tab" data-tab="tab-services">🛠️ Services Catalog & Pricing</button>
+      <button class="admin-nav-tab" data-tab="tab-promos">📢 Banners, Promos & Hero</button>
+      <button class="admin-nav-tab" data-tab="tab-technicians">👷‍♂️ Bhilai Electricians Pool</button>
+      <button class="admin-nav-tab" data-tab="tab-emergencies">🚨 Emergency SOS Feed</button>
+    </div>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="admin-main">
+
+    <!-- 1. DASHBOARD OVERVIEW TAB -->
+    <section id="tab-overview" class="tab-content active">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-title">Total Bookings</div>
+          <div class="kpi-value" id="kpi-total-bookings">0</div>
+          <div class="kpi-sub">Lifetime registered</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Pending Confirmation</div>
+          <div class="kpi-value" id="kpi-pending-bookings" style="color: #b45309;">0</div>
+          <div class="kpi-sub" style="color: #b45309;">Needs operator call</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Active Dispatched</div>
+          <div class="kpi-value" id="kpi-active-dispatch" style="color: #5e35b1;">0</div>
+          <div class="kpi-sub" style="color: #5e35b1;">Assigned / On The Way</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Completed (COD)</div>
+          <div class="kpi-value" id="kpi-completed-bookings" style="color: #047857;">0</div>
+          <div class="kpi-sub" style="color: #047857;">Cash Collected</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Bhilai Electricians</div>
+          <div class="kpi-value" id="kpi-active-techs">6</div>
+          <div class="kpi-sub">All active in CG-07</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Emergency SOS</div>
+          <div class="kpi-value" id="kpi-emergencies" style="color: #dc2626;">0</div>
+          <div class="kpi-sub" style="color: #dc2626;">15-Min Priority Tickets</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Live Dispatch Feed (Bhilai Sectors)</h2>
+            <p class="card-subtitle">Real-time status updates from customer app bookings</p>
+          </div>
+          <button id="btn-quick-seed-demo" class="btn btn-secondary">⚡ Quick Simulate Demo Booking</button>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Booking ID</th>
+                <th>Customer</th>
+                <th>Service Requested</th>
+                <th>Bhilai Area</th>
+                <th>Status</th>
+                <th>Electrician</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="overview-recent-table-body">
+              <tr><td colspan="7" style="text-align: center; color: var(--ink-muted); padding: 30px;">Loading bookings...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. BOOKINGS & DISPATCH TAB -->
+    <section id="tab-bookings" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">All Customer Bookings</h2>
+            <p class="card-subtitle">Manage lifecycle, manual dispatch & Cash on Delivery collection</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <select id="filter-booking-status" class="form-control" style="width: 200px;">
+              <option value="ALL">All Statuses</option>
+              <option value="PENDING_CONFIRMATION">Pending Confirmation</option>
+              <option value="CONFIRMED">Confirmed</option>
+              <option value="TECHNICIAN_ASSIGNED">Electrician Assigned</option>
+              <option value="ON_THE_WAY">On The Way</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="COMPLETED">Completed (COD)</option>
+              <option value="CANCELLED">Cancelled</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Booking ID</th>
+                <th>Customer</th>
+                <th>Service</th>
+                <th>Address & Sector</th>
+                <th>Date / Slot</th>
+                <th>Status</th>
+                <th>Assigned Partner</th>
+                <th>Update Status</th>
+                <th>Assign Partner</th>
+              </tr>
+            </thead>
+            <tbody id="all-bookings-table-body">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. SERVICES CATALOG & LIVE PRICING TAB -->
+    <section id="tab-services" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Catalog & Live Pricing Manager</h2>
+            <p class="card-subtitle">Change any service price in real-time — instant sync to customer app</p>
+          </div>
+          <button id="btn-add-service-modal" class="btn btn-primary">+ Add New Service</button>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Service Name</th>
+                <th>Category</th>
+                <th>Base Price (₹)</th>
+                <th>Duration</th>
+                <th>Rating</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="services-table-body">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. BANNERS, PROMOS & HERO TAB -->
+    <section id="tab-promos" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Home Screen Banners & Promotions</h2>
+            <p class="card-subtitle">Control the promotional texts, coupons, and headers shown to Bhilai users</p>
+          </div>
+          <button id="btn-save-promos" class="btn btn-primary">💾 Save Changes to App</button>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Hero Title (Main Header):</label>
+            <input type="text" id="input-hero-title" class="form-control" value="Electricians in Bhilai" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hero Subtitle:</label>
+            <input type="text" id="input-hero-subtitle" class="form-control" value="Doorstep electrical repairs & installations in Bhilai" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Rating Strip Line:</label>
+            <input type="text" id="input-hero-rating" class="form-control" value="4.88 (12,400+ Bhilai Homes Serviced)" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Earliest Slot Timing Tag:</label>
+            <input type="text" id="input-earliest-slot" class="form-control" value="Today, 30–45m" />
+          </div>
+        </div>
+
+        <hr style="border: none; border-top: 1.5px solid var(--border); margin: 20px 0;" />
+        <h3 style="font-size: 15px; font-weight: 850; margin-bottom: 14px;">Visitation Promo Card & Coupon</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Promo Title:</label>
+            <input type="text" id="input-promo-title" class="form-control" value="Get visitation fee off" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Promo Subtext:</label>
+            <input type="text" id="input-promo-subtext" class="form-control" value="On orders above ₹499 (Tap for details)" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Active Coupon Code:</label>
+            <input type="text" id="input-promo-code" class="form-control" value="BHILAI50" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Discount Amount (₹):</label>
+            <input type="number" id="input-promo-discount" class="form-control" value="50" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Min Order Value (₹):</label>
+            <input type="number" id="input-promo-minorder" class="form-control" value="499" />
+          </div>
+        </div>
+
+        <hr style="border: none; border-top: 1.5px solid var(--border); margin: 20px 0;" />
+        <h3 style="font-size: 15px; font-weight: 850; margin-bottom: 14px;">Support Helpline Numbers</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Customer Support Phone:</label>
+            <input type="text" id="input-support-phone" class="form-control" value="+919876543210" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">WhatsApp Helpline (Digits only):</label>
+            <input type="text" id="input-support-whatsapp" class="form-control" value="919876543210" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. BHILAI TECHNICIANS TAB -->
+    <section id="tab-technicians" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Verified Bhilai Electrician Directory</h2>
+            <p class="card-subtitle">Active partners in Bhilai, Durg & Industrial Township (CG-07)</p>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Technician</th>
+                <th>Contact Phone</th>
+                <th>Rating</th>
+                <th>Vehicle & Reg</th>
+                <th>Primary Bhilai Zones</th>
+                <th>Jobs Done</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="technicians-table-body">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. EMERGENCY SOS FEED TAB -->
+    <section id="tab-emergencies" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">🚨 Emergency SOS Dispatch Queue</h2>
+            <p class="card-subtitle">High-priority 15-minute SLA tickets triggered by Bhilai customers</p>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Ticket ID</th>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th>Location</th>
+                <th>Issue Details</th>
+                <th>Dispatched Partner</th>
+                <th>Priority</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="emergencies-table-body">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal: Assign Electrician -->
+  <div id="modal-assign" class="modal-overlay">
+    <div class="modal-card">
+      <h3 style="font-size: 17px; font-weight: 850; margin-bottom: 6px;">Assign Bhilai Partner</h3>
+      <p style="font-size: 13px; color: var(--ink-muted); margin-bottom: 16px;" id="modal-assign-meta">Select verified electrician for booking</p>
+      
+      <div class="form-group">
+        <label class="form-label">Select Partner:</label>
+        <select id="select-modal-tech" class="form-control">
+          <!-- Filled dynamically -->
+        </select>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button id="btn-close-assign-modal" class="btn btn-secondary">Cancel</button>
+        <button id="btn-confirm-assign-modal" class="btn btn-primary">Confirm Assignment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="admin-toast">Status updated</div>
+
+  <script>
+    let appConfig = null;
+    let allBookings = [];
+    let allServices = [];
+    let allTechs = [];
+    let currentAssignBookingId = null;
+
+    function showToast(msg) {
+      const el = document.getElementById("admin-toast");
+      el.textContent = msg;
+      el.style.display = "block";
+      setTimeout(() => { el.style.display = "none"; }, 3500);
+    }
+
+    // Tab Switching
+    document.querySelectorAll(".admin-nav-tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".admin-nav-tab").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+        tab.classList.add("active");
+        const targetId = tab.getAttribute("data-tab");
+        const target = document.getElementById(targetId);
+        if (target) target.classList.add("active");
+      });
+    });
+
+    async function fetchStats() {
+      try {
+        const res = await fetch('/api/admin/stats');
+        const data = await res.json();
+        if (data && data.stats) {
+          const s = data.stats;
+          document.getElementById('kpi-total-bookings').textContent = s.totalBookings;
+          document.getElementById('kpi-pending-bookings').textContent = s.pendingCount;
+          document.getElementById('kpi-active-dispatch').textContent = s.activeDispatchCount;
+          document.getElementById('kpi-completed-bookings').textContent = s.completedCount;
+          document.getElementById('kpi-active-techs').textContent = s.activeTechnicians;
+          document.getElementById('kpi-emergencies').textContent = s.emergencyCount;
+        }
+      } catch (e) {
+        console.error("Failed to load stats:", e);
+      }
+    }
+
+    async function fetchAppConfig() {
+      try {
+        const res = await fetch('/api/app-config');
+        const data = await res.json();
+        if (data && data.config) {
+          appConfig = data.config;
+          document.getElementById('input-hero-title').value = appConfig.hero.title || "";
+          document.getElementById('input-hero-subtitle').value = appConfig.hero.subtitle || "";
+          document.getElementById('input-hero-rating').value = appConfig.hero.ratingText || "";
+          document.getElementById('input-earliest-slot').value = appConfig.hero.earliestSlot || "";
+          
+          if (appConfig.visitationPromo) {
+            document.getElementById('input-promo-title').value = appConfig.visitationPromo.title || "";
+            document.getElementById('input-promo-subtext').value = appConfig.visitationPromo.subtext || "";
+            document.getElementById('input-promo-code').value = appConfig.visitationPromo.couponCode || "";
+            document.getElementById('input-promo-discount').value = appConfig.visitationPromo.discountAmount || 50;
+            document.getElementById('input-promo-minorder').value = appConfig.visitationPromo.minOrderAmount || 499;
+          }
+
+          if (appConfig.app) {
+            document.getElementById('input-support-phone').value = appConfig.app.supportPhone || "";
+            document.getElementById('input-support-whatsapp').value = appConfig.app.supportWhatsApp || "";
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load config:", e);
+      }
+    }
+
+    async function fetchBookings() {
+      try {
+        const res = await fetch('/api/admin/bookings');
+        const data = await res.json();
+        if (data && data.bookings) {
+          allBookings = data.bookings;
+          renderBookingsTables();
+        }
+      } catch (e) {
+        console.error("Failed to load bookings:", e);
+      }
+    }
+
+    async function fetchServices() {
+      try {
+        const res = await fetch('/api/services?all=true');
+        const data = await res.json();
+        if (data && data.services) {
+          allServices = data.services;
+          renderServicesTable();
+        }
+      } catch (e) {
+        console.error("Failed to load services:", e);
+      }
+    }
+
+    async function fetchTechnicians() {
+      try {
+        const res = await fetch('/api/technicians');
+        const data = await res.json();
+        if (data && data.technicians) {
+          allTechs = data.technicians;
+          renderTechniciansTable();
+          populateTechSelect();
+        }
+      } catch (e) {
+        console.error("Failed to load technicians:", e);
+      }
+    }
+
+    async function fetchEmergencies() {
+      try {
+        const res = await fetch('/api/admin/emergencies');
+        const data = await res.json();
+        if (data && data.emergencies) {
+          renderEmergenciesTable(data.emergencies);
+        }
+      } catch (e) {
+        console.error("Failed to load emergencies:", e);
+      }
+    }
+
+    function renderBookingsTables() {
+      const filter = document.getElementById("filter-booking-status").value;
+      const filtered = filter === "ALL" ? allBookings : allBookings.filter(b => b.bookingStatus === filter);
+
+      // 1. Overview recent table (top 5)
+      const ovBody = document.getElementById("overview-recent-table-body");
+      if (allBookings.length === 0) {
+        ovBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--ink-muted); padding: 20px;">No bookings found. Click "Quick Simulate" to test.</td></tr>`;
+      } else {
+        ovBody.innerHTML = allBookings.slice(0, 5).map(b => {
+          const badgeClass = getBadgeClass(b.bookingStatus);
+          return `
+            <tr>
+              <td><strong style="font-family: 'JetBrains Mono', monospace; color: #5e35b1;">${b.bookingId}</strong></td>
+              <td>
+                <div style="font-weight: 750;">${escapeHtml(b.customerName || 'Customer')}</div>
+                <div style="font-size: 11.5px; color: var(--ink-muted);">${b.customerPhone}</div>
+              </td>
+              <td>${escapeHtml(b.serviceNameSnapshot)}</td>
+              <td>${escapeHtml(b.addressSnapshot ? b.addressSnapshot.fullAddress : 'Bhilai')}</td>
+              <td><span class="badge ${badgeClass}">${formatStatus(b.bookingStatus)}</span></td>
+              <td>${b.technicianName ? `👷‍♂️ ${b.technicianName}` : '<span style="color:#94a3b8;">Unassigned</span>'}</td>
+              <td>
+                <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 12px;" onclick="openAssignModal('${b.bookingId}')">Assign</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // 2. All Bookings table
+      const allBody = document.getElementById("all-bookings-table-body");
+      if (filtered.length === 0) {
+        allBody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--ink-muted); padding: 20px;">No bookings matching filter.</td></tr>`;
+      } else {
+        allBody.innerHTML = filtered.map(b => {
+          const badgeClass = getBadgeClass(b.bookingStatus);
+          return `
+            <tr>
+              <td><strong style="font-family: 'JetBrains Mono', monospace; color: #5e35b1;">${b.bookingId}</strong></td>
+              <td>
+                <div style="font-weight: 750;">${escapeHtml(b.customerName || 'Customer')}</div>
+                <div style="font-size: 11.5px; color: var(--ink-muted);">${b.customerPhone}</div>
+              </td>
+              <td>${escapeHtml(b.serviceNameSnapshot)}</td>
+              <td><div style="max-width: 200px; font-size: 12px;">${escapeHtml(b.addressSnapshot ? b.addressSnapshot.fullAddress : 'Bhilai')}</div></td>
+              <td><div style="font-size: 12px;">${b.preferredDate}<br><span style="color:var(--ink-muted);">${b.preferredTimeSlot}</span></div></td>
+              <td><span class="badge ${badgeClass}">${formatStatus(b.bookingStatus)}</span></td>
+              <td>${b.technicianName ? `👷‍♂️ <strong>${b.technicianName}</strong><br><span style="font-size: 11px; color: #64748b;">${b.technicianVehicle || ''}</span>` : '<span style="color:#94a3b8;">Not assigned</span>'}</td>
+              <td>
+                <select class="form-control" style="padding: 4px 8px; font-size: 12px; width: 140px;" onchange="updateBookingStatus('${b.bookingId}', this.value)">
+                  <option value="" disabled selected>Change Status</option>
+                  <option value="PENDING_CONFIRMATION">1. Pending</option>
+                  <option value="CONFIRMED">2. Confirmed</option>
+                  <option value="TECHNICIAN_ASSIGNED">3. Tech Assigned</option>
+                  <option value="ON_THE_WAY">4. On The Way</option>
+                  <option value="IN_PROGRESS">5. In Progress</option>
+                  <option value="COMPLETED">6. Completed (Paid)</option>
+                  <option value="CANCELLED">7. Cancel</option>
+                </select>
+              </td>
+              <td>
+                <button class="btn btn-secondary" style="padding: 5px 12px; font-size: 12px;" onclick="openAssignModal('${b.bookingId}')">
+                  ${b.assignedTechnician ? 'Re-assign' : '⚡ Assign'}
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    function renderServicesTable() {
+      const tbody = document.getElementById("services-table-body");
+      tbody.innerHTML = allServices.map(s => {
+        return `
+          <tr>
+            <td>
+              <div style="font-weight: 800; font-size: 13.5px;">${escapeHtml(s.name)}</div>
+              <div style="font-size: 11.5px; color: var(--ink-muted);">${escapeHtml(s.hindiName || '')}</div>
+            </td>
+            <td><span class="badge" style="background:#f1f5f9; color:#475569;">${s.categoryLabel || s.categoryId}</span></td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-weight: 800;">₹</span>
+                <input type="number" value="${s.priceNumber}" id="price-input-${s.id}" class="form-control" style="width: 85px; padding: 4px 8px; font-size: 13px; font-weight: 800;" />
+                <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 11.5px;" onclick="saveServicePrice('${s.id}')">Save</button>
+              </div>
+            </td>
+            <td><input type="text" value="${s.estimatedDuration || '30 mins'}" id="dur-input-${s.id}" class="form-control" style="width: 100px; padding: 4px 8px; font-size: 12px;" onchange="saveServiceDuration('${s.id}', this.value)" /></td>
+            <td>⭐ ${s.rating || 4.85}</td>
+            <td>
+              <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 750;">
+                <input type="checkbox" ${s.active !== false ? 'checked' : ''} onchange="toggleServiceActive('${s.id}', this.checked)" />
+                <span>${s.active !== false ? 'Active' : 'Hidden'}</span>
+              </label>
+            </td>
+            <td>
+              <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="deleteService('${s.id}')">Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderTechniciansTable() {
+      const tbody = document.getElementById("technicians-table-body");
+      tbody.innerHTML = allTechs.map(t => {
+        return `
+          <tr>
+            <td>
+              <div style="font-weight: 800; display: flex; align-items: center; gap: 6px;">
+                <span>${t.avatar || '👷‍♂️'}</span>
+                <span>${t.name}</span>
+              </div>
+              <div style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: #5e35b1;">${t.id}</div>
+            </td>
+            <td><a href="tel:${t.phone}" style="color: #059669; font-weight: 700; text-decoration: none;">📞 ${t.phone}</a></td>
+            <td><strong>${t.rating}</strong></td>
+            <td><span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; background: #f8fafc; border: 1px solid var(--border); padding: 2px 6px; border-radius: 6px;">${t.vehicle}</span></td>
+            <td><div style="font-size: 12px; max-width: 220px; color: #475569;">${(t.primaryAreas || []).join(', ')}</div></td>
+            <td><strong>${t.completedJobs || 100}+</strong></td>
+            <td>
+              <label style="cursor: pointer; font-size: 12px; font-weight: 750; color: ${t.active ? '#059669' : '#94a3b8'};">
+                <input type="checkbox" ${t.active ? 'checked' : ''} onchange="toggleTechnicianActive('${t.id}', this.checked)" />
+                <span>${t.active ? 'Active' : 'Offline'}</span>
+              </label>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderEmergenciesTable(list) {
+      const tbody = document.getElementById("emergencies-table-body");
+      if (!list || list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--ink-muted); padding: 24px;">No emergency alerts active.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = list.map(item => {
+        return `
+          <tr style="background: #fef2f2;">
+            <td><strong style="color: #dc2626; font-family: 'JetBrains Mono', monospace;">${item.ticketId}</strong></td>
+            <td><strong>${escapeHtml(item.customerName)}</strong></td>
+            <td><a href="tel:${item.customerPhone}" style="color: #dc2626; font-weight: 800;">📞 ${item.customerPhone}</a></td>
+            <td>${escapeHtml(item.location)}</td>
+            <td><span style="color: #991b1b; font-weight: 750;">${escapeHtml(item.issueType)}</span></td>
+            <td>${item.dispatchedTechnician ? `👷‍♂️ <strong>${item.dispatchedTechnician.name}</strong> (${item.dispatchedTechnician.vehicle})` : 'Pending'}</td>
+            <td><span class="badge" style="background:#dc2626; color:#ffffff;">CRITICAL 15-MIN</span></td>
+            <td style="font-size: 12px;">${new Date(item.createdAt).toLocaleTimeString()}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function populateTechSelect() {
+      const select = document.getElementById("select-modal-tech");
+      select.innerHTML = allTechs.map(t => `<option value="${t.id}">${t.name} (${t.rating}) — ${t.vehicle}</option>`).join('');
+    }
+
+    function openAssignModal(bookingId) {
+      currentAssignBookingId = bookingId;
+      document.getElementById("modal-assign-meta").textContent = `Assign verified electrician to ${bookingId}`;
+      document.getElementById("modal-assign").classList.add("active");
+    }
+
+    document.getElementById("btn-close-assign-modal").addEventListener("click", () => {
+      document.getElementById("modal-assign").classList.remove("active");
+    });
+
+    document.getElementById("btn-confirm-assign-modal").addEventListener("click", async () => {
+      if (!currentAssignBookingId) return;
+      const techId = document.getElementById("select-modal-tech").value;
+      try {
+        const res = await fetch(`/api/bookings/${currentAssignBookingId}/assign`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ technicianId: techId })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Assigned electrician to ${currentAssignBookingId}`);
+          document.getElementById("modal-assign").classList.remove("active");
+          await fetchBookings();
+          await fetchStats();
+        } else {
+          alert(data.error || "Failed to assign");
+        }
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
+    });
+
+    async function updateBookingStatus(bookingId, status) {
+      if (!status) return;
+      try {
+        const res = await fetch(`/api/bookings/${bookingId}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Updated ${bookingId} to ${status}`);
+          await fetchBookings();
+          await fetchStats();
+        } else {
+          alert(data.error || "Status update failed");
+        }
+      } catch (e) {
+        alert("Error: " + e.message);
+      }
+    }
+
+    async function saveServicePrice(id) {
+      const input = document.getElementById(`price-input-${id}`);
+      const newPrice = Number(input.value);
+      if (isNaN(newPrice) || newPrice <= 0) return alert("Enter valid price");
+      try {
+        const res = await fetch(`/api/admin/services/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ priceNumber: newPrice })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Price updated to ₹${newPrice}! Customer app synced.`);
+        }
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function saveServiceDuration(id, duration) {
+      try {
+        await fetch(`/api/admin/services/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ estimatedDuration: duration })
+        });
+        showToast("Duration updated!");
+      } catch (e) {}
+    }
+
+    async function toggleServiceActive(id, active) {
+      try {
+        await fetch(`/api/admin/services/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ active })
+        });
+        showToast(active ? "Service activated in app" : "Service hidden from app");
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function deleteService(id) {
+      if (!confirm("Are you sure you want to remove this service from the catalog?")) return;
+      try {
+        const res = await fetch(`/api/admin/services/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) {
+          showToast("Service deleted");
+          await fetchServices();
+        }
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function toggleTechnicianActive(id, active) {
+      try {
+        await fetch(`/api/admin/technicians/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ active })
+        });
+        showToast(active ? "Technician marked active" : "Technician marked offline");
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    // Save Promos & Banners
+    document.getElementById("btn-save-promos").addEventListener("click", async () => {
+      const payload = {
+        hero: {
+          title: document.getElementById('input-hero-title').value,
+          subtitle: document.getElementById('input-hero-subtitle').value,
+          ratingText: document.getElementById('input-hero-rating').value,
+          earliestSlot: document.getElementById('input-earliest-slot').value
+        },
+        visitationPromo: {
+          title: document.getElementById('input-promo-title').value,
+          subtext: document.getElementById('input-promo-subtext').value,
+          couponCode: document.getElementById('input-promo-code').value,
+          discountAmount: Number(document.getElementById('input-promo-discount').value) || 50,
+          minOrderAmount: Number(document.getElementById('input-promo-minorder').value) || 499
+        },
+        app: {
+          supportPhone: document.getElementById('input-support-phone').value,
+          supportWhatsApp: document.getElementById('input-support-whatsapp').value
+        }
+      };
+
+      try {
+        const res = await fetch('/api/admin/app-config', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast("⚡ All Banners, Promos & Support info updated live in app!");
+        }
+      } catch (e) {
+        alert("Error saving: " + e.message);
+      }
+    });
+
+    // Quick Simulate Demo Booking
+    document.getElementById("btn-quick-seed-demo").addEventListener("click", async () => {
+      const sectors = ["Civic Centre, Sector 6", "Nehru Nagar West", "Supela Market", "Vaishali Nagar", "Smriti Nagar, Junwani"];
+      const randomSector = sectors[Math.floor(Math.random() * sectors.length)];
+      const names = ["Rohan Sahu", "Vikram Patel", "Ananya Deshmukh", "Nitin Dewangan", "Priya Jain"];
+      const randomName = names[Math.floor(Math.random() * names.length)];
+
+      try {
+        const res = await fetch('/api/bookings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            serviceId: "regular-fan-installation",
+            serviceNameSnapshot: "Regular Ceiling Fan Installation",
+            customerName: randomName,
+            customerPhone: "+919876543210",
+            addressSnapshot: {
+              houseNo: `Plot ${Math.floor(10 + Math.random() * 80)}`,
+              street: randomSector,
+              landmark: "Near Market",
+              pincode: "490006",
+              city: "Bhilai, Chhattisgarh",
+              fullAddress: `Plot ${Math.floor(10 + Math.random() * 80)}, ${randomSector}, Bhilai, Chhattisgarh`
+            },
+            issueDescription: "Fan speed issue & wobbling",
+            preferredTimeSlot: "Today, 30–45m"
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`⚡ Simulated new booking ${data.booking.bookingId} in ${randomSector}!`);
+          await fetchBookings();
+          await fetchStats();
+        }
+      } catch (e) {
+        alert(e.message);
+      }
+    });
+
+    document.getElementById("btn-refresh-all").addEventListener("click", async () => {
+      await initAll();
+      showToast("Refreshed all live operational data");
+    });
+
+    document.getElementById("filter-booking-status").addEventListener("change", renderBookingsTables);
+
+    function getBadgeClass(st) {
+      const map = {
+        PENDING_CONFIRMATION: 'badge-pending',
+        CONFIRMED: 'badge-confirmed',
+        TECHNICIAN_ASSIGNED: 'badge-assigned',
+        ON_THE_WAY: 'badge-ontheway',
+        IN_PROGRESS: 'badge-inprogress',
+        COMPLETED: 'badge-completed',
+        CANCELLED: 'badge-cancelled'
+      };
+      return map[st] || 'badge-pending';
+    }
+
+    function formatStatus(st) {
+      const map = {
+        PENDING_CONFIRMATION: 'Pending Call',
+        CONFIRMED: 'Confirmed',
+        TECHNICIAN_ASSIGNED: 'Partner Assigned',
+        ON_THE_WAY: 'On The Way',
+        IN_PROGRESS: 'In Progress',
+        COMPLETED: 'Completed (COD)',
+        CANCELLED: 'Cancelled'
+      };
+      return map[st] || st;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+    }
+
+    async function initAll() {
+      await Promise.all([
+        fetchStats(),
+        fetchAppConfig(),
+        fetchBookings(),
+        fetchServices(),
+        fetchTechnicians(),
+        fetchEmergencies()
+      ]);
+
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has("tab")) {
+        const t = urlParams.get("tab");
+        const tabTarget = t.startsWith("tab-") ? t : `tab-${t}`;
+        const tabBtn = document.querySelector(`[data-tab="${tabTarget}"]`);
+        if (tabBtn) tabBtn.click();
+      }
+    }
+
+    initAll();
+    // Auto-refresh every 6 seconds for live operations
+    setInterval(async () => {
+      await fetchStats();
+      await fetchBookings();
+      await fetchEmergencies();
+    }, 6000);
+  </script>
+</body>
+</html>

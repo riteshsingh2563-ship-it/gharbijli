@@ -1,5 +1,5 @@
 /**
- * GharBijli Backend API Request Handler
+ * GharBijli Backend API Request Handler (Bhilai, Chhattisgarh)
  * Compatible with Node http.Server, Express, and Vercel serverless functions.
  */
 
@@ -68,16 +68,99 @@ async function handleApiRequest(req, res) {
     if (pathname === '/api/health') {
       sendJson(res, 200, {
         status: 'UP',
-        service: 'GharBijli Patna Backend Engine',
-        version: '1.2.0',
+        service: 'GharBijli Bhilai Backend Engine',
+        version: '2.0.0',
+        city: 'Bhilai, Chhattisgarh',
         timestamp: new Date().toISOString(),
         totalBookings: store.data.bookings.length,
-        techniciansActive: store.data.technicians.filter(t => t.active).length
+        techniciansActive: store.data.technicians.filter(t => t.active).length,
+        totalServices: store.data.services.length
       });
       return true;
     }
 
-    // 2. Auth: Send OTP
+    // 2. Dynamic App Config & Server-Driven UI (100% Backend-Controlled)
+    if (pathname === '/api/app-config' && method === 'GET') {
+      const config = store.getAppConfig();
+      sendJson(res, 200, { success: true, config });
+      return true;
+    }
+
+    // 3. Admin: Update App Config, Banners, Promos, Hero
+    if (pathname === '/api/admin/app-config' && (method === 'PATCH' || method === 'POST')) {
+      const body = await parseJsonBody(req);
+      const updated = store.updateAppConfig(body);
+      sendJson(res, 200, { success: true, config: updated });
+      return true;
+    }
+
+    // 4. Services Catalog: List
+    if (pathname === '/api/services' && method === 'GET') {
+      const all = query.all === 'true' || query.all === '1';
+      const services = store.getServices(all);
+      sendJson(res, 200, { success: true, count: services.length, services });
+      return true;
+    }
+
+    // 5. Admin: Create New Service
+    if (pathname === '/api/admin/services' && method === 'POST') {
+      const body = await parseJsonBody(req);
+      try {
+        const added = store.addService(body);
+        sendJson(res, 201, { success: true, service: added });
+      } catch (err) {
+        sendJson(res, 400, { error: err.message });
+      }
+      return true;
+    }
+
+    // 6. Admin: Update Specific Service (/api/admin/services/:id)
+    const adminServiceMatch = pathname.match(/^\/api\/admin\/services\/([A-Za-z0-9_-]+)$/);
+    if (adminServiceMatch) {
+      const serviceId = adminServiceMatch[1];
+      if (method === 'PATCH' || method === 'POST' || method === 'PUT') {
+        const body = await parseJsonBody(req);
+        try {
+          const updated = store.updateService(serviceId, body);
+          sendJson(res, 200, { success: true, service: updated });
+        } catch (err) {
+          sendJson(res, 400, { error: err.message });
+        }
+        return true;
+      }
+      if (method === 'DELETE') {
+        try {
+          const removed = store.deleteService(serviceId);
+          sendJson(res, 200, { success: true, message: 'Service removed', service: removed });
+        } catch (err) {
+          sendJson(res, 400, { error: err.message });
+        }
+        return true;
+      }
+    }
+
+    // 7. Categories: List
+    if (pathname === '/api/categories' && method === 'GET') {
+      const categories = store.getCategories();
+      sendJson(res, 200, { success: true, count: categories.length, categories });
+      return true;
+    }
+
+    // 8. Admin: Update Category (/api/admin/categories/:id)
+    const adminCatMatch = pathname.match(/^\/api\/admin\/categories\/([A-Za-z0-9_-]+)$/);
+    if (adminCatMatch && (method === 'PATCH' || method === 'POST')) {
+      const catId = adminCatMatch[1];
+      const body = await parseJsonBody(req);
+      try {
+        const updated = store.updateCategory(catId, body);
+        sendJson(res, 200, { success: true, category: updated });
+      } catch (err) {
+        sendJson(res, 400, { error: err.message });
+      }
+      return true;
+    }
+
+    // 9. Auth: Send OTP
     if (pathname === '/api/auth/send-otp' && method === 'POST') {
       const body = await parseJsonBody(req);
       if (!body.phone) {
@@ -89,7 +172,7 @@ async function handleApiRequest(req, res) {
       return true;
     }
 
-    // 3. Auth: Verify OTP
+    // 10. Auth: Verify OTP
     if (pathname === '/api/auth/verify-otp' && method === 'POST') {
       const body = await parseJsonBody(req);
       if (!body.phone || !body.code) {
@@ -101,7 +184,7 @@ async function handleApiRequest(req, res) {
       return true;
     }
 
-    // 4. Auth: Update User Profile
+    // 11. Auth: Update User Profile
     if (pathname === '/api/auth/profile' && method === 'POST') {
       const body = await parseJsonBody(req);
       if (!body.uid) {
@@ -116,7 +199,7 @@ async function handleApiRequest(req, res) {
       return true;
     }
 
-    // 5. Technicians Directory
+    // 12. Technicians Directory
     if (pathname === '/api/technicians' && method === 'GET') {
       sendJson(res, 200, {
         success: true,
@@ -126,7 +209,21 @@ async function handleApiRequest(req, res) {
       return true;
     }
 
-    // 6. Bookings: List
+    // 13. Admin: Update Technician (/api/admin/technicians/:id)
+    const adminTechMatch = pathname.match(/^\/api\/admin\/technicians\/([A-Za-z0-9_-]+)$/);
+    if (adminTechMatch && (method === 'PATCH' || method === 'POST')) {
+      const techId = adminTechMatch[1];
+      const body = await parseJsonBody(req);
+      try {
+        const updated = store.updateTechnician(techId, body);
+        sendJson(res, 200, { success: true, technician: updated });
+      } catch (err) {
+        sendJson(res, 400, { error: err.message });
+      }
+      return true;
+    }
+
+    // 14. Bookings: List
     if (pathname === '/api/bookings' && method === 'GET') {
       const bookings = store.getBookings({
         customerUid: query.customerUid,
@@ -137,7 +234,7 @@ async function handleApiRequest(req, res) {
       return true;
     }
 
-    // 7. Bookings: Create New
+    // 15. Bookings: Create New
     if (pathname === '/api/bookings' && method === 'POST') {
       const body = await parseJsonBody(req);
       if (!body.serviceId) {
@@ -149,8 +246,42 @@ async function handleApiRequest(req, res) {
       return true;
     }
 
-    // 8. Bookings: Specific Booking Route (/api/bookings/:id)
-    const bookingMatch = pathname.match(/^\/api\/bookings\/([A-Za-z0-9_-]+)(?:\/(cancel|status|review))?$/);
+    // 16. Admin: Overview KPI Stats
+    if (pathname === '/api/admin/stats' && method === 'GET') {
+      const stats = store.getAdminStats();
+      sendJson(res, 200, { success: true, stats });
+      return true;
+    }
+
+    // 17. Admin: All Bookings Feed
+    if (pathname === '/api/admin/bookings' && method === 'GET') {
+      sendJson(res, 200, {
+        success: true,
+        count: store.data.bookings.length,
+        bookings: store.data.bookings
+      });
+      return true;
+    }
+
+    // 18. Admin: All Emergencies
+    if (pathname === '/api/admin/emergencies' && method === 'GET') {
+      sendJson(res, 200, {
+        success: true,
+        count: store.data.emergencyTickets.length,
+        emergencies: store.data.emergencyTickets
+      });
+      return true;
+    }
+
+    // 19. Admin: Reset Demo Data
+    if (pathname === '/api/admin/reset-demo' && method === 'POST') {
+      store.seedDemoData();
+      sendJson(res, 200, { success: true, message: 'Demo data reset successfully' });
+      return true;
+    }
+
+    // 20. Bookings: Specific Booking Route (/api/bookings/:id)
+    const bookingMatch = pathname.match(/^\/api\/bookings\/([A-Za-z0-9_-]+)(?:\/(cancel|status|review|assign))?$/);
     if (bookingMatch) {
       const bookingId = bookingMatch[1];
       const subAction = bookingMatch[2];
@@ -163,6 +294,22 @@ async function handleApiRequest(req, res) {
           return true;
         }
         sendJson(res, 200, { success: true, booking });
+        return true;
+      }
+
+      // POST /api/bookings/:id/assign
+      if (subAction === 'assign' && method === 'POST') {
+        const body = await parseJsonBody(req);
+        if (!body.technicianId) {
+          sendJson(res, 400, { error: 'technicianId is required' });
+          return true;
+        }
+        try {
+          const assigned = store.assignTechnician(bookingId, body.technicianId);
+          sendJson(res, 200, { success: true, booking: assigned });
+        } catch (err) {
+          sendJson(res, 400, { error: err.message });
+        }
         return true;
       }
 
@@ -212,13 +359,13 @@ async function handleApiRequest(req, res) {
       }
     }
 
-    // 9. Emergency SOS
+    // 21. Emergency SOS (Bhilai)
     if (pathname === '/api/emergency' && method === 'POST') {
       const body = await parseJsonBody(req);
       const ticket = store.createEmergencyTicket(body);
       sendJson(res, 201, {
         success: true,
-        message: 'Emergency Patna Electrician dispatched on high-priority SLA',
+        message: 'Emergency Bhilai Electrician dispatched on high-priority SLA',
         ticket
       });
       return true;

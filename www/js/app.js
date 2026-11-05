@@ -96,6 +96,7 @@
     // Screen specific lifecycle renders
     if (screenId === "home") {
       renderHomeScreen();
+    loadDynamicAppConfig();
     } else if (screenId === "myBookings") {
       renderMyBookingsScreen();
     } else if (screenId === "profile") {
@@ -735,7 +736,7 @@
     const street = document.getElementById("address-street").value.trim();
     const landmark = document.getElementById("address-landmark").value.trim();
     const pincode = document.getElementById("address-pincode").value.trim();
-    const city = document.getElementById("address-city").value.trim() || "Patna, Bihar";
+    const city = document.getElementById("address-city").value.trim() || "Bhilai, Chhattisgarh";
     const preferredDate = document.getElementById("booking-date").value;
     const preferredTimeSlot = document.getElementById("booking-time-slot").value || activeTimeSlot;
     const problemDesc = document.getElementById("booking-problem-desc").value.trim();
@@ -750,7 +751,7 @@
       return;
     }
     if (!pincode || !/^\d{6}$/.test(pincode)) {
-      showToast("Please enter a valid 6-digit Patna pincode (e.g. 800001).", "error");
+      showToast("Please enter a valid 6-digit Bhilai pincode (e.g. 490006).", "error");
       return;
     }
     if (!preferredDate) {
@@ -1016,7 +1017,7 @@
           <div style="text-align: center; padding: 40px 16px; background: #ffffff; border-radius: var(--radius-lg); border: 1.5px dashed var(--border);">
             <div style="font-size: 36px; margin-bottom: 10px;">⚡</div>
             <h4 style="font-size: 16px; font-weight: 850; color: var(--ink);">${activeTab === 'active' ? 'No Active Bookings' : 'No Past Bookings'}</h4>
-            <p style="font-size: 12.5px; color: var(--ink-muted); margin: 4px 0 16px;">${activeTab === 'active' ? 'Need electrical repair in Patna? Book a verified electrician in 60 seconds.' : 'Your completed and cancelled services will appear here.'}</p>
+            <p style="font-size: 12.5px; color: var(--ink-muted); margin: 4px 0 16px;">${activeTab === 'active' ? 'Need electrical repair in Bhilai? Book a verified electrician in 60 seconds.' : 'Your completed and cancelled services will appear here.'}</p>
             ${activeTab === 'active' ? '<button class="btn btn-primary" id="btn-book-from-empty" style="width: auto; padding: 10px 24px;">Explore Electrical Services →</button>' : ''}
           </div>
         `;
@@ -1041,7 +1042,7 @@
             <span>📅 ${booking.preferredDate}</span> • <span>⏰ ${booking.preferredTimeSlot}</span>
           </div>
           <div style="font-size: 12px; color: var(--ink-muted); margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">
-            📍 ${booking.addressSnapshot ? booking.addressSnapshot.fullAddress : 'Patna'}
+            📍 ${booking.addressSnapshot ? booking.addressSnapshot.fullAddress : 'Bhilai'}
           </div>
           <div class="booking-card-footer">
             <span style="font-size: 11.5px; font-weight: 750; color: var(--success-dark);">💵 Cash After Service</span>
@@ -1103,7 +1104,7 @@
       if (lastObservedTrackingStatus && lastObservedTrackingStatus !== booking.bookingStatus) {
         const techName = booking.technicianName || "Electrician";
         if (booking.bookingStatus === "CONFIRMED") {
-          showToast("⚡ Booking Confirmed by Patna Operations!", "success");
+          showToast("⚡ Booking Confirmed by Bhilai Operations!", "success");
         } else if (booking.bookingStatus === "TECHNICIAN_ASSIGNED") {
           showToast(`👷‍♂️ Partner ${techName} assigned to your booking!`, "success");
         } else if (booking.bookingStatus === "ON_THE_WAY") {
@@ -1125,7 +1126,7 @@
       badgeEl.textContent = statusMeta.label || booking.bookingStatus;
 
       document.getElementById("tracking-status-desc").textContent = statusMeta.description || "";
-      document.getElementById("tracking-address-text").textContent = booking.addressSnapshot ? booking.addressSnapshot.fullAddress : "Patna";
+      document.getElementById("tracking-address-text").textContent = booking.addressSnapshot ? booking.addressSnapshot.fullAddress : "Bhilai";
 
       // Render Verified Partner Profile Card
       renderTrackingPartnerCard(booking);
@@ -1307,8 +1308,8 @@
       navShareBtn.addEventListener("click", () => {
         if (navigator.share) {
           navigator.share({
-            title: "GharBijli Electricians in Patna",
-            text: "Book certified electricians in Patna starting at ₹49 with GharBijli",
+            title: "GharBijli Electricians in Bhilai",
+            text: "Book certified electricians in Bhilai starting at ₹49 with GharBijli",
             url: "https://gharbijli.me"
           }).catch(() => {});
         } else {
@@ -1393,9 +1394,9 @@
       btn.addEventListener("click", () => {
         const areaName = btn.dataset.area || "Bailey Road";
         const topAreaLabel = document.getElementById("top-selected-area");
-        if (topAreaLabel) topAreaLabel.textContent = `${areaName}, Patna`;
+        if (topAreaLabel) topAreaLabel.textContent = `${areaName}, Bhilai`;
         if (areaModal) areaModal.classList.remove("active");
-        showToast(`📍 Location updated to ${areaName}, Patna`, "info");
+        showToast(`📍 Location updated to ${areaName}, Bhilai`, "info");
       });
     });
 
@@ -1437,7 +1438,7 @@
     if (okOfferBtn && offerModal) {
       okOfferBtn.addEventListener("click", () => {
         offerModal.classList.remove("active");
-        showToast("✓ Patna launch discount PATNA50 automatically applied at checkout!", "success");
+        showToast("✓ Bhilai launch discount PATNA50 automatically applied at checkout!", "success");
       });
     }
 
@@ -1522,7 +1523,7 @@
       });
     }
 
-    // Patna Locality Selector Modal (area-modal)
+    // Bhilai Locality Selector Modal (area-modal)
     const locationBtn = document.getElementById("btn-select-location");
     if (locationBtn && areaModal) {
       locationBtn.addEventListener("click", () => {
@@ -1538,13 +1539,13 @@
       document.querySelectorAll(".select-area-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
           const area = btn.dataset.area;
-          document.getElementById("current-location-text").textContent = `Patna • ${area}`;
+          document.getElementById("current-location-text").textContent = `Bhilai • ${area}`;
           const streetInput = document.getElementById("address-street");
           if (streetInput) {
-            streetInput.value = `${area}, Patna`;
+            streetInput.value = `${area}, Bhilai`;
           }
           areaModal.classList.remove("active");
-          showToast(`Location set to Patna (${area})`, "info");
+          showToast(`Location set to Bhilai (${area})`, "info");
         });
       });
     }
@@ -1567,8 +1568,8 @@
     function updateMapLocationPreview(pos) {
       const titleEl = document.getElementById("map-detected-title");
       const subEl = document.getElementById("map-detected-sub");
-      if (titleEl) titleEl.textContent = pos.street || "Bailey Road, Patna";
-      if (subEl) subEl.textContent = `${pos.area || 'Patna'} - ${pos.pincode || '800001'} (${pos.lat}, ${pos.lng})`;
+      if (titleEl) titleEl.textContent = pos.street || "Civic Centre, Bhilai";
+      if (subEl) subEl.textContent = `${pos.area || 'Bhilai'} - ${pos.pincode || '490006'} (${pos.lat}, ${pos.lng})`;
     }
 
     function getMapService() {
@@ -1627,12 +1628,12 @@
         if (lngInput) lngInput.value = pos.lng;
 
         if (statusText) {
-          statusText.textContent = `✓ Pinned on Map: ${pos.area || 'Patna'} (${pos.pincode || '800001'})`;
+          statusText.textContent = `✓ Pinned on Map: ${pos.area || 'Bhilai'} (${pos.pincode || '490006'})`;
           statusText.style.color = "var(--success-dark)";
           statusText.style.fontWeight = "750";
         }
         if (headerLocation) {
-          headerLocation.textContent = `Patna • ${pos.area || 'Bailey Rd'}`;
+          headerLocation.textContent = `Bhilai • ${pos.area || 'Bailey Rd'}`;
         }
 
         mapModal.classList.remove("active");
@@ -1654,7 +1655,7 @@
         );
 
         if (matches.length === 0) {
-          mapSuggestionsBox.innerHTML = `<div style="padding:10px 14px; font-size:12px; color:var(--ink-muted);">No Patna area found matching "${q}"</div>`;
+          mapSuggestionsBox.innerHTML = `<div style="padding:10px 14px; font-size:12px; color:var(--ink-muted);">No Bhilai area found matching "${q}"</div>`;
           mapSuggestionsBox.style.display = "block";
           return;
         }
@@ -1696,7 +1697,7 @@
         const area = chip.dataset.area;
         const streetInput = document.getElementById("address-street");
         if (streetInput) {
-          streetInput.value = `${area}, Patna`;
+          streetInput.value = `${area}, Bhilai`;
         }
         showToast(`Auto-filled address: ${area}`, "info");
       });
@@ -1900,7 +1901,7 @@
 
     const profAbout = document.getElementById("btn-profile-about");
     if (profAbout) profAbout.addEventListener("click", () => {
-      showToast("GharBijli (Patna) — Bihar's 1st Local Electrician Network", "info");
+      showToast("GharBijli (Bhilai) — Bihar's 1st Local Electrician Network", "info");
     });
 
     const profTerms = document.getElementById("btn-profile-terms");
@@ -1941,12 +1942,12 @@
           emergencySosBtn.textContent = "Dispatched Priority Operator...";
           const user = window.GharBijliFirebase.currentUser;
           const userPhone = user ? user.phoneNumber : "+919876543210";
-          const userName = user ? (user.displayName || "Emergency Customer") : "Patna Resident";
+          const userName = user ? (user.displayName || "Emergency Customer") : "Bhilai Resident";
           
           const result = await window.GharBijliFirebase.submitEmergencySos({
             name: userName,
             phone: userPhone,
-            address: currentSelectedArea || "Bailey Road, Patna",
+            address: currentSelectedArea || "Civic Centre, Bhilai",
             issueType: "Urgent Electrical Breakdown / Spark / MCB Failure"
           });
 
@@ -2007,7 +2008,7 @@
         window.GharBijliFirebase.currentUser = testUser;
       }
       const mockBooking = {
-        bookingId: "GB-2026-PAT-108",
+        bookingId: "GB-2026-BHL-108",
         customerUid: "test-user-patna-123",
         serviceId: "regular-fan-installation",
         serviceNameSnapshot: "Regular Ceiling Fan Installation",
@@ -2017,8 +2018,8 @@
         preferredDate: "2026-11-05",
         preferredTimeSlot: "12:00 PM – 03:00 PM",
         addressSnapshot: {
-          fullAddress: "Flat 302, Green Enclave, Bailey Road, Patna",
-          area: "Bailey Road, Patna"
+          fullAddress: "Flat 302, Green Enclave, Civic Centre, Bhilai",
+          area: "Civic Centre, Bhilai"
         },
         technicianName: "Manoj Kumar",
         technicianRating: "4.9 ★ (142 repairs)",
