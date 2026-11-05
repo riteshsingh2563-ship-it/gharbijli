@@ -1349,5 +1349,14 @@
   <script src="js/map-service.js"></script>
   <script src="js/firebase-service.js"></script>
   <script src="js/app.js"></script>
+
+  <!-- Service Worker Registration for Offline Reliability & PWA -->
+  <script>
+    if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>
