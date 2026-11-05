@@ -80,6 +80,23 @@ async function handleApiRequest(req, res) {
       return true;
     }
 
+    // MongoDB Atlas Live Diagnostic
+    if (pathname === '/api/test-mongo') {
+      try {
+        const { MongoClient } = require('mongodb');
+        const uri = process.env.MONGODB_URI || 'mongodb+srv://riteshsingh2563_db_user:L2WIPeTUl44lzfvp@ghar-bijli.xmuka3y.mongodb.net/gharbijli?retryWrites=true&w=majority';
+        const client = new MongoClient(uri, { serverSelectionTimeoutMS: 6000 });
+        await client.connect();
+        const d = client.db('gharbijli');
+        const colls = await d.listCollections().toArray();
+        await client.close();
+        sendJson(res, 200, { success: true, collections: colls.map(c => c.name) });
+      } catch (err) {
+        sendJson(res, 500, { success: false, error: err.message });
+      }
+      return true;
+    }
+
     // Admin Login / Auth Lock Gate
     if (pathname === '/api/admin/auth' && method === 'POST') {
       const body = await parseJsonBody(req);
