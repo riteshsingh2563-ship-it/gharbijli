@@ -105,6 +105,65 @@ class GharBijliFirebaseService {
     };
   }
 
+  
+  /**
+   * Real Official Google Sign-In via Firebase Auth
+   * Triggers official Google account selector / popup
+   */
+  async signInWithGoogle() {
+    if (typeof firebase === 'undefined' || !firebase.auth) {
+      throw new Error("Google Authentication service is loading. Please retry in a moment.");
+    }
+    
+    // Ensure app initialized
+    if (!firebase.apps.length && this.config && this.config.firebase) {
+      firebase.initializeApp(this.config.firebase);
+    }
+
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.addScope('email');
+    provider.addScope('profile');
+    provider.setCustomParameters({ prompt: 'select_account' });
+
+    try {
+      const result = await firebase.auth().signInWithPopup(provider);
+      if (result && result.user) {
+        const u = result.user;
+        const verifiedUser = {
+          uid: u.uid,
+          email: u.email,
+          displayName: u.displayName || (u.email ? u.email.split('@')[0] : 'User'),
+          photoURL: u.photoURL || '',
+          phoneNumber: u.phoneNumber || '',
+          authProvider: 'google'
+        };
+        this.currentUser = verifiedUser;
+        localStorage.setItem('gb_current_user', JSON.stringify(verifiedUser));
+
+        // Sync to MongoDB Atlas backend
+        try {
+          await this.apiRequest('/api/auth/google', {
+            method: 'POST',
+            body: JSON.stringify({
+              email: verifiedUser.email,
+              name: verifiedUser.displayName,
+              picture: verifiedUser.photoURL,
+              sub: verifiedUser.uid
+            })
+          });
+        } catch (syncErr) {
+          console.warn("[GharBijli] Mongo user sync note:", syncErr.message);
+        }
+
+        this.notifyAuthListeners();
+        return verifiedUser;
+      }
+    } catch (popupErr) {
+      console.warn("[GharBijli] Google popup auth error:", popupErr.message);
+      throw popupErr;
+    }
+  }
+
   notifyAuthListeners() {
     for (const listener of this.authListeners) {
       try {
@@ -340,86 +399,28 @@ class GharBijliFirebaseService {
    */
   async createBooking(bookingData) {
     if (!this.currentUser) {
-      this.currentUser = {
-        uid: "gb_customer_" + Date.now(),
-        displayName: "Bhilai Customer",
-        phoneNumber: "+919876543210",
-        email: "customer@gharbijli.me"
-      };
+      throw new Error("Authentication required. Please sign in with Google before booking.");
     }
 
     const payload = {
       ...bookingData,
       customerUid: this.currentUser.uid,
-      customerPhone: this.currentUser.phoneNumber || "+919876543210",
+      customerPhone: this.currentUser.phoneNumber || "",
       customerName: this.currentUser.displayName || "Customer",
       customerEmail: this.currentUser.email || ""
     };
 
-    // 1. Try Backend API
-    try {
-      const apiResp = await this.apiRequest('/api/bookings', {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
-      if (apiResp && apiResp.success && apiResp.booking) {
-        const booking = apiResp.booking;
-        this.saveToLocalCache(booking);
-        return booking;
-      }
-    } catch (apiErr) {
-      console.warn("[GharBijli] API booking creation fallback:", apiErr.message);
+    // Persist directly to MongoDB Atlas via Backend API
+    const apiResp = await this.apiRequest('/api/bookings', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    if (apiResp && apiResp.success && apiResp.booking) {
+      const booking = apiResp.booking;
+      this.saveToLocalCache(booking);
+      return booking;
     }
-
-    // 2. Client-side Fallback
-    const bookingId = "GB-" + new Date().getFullYear() + "-BHL-" + Math.floor(100 + Math.random() * 900);
-    const nowIso = new Date().toISOString();
-
-    const record = {
-      bookingId: bookingId,
-      customerUid: this.currentUser.uid,
-      customerPhone: this.currentUser.phoneNumber,
-      customerName: this.currentUser.displayName || "Customer",
-      serviceId: bookingData.serviceId,
-      serviceNameSnapshot: bookingData.serviceNameSnapshot,
-      pricingTypeSnapshot: bookingData.pricingTypeSnapshot || "inspection_based",
-      addressSnapshot: bookingData.addressSnapshot,
-      preferredDate: bookingData.preferredDate,
-      preferredTimeSlot: bookingData.preferredTimeSlot,
-      issueDescription: bookingData.issueDescription || "",
-      customerNotes: bookingData.customerNotes || "",
-      paymentMethod: "CASH_ON_DELIVERY",
-      paymentStatus: "PENDING",
-      bookingStatus: "PENDING_CONFIRMATION",
-      assignedTechnician: null,
-      technicianName: "Manoj Kumar",
-      technicianPhone: "+919876543210",
-      technicianRating: "4.92 ★ (142 repairs)",
-      technicianVehicle: "Honda Activa (BR-01-XX-1234)",
-      finalAmount: null,
-      createdAt: this.isLiveFirebase ? firebase.firestore.FieldValue.serverTimestamp() : nowIso,
-      updatedAt: this.isLiveFirebase ? firebase.firestore.FieldValue.serverTimestamp() : nowIso,
-      confirmedAt: null,
-      completedAt: null,
-      cancelledAt: null,
-      cancellationReason: null,
-      statusHistory: [
-        {
-          status: "PENDING_CONFIRMATION",
-          timestamp: nowIso,
-          note: "Booking submitted by customer. Awaiting operator confirmation call."
-        }
-      ]
-    };
-
-    if (this.isLiveFirebase) {
-      await this.db.collection("bookings").doc(bookingId).set(record);
-      record.createdAt = nowIso;
-      record.updatedAt = nowIso;
-    }
-
-    this.saveToLocalCache(record);
-    return record;
+    throw new Error("Unable to save booking to server. Please check your internet connection.");
   }
 
   saveToLocalCache(record) {

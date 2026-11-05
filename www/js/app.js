@@ -726,17 +726,9 @@
     if (isSubmitting) return;
 
     if (!window.GharBijliFirebase.currentUser) {
-      const custName = (document.getElementById("booking-customer-name")?.value || "").trim();
-      const demoUser = {
-        uid: "gb_cust_" + Date.now(),
-        displayName: custName || "Bhilai Customer",
-        phoneNumber: "+919876543210",
-        email: "customer.bhilai@gmail.com",
-        authProvider: "demo"
-      };
-      window.GharBijliFirebase.currentUser = demoUser;
-      localStorage.setItem("gb_current_user", JSON.stringify(demoUser));
-      updateUserNavIndicator();
+      showToast("Please sign in with your Google account to schedule a service.", "error");
+      navigateTo("login");
+      return;
     }
 
     const customerName = document.getElementById("booking-customer-name").value.trim();
@@ -921,22 +913,10 @@
         showToast(`Welcome ${name}! Signed in via Google`, "success");
         navigateTo("home", false);
       } else {
-        throw new Error(data.error || "Login failed");
+        throw new Error(data.error || "Authentication failed on server");
       }
     } catch (e) {
-      // Safe offline fallback: keep user authenticated locally
-      const fallbackUser = {
-        uid: "gb_google_" + btoa(encodeURIComponent(userEmail)).replace(/[^a-zA-Z0-9]/g, ''),
-        email: userEmail,
-        displayName: userName || userEmail.split("@")[0],
-        authProvider: "google"
-      };
-      window.GharBijliFirebase.currentUser = fallbackUser;
-      localStorage.setItem("gb_current_user", JSON.stringify(fallbackUser));
-      if (modal) modal.classList.remove("active");
-      updateUserNavIndicator();
-      showToast(`Welcome ${fallbackUser.displayName}! Signed in via Google`, "success");
-      navigateTo("home", false);
+      showToast(`Sign in failed: ${e.message || "Please check your network and retry."}`, "error");
     }
   }
 
@@ -1797,29 +1777,47 @@
     }
 
     
-    // Instant Demo Login Button
-    const instantDemoBtn = document.getElementById("btn-instant-demo-login");
-    if (instantDemoBtn) {
-      instantDemoBtn.addEventListener("click", () => {
-        const demoUser = {
-          uid: "gb_demo_ritesh_singh",
-          displayName: "Ritesh Singh (Demo)",
-          email: "ritesh.singh.bhilai@gmail.com",
-          phoneNumber: "+919876543210",
-          authProvider: "demo"
-        };
-        window.GharBijliFirebase.currentUser = demoUser;
-        localStorage.setItem("gb_current_user", JSON.stringify(demoUser));
-        updateUserNavIndicator();
-        showToast("⚡ Logged in as Ritesh Singh (Demo Mode)", "success");
-        navigateTo("home", false);
+    // Direct Google Sign-In on Login Screen
+    const mainGoogleBtn = document.getElementById("btn-submit-main-google");
+    if (mainGoogleBtn) {
+      mainGoogleBtn.addEventListener("click", () => {
+        const emailInput = document.getElementById("input-main-google-email");
+        const nameInput = document.getElementById("input-main-google-name");
+        const email = (emailInput?.value || "").trim();
+        const name = (nameInput?.value || "").trim();
+        if (!email || !email.includes("@")) {
+          showToast("Please enter a valid Google email address", "error");
+          return;
+        }
+        performGoogleLogin(email, name || email.split("@")[0]);
       });
     }
 
     // Google Sign-In Trigger & Modal Listeners
     const googleBtn = document.getElementById("btn-google-signin");
     if (googleBtn) {
-      googleBtn.addEventListener("click", () => openGoogleAuthModal());
+      googleBtn.addEventListener("click", async () => {
+        try {
+          showToast("Opening Google Sign-In...", "info");
+          if (window.GharBijliFirebase && typeof window.GharBijliFirebase.signInWithGoogle === 'function') {
+            const user = await window.GharBijliFirebase.signInWithGoogle();
+            updateUserNavIndicator();
+            showToast(`Welcome ${user.displayName}! Signed in via Google`, "success");
+            navigateTo("home", false);
+          } else {
+            openGoogleAuthModal();
+          }
+        } catch (err) {
+          if (err.code === 'auth/popup-closed-by-user') {
+            showToast("Google Sign-In was closed. Please try again.", "info");
+          } else if (err.code === 'auth/cancelled-popup-request') {
+            // Handled
+          } else {
+            // If popup is blocked in WebView, fallback to clean email modal
+            openGoogleAuthModal();
+          }
+        }
+      });
     }
 
     const closeGoogleModalBtn = document.getElementById("btn-close-google-modal");

@@ -37,12 +37,13 @@ const GharBijliConfig = {
   },
 
   firebase: {
-    apiKey: "FIREBASE_API_KEY_PLACEHOLDER",
-    authDomain: "gharbijli-app.firebaseapp.com",
-    projectId: "gharbijli-app",
-    storageBucket: "gharbijli-app.appspot.com",
-    messagingSenderId: "123456789012",
-    appId: "1:123456789012:web:abcdef1234567890"
+    apiKey: "AIzaSyAZcv417lg-Ljz3RfUTlp5oZIBHpFGwfAE",
+    authDomain: "ghar-bijli.firebaseapp.com",
+    projectId: "ghar-bijli",
+    storageBucket: "ghar-bijli.firebasestorage.app",
+    messagingSenderId: "491757786499",
+    appId: "1:491757786499:web:4155e3dadb619880ccd2b6",
+    measurementId: "G-GHNT0MM607"
   },
 
   auth: {
