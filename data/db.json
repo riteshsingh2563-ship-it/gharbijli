@@ -12,21 +12,13 @@
       "supportEmail": "support@gharbijli.me",
       "supportHours": "8:00 AM – 9:00 PM (Monday – Sunday)"
     },
+    "defaultArea": "Civic Centre, Bhilai",
     "hero": {
-      "title": "Electricians in Bhilai",
+      "title": "Bhilai Electricians & Repair",
       "subtitle": "Doorstep electrical repairs & installations in Bhilai",
       "ratingText": "4.88 (12,400+ Bhilai Homes Serviced)",
       "earliestSlot": "Today, 30–45m"
     },
-    "visitationPromo": {
-      "title": "Get visitation fee off",
-      "subtext": "On orders above ₹499 (Tap for details)",
-      "couponCode": "BHILAI50",
-      "discountAmount": 50,
-      "minOrderAmount": 499,
-      "active": true
-    },
-    "defaultArea": "Civic Centre, Bhilai",
     "localities": [
       {
         "id": "civic-centre",
@@ -82,590 +74,599 @@
         "pincode": "490006",
         "active": true
       }
-    ]
+    ],
+    "updatedAt": "2026-11-05T15:18:18.056Z",
+    "visitationPromo": {
+      "title": "Get visitation fee off",
+      "subtext": "On orders above ₹499 (Tap for details)",
+      "couponCode": "BHILAI50",
+      "discountAmount": 50,
+      "minOrderAmount": 499,
+      "active": true
+    }
   },
   "categories": [
     {
       "id": "switch-socket",
-      "name": "Switch & socket",
+      "active": true,
       "icon": "assets/categories/switch-socket.png",
-      "order": 1,
-      "active": true
+      "name": "Switch & socket",
+      "order": 1
     },
     {
       "id": "fan",
-      "name": "Fan",
+      "active": true,
       "icon": "assets/categories/fan.png",
-      "order": 2,
-      "active": true
+      "name": "Fan",
+      "order": 2
     },
     {
       "id": "light",
-      "name": "Light",
+      "active": true,
       "icon": "assets/categories/light.png",
-      "order": 3,
-      "active": true
+      "name": "Light",
+      "order": 3
     },
     {
       "id": "wiring",
-      "name": "Wiring",
+      "active": true,
       "icon": "assets/categories/wiring.png",
-      "order": 4,
-      "active": true
+      "name": "Wiring",
+      "order": 4
     },
     {
       "id": "doorbell-security",
-      "name": "Doorbell & security",
+      "active": true,
       "icon": "assets/categories/doorbell-security.png",
-      "order": 5,
-      "active": true
+      "name": "Doorbell & security",
+      "order": 5
     },
     {
       "id": "mcb-submeter",
-      "name": "MCB & submeter",
+      "active": true,
       "icon": "assets/categories/mcb-submeter.png",
-      "order": 6,
-      "active": true
+      "name": "MCB & submeter",
+      "order": 6
     },
     {
       "id": "inverter-stabiliser",
-      "name": "Inverter & stabiliser",
+      "active": true,
       "icon": "assets/categories/inverter-stabiliser.png",
-      "order": 7,
-      "active": true
+      "name": "Inverter & stabiliser",
+      "order": 7
     },
     {
       "id": "appliances",
-      "name": "TV & other appliances",
+      "active": true,
       "icon": "assets/categories/appliances.png",
-      "order": 8,
-      "active": true
+      "name": "TV & other appliances",
+      "order": 8
     },
     {
       "id": "festive-lights",
-      "name": "Festive lights",
+      "active": true,
       "icon": "assets/categories/festive-lights.png",
-      "order": 9,
-      "active": true
+      "name": "Festive lights",
+      "order": 9
     },
     {
       "id": "ev-charger",
-      "name": "EV charger installation",
+      "active": true,
       "icon": "assets/categories/ev-charger.png",
-      "order": 10,
-      "active": true
+      "name": "EV charger installation",
+      "order": 10
     },
     {
       "id": "consultation",
-      "name": "Book a consultation",
+      "active": true,
       "icon": "assets/categories/consultation.png",
-      "order": 11,
-      "active": true
+      "name": "Book a consultation",
+      "order": 11
     }
   ],
   "services": [
     {
       "id": "switch-socket-repair",
-      "categoryId": "switch-socket",
-      "category": "Switches",
-      "categoryLabel": "Switch & socket",
-      "name": "Switch replace/ install",
-      "hindiName": "स्विच रिप्लेस / इन्स्टॉल",
-      "icon": "🔌",
-      "image": "assets/images/switch-repair.jpg",
+      "active": true,
       "badge": "5 options",
-      "rating": 4.83,
-      "reviews": "229K reviews",
-      "mrp": "₹79",
-      "priceTag": "Starts at ₹49",
-      "priceNumber": 49,
-      "discountBadge": "38% OFF",
-      "warranty": "30-Day Guarantee",
+      "category": "Switches",
+      "categoryId": "switch-socket",
+      "categoryLabel": "Switch & socket",
       "description": "Replacement or fresh fitting of 1-way, 2-way, or bell switches. Safe earthing check and testing included.",
-      "pricingType": "standard",
+      "discountBadge": "38% OFF",
       "estimatedDuration": "30 mins",
+      "excluded": [
+        "Cost of switch board or modular plates",
+        "Major concealed wall cutting"
+      ],
       "highlights": [
         "Modular & non-modular switch fitting",
         "Short-circuit safety check included",
         "Pay cash after testing switch operation"
       ],
+      "hindiName": "स्विच रिप्लेस / इन्स्टॉल",
+      "icon": "🔌",
+      "image": "assets/images/switch-repair.jpg",
       "included": [
         "Removal of old burnt/loose switch",
         "Wire striping, tightening & terminal connection",
         "Live voltage & load testing"
       ],
-      "excluded": [
-        "Cost of switch board or modular plates",
-        "Major concealed wall cutting"
-      ],
-      "active": true
+      "mrp": "₹79",
+      "name": "Switch replace/ install",
+      "priceNumber": 49,
+      "priceTag": "Starts at ₹49",
+      "pricingType": "standard",
+      "rating": 4.83,
+      "reviews": "229K reviews",
+      "warranty": "30-Day Guarantee"
     },
     {
       "id": "socket-repair",
-      "categoryId": "switch-socket",
-      "category": "Switches",
-      "categoryLabel": "Switch & socket",
-      "name": "Socket replace/ install",
-      "hindiName": "सॉकेट रिप्लेस / इन्स्टॉल",
-      "icon": "🔌",
-      "image": "assets/images/switch-repair.jpg",
+      "active": true,
       "badge": "5 options",
-      "rating": 4.83,
-      "reviews": "11K reviews",
-      "mrp": "₹99",
-      "priceTag": "Starts at ₹59",
-      "priceNumber": 59,
-      "discountBadge": "40% OFF",
-      "warranty": "30-Day Guarantee",
+      "category": "Switches",
+      "categoryId": "switch-socket",
+      "categoryLabel": "Switch & socket",
       "description": "6A or 16A power socket fitting for heavy appliances like geyser, AC, microwave, or iron.",
-      "pricingType": "standard",
+      "discountBadge": "40% OFF",
       "estimatedDuration": "30 mins",
+      "excluded": [
+        "Cost of new socket (at actuals)"
+      ],
       "highlights": [
         "6A and 16A power socket installation",
         "Proper neutral & ground earthing verification",
         "Pay cash after testing"
       ],
+      "hindiName": "सॉकेट रिप्लेस / इन्स्टॉल",
+      "icon": "🔌",
+      "image": "assets/images/switch-repair.jpg",
       "included": [
         "Old socket removal and wire inspection",
         "Tight terminal fitting with earthing loop",
         "Load & polarity test"
       ],
-      "excluded": [
-        "Cost of new socket (at actuals)"
-      ],
-      "active": true
+      "mrp": "₹99",
+      "name": "Socket replace/ install",
+      "priceNumber": 59,
+      "priceTag": "Starts at ₹59",
+      "pricingType": "standard",
+      "rating": 4.83,
+      "reviews": "11K reviews",
+      "warranty": "30-Day Guarantee"
     },
     {
       "id": "switchboard-install-repair",
-      "categoryId": "switch-socket",
-      "category": "Switches",
-      "categoryLabel": "Switch & socket",
-      "name": "Full switchboard repair/replace",
-      "hindiName": "फुल स्विचबोर्ड रिपेयर / रिप्लेस",
-      "icon": "🎛️",
-      "image": "assets/images/switchboard.jpg",
+      "active": true,
       "badge": "5 options",
-      "rating": 4.83,
-      "reviews": "61K reviews",
-      "mrp": "₹199",
-      "priceTag": "Starts at ₹129",
-      "priceNumber": 129,
-      "discountBadge": "35% OFF",
-      "warranty": "30-Day Guarantee",
+      "category": "Switches",
+      "categoryId": "switch-socket",
+      "categoryLabel": "Switch & socket",
       "description": "Complete modular or wooden switchboard disassembly, terminal reconnection, burnt wire trimming and board fitting.",
-      "pricingType": "standard",
+      "discountBadge": "35% OFF",
       "estimatedDuration": "45 mins",
+      "excluded": [
+        "Cost of new modular plate if broken"
+      ],
       "highlights": [
         "Complete board rewiring & cleanup",
         "Sparks & loose contact rectification",
         "Pay cash after testing"
       ],
+      "hindiName": "फुल स्विचबोर्ड रिपेयर / रिप्लेस",
+      "icon": "🎛️",
+      "image": "assets/images/switchboard.jpg",
       "included": [
         "Inspection of all switches, sockets & regulator",
         "Tightening all internal screw terminals",
         "Safety earthing continuity verification"
       ],
-      "excluded": [
-        "Cost of new modular plate if broken"
-      ],
-      "active": true
+      "mrp": "₹199",
+      "name": "Full switchboard repair/replace",
+      "priceNumber": 129,
+      "priceTag": "Starts at ₹129",
+      "pricingType": "standard",
+      "rating": 4.83,
+      "reviews": "61K reviews",
+      "warranty": "30-Day Guarantee"
     },
     {
       "id": "fan-installation",
-      "categoryId": "fan",
-      "category": "Fans",
-      "categoryLabel": "Fan",
-      "name": "Regular ceiling fan installation",
-      "hindiName": "सीलिंग पंखा इन्स्टॉलेशन",
-      "icon": "🌀",
-      "image": "assets/images/fan-installation.jpg",
+      "active": true,
       "badge": "3 options",
-      "rating": 4.85,
-      "reviews": "108K reviews",
-      "mrp": "₹149",
-      "priceTag": "Starts at ₹89",
-      "priceNumber": 89,
-      "discountBadge": "40% OFF",
-      "warranty": "30-Day Guarantee",
+      "category": "Fans",
+      "categoryId": "fan",
+      "categoryLabel": "Fan",
       "description": "Ceiling fan assembly, blade alignment, down-rod hook fixing, regulator connection and balancing.",
-      "pricingType": "standard",
+      "discountBadge": "40% OFF",
       "estimatedDuration": "35 mins",
+      "excluded": [
+        "Cost of down-rod extension or ceiling anchor fastener"
+      ],
       "highlights": [
         "Ceiling hook safety check & clamp locking",
         "Proper blade angle balancing for maximum air throw",
         "Pay cash after full speed run"
       ],
+      "hindiName": "सीलिंग पंखा इन्स्टॉलेशन",
+      "icon": "🌀",
+      "image": "assets/images/fan-installation.jpg",
       "included": [
         "Fan assembly and blade fitting",
         "Ceiling rod wiring & shackle connection",
         "Full speed test with regulator check"
       ],
-      "excluded": [
-        "Cost of down-rod extension or ceiling anchor fastener"
-      ],
-      "active": true
+      "mrp": "₹149",
+      "name": "Regular ceiling fan installation",
+      "priceNumber": 155,
+      "priceTag": "Starts at ₹155",
+      "pricingType": "standard",
+      "rating": 4.85,
+      "reviews": "108K reviews",
+      "warranty": "30-Day Guarantee",
+      "updatedAt": "2026-11-05T14:44:56.456Z"
     },
     {
       "id": "fan-winding",
-      "categoryId": "fan",
-      "category": "Fans",
-      "categoryLabel": "Fan",
-      "name": "Smart/BLDC ceiling fan replace/install",
-      "hindiName": "स्मार्ट / BLDC पंखा रिप्लेस / इन्स्टॉल",
-      "icon": "🌀",
-      "image": "assets/images/fan-winding.jpg",
+      "active": true,
       "badge": "3 options",
-      "rating": 4.83,
-      "reviews": "29K reviews",
-      "mrp": "₹149",
-      "priceTag": "Starts at ₹89",
-      "priceNumber": 89,
-      "discountBadge": "40% OFF",
-      "warranty": "30-Day Guarantee",
+      "category": "Fans",
+      "categoryId": "fan",
+      "categoryLabel": "Fan",
       "description": "Specialized installation for BLDC smart fans with remote pairing, bypass wiring and balancing.",
-      "pricingType": "standard",
+      "discountBadge": "40% OFF",
       "estimatedDuration": "45 mins",
+      "excluded": [
+        "Batteries for remote (unless in fan box)"
+      ],
       "highlights": [
         "Remote controller pairing & bypass wiring",
         "Quiet motor balancing and speed calibration",
         "Pay cash after remote testing"
       ],
+      "hindiName": "स्मार्ट / BLDC पंखा रिप्लेस / इन्स्टॉल",
+      "icon": "🌀",
+      "image": "assets/images/fan-winding.jpg",
       "included": [
         "Bypassing mechanical wall regulator for BLDC",
         "Remote frequency calibration",
         "Full speed run test"
       ],
-      "excluded": [
-        "Batteries for remote (unless in fan box)"
-      ],
-      "active": true
+      "mrp": "₹149",
+      "name": "Smart/BLDC ceiling fan replace/install",
+      "priceNumber": 89,
+      "priceTag": "Starts at ₹89",
+      "pricingType": "standard",
+      "rating": 4.83,
+      "reviews": "29K reviews",
+      "warranty": "30-Day Guarantee"
     },
     {
       "id": "fan-repair",
-      "categoryId": "fan",
-      "category": "Fans",
-      "categoryLabel": "Fan",
-      "name": "Fan repair & noise fix",
-      "hindiName": "पंखा रिपेयर व आवाज़ ठीक करना",
-      "icon": "🌀",
-      "image": "assets/images/fan-repair.jpg",
+      "active": true,
       "badge": "4 options",
-      "rating": 4.79,
-      "reviews": "91K reviews",
-      "mrp": "₹199",
-      "priceTag": "Starts at ₹119",
-      "priceNumber": 119,
-      "discountBadge": "40% OFF",
-      "warranty": "30-Day Guarantee",
+      "category": "Fans",
+      "categoryId": "fan",
+      "categoryLabel": "Fan",
       "description": "Diagnosis and fix for slow speed, humming noise, wobbling, bearing jam or capacitor breakdown.",
-      "pricingType": "standard",
+      "discountBadge": "40% OFF",
       "estimatedDuration": "40 mins",
+      "excluded": [
+        "Cost of replacement capacitor/bearings (at actuals)"
+      ],
       "highlights": [
         "Capacitor, bearing & motor speed diagnosis",
         "Wobble correction & noise elimination",
         "Pay cash after repair"
       ],
+      "hindiName": "पंखा रिपेयर व आवाज़ ठीक करना",
+      "icon": "🌀",
+      "image": "assets/images/fan-repair.jpg",
       "included": [
         "Doorstep unmounting and blade balance check",
         "Capacitor health & motor humming diagnosis",
         "Cleanup after work"
       ],
-      "excluded": [
-        "Cost of replacement capacitor/bearings (at actuals)"
-      ],
-      "active": true
+      "mrp": "₹199",
+      "name": "Fan repair & noise fix",
+      "priceNumber": 119,
+      "priceTag": "Starts at ₹119",
+      "pricingType": "standard",
+      "rating": 4.79,
+      "reviews": "91K reviews",
+      "warranty": "30-Day Guarantee"
     },
     {
       "id": "light-install-repair",
-      "categoryId": "light",
-      "category": "Lighting",
-      "categoryLabel": "Light",
-      "name": "Light & bulb installation",
-      "hindiName": "लाइट व बल्ब फिटिंग",
-      "icon": "💡",
-      "image": "assets/images/lighting.jpg",
+      "active": true,
       "badge": "2 options",
-      "rating": 4.84,
-      "reviews": "346K reviews",
-      "mrp": "₹99",
-      "priceTag": "Starts at ₹69",
-      "priceNumber": 69,
-      "discountBadge": "30% OFF",
-      "warranty": "30-Day Guarantee",
+      "category": "Lighting",
+      "categoryId": "light",
+      "categoryLabel": "Light",
       "description": "Wall bracket light, LED bulb holder, ceiling batten or spot light replacement and fitting.",
-      "pricingType": "standard",
+      "discountBadge": "30% OFF",
       "estimatedDuration": "25 mins",
+      "excluded": [
+        "Cost of light fixture itself"
+      ],
       "highlights": [
         "Wall bracket, holder and LED fitting",
         "Clean drill hole & neat anchor mounting",
         "Pay cash after testing"
       ],
+      "hindiName": "लाइट व बल्ब फिटिंग",
+      "icon": "💡",
+      "image": "assets/images/lighting.jpg",
       "included": [
         "Drill work and wall anchor screw fixing",
         "Wire striping, insulation & holder connection",
         "Light testing"
       ],
-      "excluded": [
-        "Cost of light fixture itself"
-      ],
-      "active": true
+      "mrp": "₹99",
+      "name": "Light & bulb installation",
+      "priceNumber": 69,
+      "priceTag": "Starts at ₹69",
+      "pricingType": "standard",
+      "rating": 4.84,
+      "reviews": "346K reviews",
+      "warranty": "30-Day Guarantee"
     },
     {
       "id": "electrical-wiring",
-      "categoryId": "wiring",
-      "category": "Wiring",
-      "categoryLabel": "Wiring",
-      "name": "Short circuit & fault finding",
-      "hindiName": "शॉर्ट सर्किट व फॉल्ट रिपेयर",
-      "icon": "⚡",
-      "image": "assets/images/wiring.jpg",
+      "active": true,
       "badge": "Most Urgent",
-      "rating": 4.88,
-      "reviews": "150K reviews",
-      "mrp": "₹299",
-      "priceTag": "Starts at ₹199",
-      "priceNumber": 199,
-      "discountBadge": "33% OFF",
-      "warranty": "30-Day Guarantee",
+      "category": "Wiring",
+      "categoryId": "wiring",
+      "categoryLabel": "Wiring",
       "description": "Multimeter diagnosis of tripping circuits, sparking joints, burnt insulation, and power blackouts.",
-      "pricingType": "inspection_based",
+      "discountBadge": "33% OFF",
       "estimatedDuration": "45 mins",
+      "excluded": [
+        "Concealed wall chasing or major pipe laying"
+      ],
       "highlights": [
         "Digital multimeter diagnosis for trip cause",
         "Identification of earth leakage and sparking",
         "Pay cash after power is safely restored"
       ],
+      "hindiName": "शॉर्ट सर्किट व फॉल्ट रिपेयर",
+      "icon": "⚡",
+      "image": "assets/images/wiring.jpg",
       "included": [
         "Circuit isolation & voltage check across points",
         "Burn joint reconnection and heat-shrink taping",
         "Safety reset test"
       ],
-      "excluded": [
-        "Concealed wall chasing or major pipe laying"
-      ],
-      "active": true
+      "mrp": "₹299",
+      "name": "Short circuit & fault finding",
+      "priceNumber": 199,
+      "priceTag": "Starts at ₹199",
+      "pricingType": "inspection_based",
+      "rating": 4.88,
+      "reviews": "150K reviews",
+      "warranty": "30-Day Guarantee"
     },
     {
       "id": "mcb-fuse-services",
-      "categoryId": "mcb-submeter",
-      "category": "Distribution",
-      "categoryLabel": "MCB & submeter",
-      "name": "Main board replace/install",
-      "hindiName": "मेन बोर्ड रिप्लेस / इन्स्टॉल",
-      "icon": "🛡️",
-      "image": "assets/images/mcb.jpg",
+      "active": true,
       "badge": "2 options",
-      "rating": 4.82,
-      "reviews": "1K reviews",
-      "mrp": "₹349",
-      "priceTag": "Starts at ₹249",
-      "priceNumber": 249,
-      "discountBadge": "28% OFF",
-      "warranty": "30-Day Guarantee",
+      "category": "Distribution",
+      "categoryId": "mcb-submeter",
+      "categoryLabel": "MCB & submeter",
       "description": "Distribution board box mounting, bus-bar connection, single-phase or 3-phase MCB fitting and load balance.",
-      "pricingType": "standard",
+      "discountBadge": "28% OFF",
       "estimatedDuration": "45 mins",
+      "excluded": [
+        "Cost of MCB units (at actuals)"
+      ],
       "highlights": [
         "Single/Double pole MCB installation",
         "Proper phase and neutral distribution",
         "Pay cash after trip testing"
       ],
+      "hindiName": "मेन बोर्ड रिप्लेस / इन्स्टॉल",
+      "icon": "🛡️",
+      "image": "assets/images/mcb.jpg",
       "included": [
         "DIN rail mounting of MCB/RCCB breakers",
         "Heavy gauge bus-bar connection",
         "Trip button test under load"
       ],
-      "excluded": [
-        "Cost of MCB units (at actuals)"
-      ],
-      "active": true
+      "mrp": "₹349",
+      "name": "Main board replace/install",
+      "priceNumber": 249,
+      "priceTag": "Starts at ₹249",
+      "pricingType": "standard",
+      "rating": 4.82,
+      "reviews": "1K reviews",
+      "warranty": "30-Day Guarantee"
     },
     {
       "id": "submeter-install",
-      "categoryId": "mcb-submeter",
-      "category": "Distribution",
-      "categoryLabel": "MCB & submeter",
-      "name": "Submeter installation",
-      "hindiName": "सबमीटर इन्स्टॉलेशन",
-      "icon": "📟",
-      "image": "assets/images/general.jpg",
+      "active": true,
       "badge": "Verified",
-      "rating": 4.78,
-      "reviews": "3K reviews",
-      "mrp": "₹349",
-      "priceTag": "Starts at ₹229",
-      "priceNumber": 229,
-      "discountBadge": "34% OFF",
-      "warranty": "30-Day Guarantee",
+      "category": "Distribution",
+      "categoryId": "mcb-submeter",
+      "categoryLabel": "MCB & submeter",
       "description": "Digital energy submeter installation for tenant rooms, rental flats, or commercial shops in Patna.",
-      "pricingType": "standard",
+      "discountBadge": "34% OFF",
       "estimatedDuration": "60 mins",
+      "excluded": [
+        "Cost of the digital submeter unit"
+      ],
       "highlights": [
         "Accurate tenant submeter wiring",
         "Tamper-proof terminal sealing & load check",
         "Pay cash after test"
       ],
+      "hindiName": "सबमीटर इन्स्टॉलेशन",
+      "icon": "📟",
+      "image": "assets/images/general.jpg",
       "included": [
         "Wall board mounting",
         "Phase in/out and neutral wiring",
         "Pulse LED verification"
       ],
-      "excluded": [
-        "Cost of the digital submeter unit"
-      ],
-      "active": true
+      "mrp": "₹349",
+      "name": "Submeter installation",
+      "priceNumber": 229,
+      "priceTag": "Starts at ₹229",
+      "pricingType": "standard",
+      "rating": 4.78,
+      "reviews": "3K reviews",
+      "warranty": "30-Day Guarantee"
     },
     {
       "id": "inverter-services",
-      "categoryId": "inverter-stabiliser",
-      "category": "Inverters",
-      "categoryLabel": "Inverter & stabiliser",
-      "name": "Inverter installation/uninstallation",
-      "hindiName": "इन्वर्टर इन्स्टॉलेशन / अनइन्स्टॉल",
-      "icon": "🔋",
-      "image": "assets/images/inverter.jpg",
+      "active": true,
       "badge": "3 options",
-      "rating": 4.78,
-      "reviews": "12K reviews",
-      "mrp": "₹449",
-      "priceTag": "Starts at ₹299",
-      "priceNumber": 299,
-      "discountBadge": "33% OFF",
-      "warranty": "30-Day Guarantee",
+      "category": "Inverters",
+      "categoryId": "inverter-stabiliser",
+      "categoryLabel": "Inverter & stabiliser",
       "description": "Complete setup for sine wave inverters, tubular battery connection, terminal greasing, and backup line routing.",
-      "pricingType": "standard",
+      "discountBadge": "33% OFF",
       "estimatedDuration": "60 mins",
+      "excluded": [
+        "Cost of battery trolley or new battery"
+      ],
       "highlights": [
         "Heavy copper battery cable lugging & petroleum jelly coat",
         "Output circuit separation (lights, fans & TV)",
         "Pay cash after mains trip simulation"
       ],
+      "hindiName": "इन्वर्टर इन्स्टॉलेशन / अनइन्स्टॉल",
+      "icon": "🔋",
+      "image": "assets/images/inverter.jpg",
       "included": [
         "Terminal connection and polarity verification",
         "Distilled water level check",
         "Mains bypass test"
       ],
-      "excluded": [
-        "Cost of battery trolley or new battery"
-      ],
-      "active": true
+      "mrp": "₹449",
+      "name": "Inverter installation/uninstallation",
+      "priceNumber": 299,
+      "priceTag": "Starts at ₹299",
+      "pricingType": "standard",
+      "rating": 4.78,
+      "reviews": "12K reviews",
+      "warranty": "30-Day Guarantee"
     },
     {
       "id": "festive-lighting",
-      "categoryId": "festive-lights",
-      "category": "Lighting",
-      "categoryLabel": "Festive lights",
-      "name": "Installation per string",
-      "hindiName": "फेस्टिवल लाइट स्ट्रिंग फिटिंग",
-      "icon": "✨",
-      "image": "assets/images/lighting.jpg",
+      "active": true,
       "badge": "Seasonal Special",
-      "rating": 4.68,
-      "reviews": "7K reviews",
-      "mrp": "₹199",
-      "priceTag": "₹124 • 30 mins",
-      "priceNumber": 124,
-      "discountBadge": "38% OFF",
-      "warranty": "Service Guarantee",
+      "category": "Lighting",
+      "categoryId": "festive-lights",
+      "categoryLabel": "Festive lights",
       "description": "Installation and secure hanging of 1 festive light string (up to 12m) with clip anchors and weatherproofing.",
-      "pricingType": "standard",
+      "discountBadge": "38% OFF",
       "estimatedDuration": "30 mins",
+      "excluded": [
+        "Cost of light strings"
+      ],
       "highlights": [
         "1 string length can be upto 12m",
         "Installation charges for 1 light string",
         "Pay cash after illumination"
       ],
+      "hindiName": "फेस्टिवल लाइट स्ट्रिंग फिटिंग",
+      "icon": "✨",
+      "image": "assets/images/lighting.jpg",
       "included": [
         "Safe ladder work & nail/clip anchoring",
         "Connection to nearest wall outlet with fuse tap",
         "Water-resistant joint taping"
       ],
-      "excluded": [
-        "Cost of light strings"
-      ],
-      "active": true
+      "mrp": "₹199",
+      "name": "Installation per string",
+      "priceNumber": 124,
+      "priceTag": "₹124 • 30 mins",
+      "pricingType": "standard",
+      "rating": 4.68,
+      "reviews": "7K reviews",
+      "warranty": "Service Guarantee"
     },
     {
       "id": "ev-charger-services",
-      "categoryId": "ev-charger",
-      "category": "Wiring",
-      "categoryLabel": "EV charger installation",
-      "name": "2-Wheeler EV charger installation",
-      "hindiName": "2-व्हीलर EV चार्जर फिटिंग",
-      "icon": "⚡",
-      "image": "assets/images/wiring.jpg",
+      "active": true,
       "badge": "Eco Fast",
-      "rating": 4.85,
-      "reviews": "120 reviews",
-      "mrp": "₹999",
-      "priceTag": "₹749 • 60 mins",
-      "priceNumber": 749,
-      "discountBadge": "25% OFF",
-      "warranty": "30-Day Guarantee",
+      "category": "Wiring",
+      "categoryId": "ev-charger",
+      "categoryLabel": "EV charger installation",
       "description": "Dedicated 16A earthing line from main board to parking bay for electric scooter charging.",
-      "pricingType": "standard",
+      "discountBadge": "25% OFF",
       "estimatedDuration": "60 mins",
+      "excluded": [
+        "Extra wire over 5m (charged at actuals)"
+      ],
       "highlights": [
         "Dedicated 16A industrial plug & enclosure",
         "Rigorous earth resistance test for EV safety",
         "Pay cash after charge test"
       ],
+      "hindiName": "2-व्हीलर EV चार्जर फिटिंग",
+      "icon": "⚡",
+      "image": "assets/images/wiring.jpg",
       "included": [
         "Surface conduit pipe laying up to 5 metres",
         "Weatherproof outdoor plug enclosure",
         "Charging cycle test"
       ],
-      "excluded": [
-        "Extra wire over 5m (charged at actuals)"
-      ],
-      "active": true
+      "mrp": "₹999",
+      "name": "2-Wheeler EV charger installation",
+      "priceNumber": 749,
+      "priceTag": "₹749 • 60 mins",
+      "pricingType": "standard",
+      "rating": 4.85,
+      "reviews": "120 reviews",
+      "warranty": "30-Day Guarantee"
     },
     {
       "id": "other-electrical",
-      "categoryId": "consultation",
-      "category": "General",
-      "categoryLabel": "Book a consultation",
-      "name": "Doorstep consultation & inspection",
-      "hindiName": "घर पर इलेक्ट्रीशियन विज़िट व कोटेशन",
-      "icon": "👨‍🔧",
-      "image": "assets/images/electrician.jpg",
+      "active": true,
       "badge": "Universal",
-      "rating": 4.89,
-      "reviews": "2.1k bookings in Patna",
-      "mrp": "₹149",
-      "priceTag": "Visitation ₹99",
-      "priceNumber": 99,
-      "discountBadge": "Fee Waived > ₹499",
-      "warranty": "Satisfaction Guaranteed",
+      "category": "General",
+      "categoryId": "consultation",
+      "categoryLabel": "Book a consultation",
       "description": "Have a unique electrical problem or whole-home rewiring project? Book a verified senior electrician for doorstep assessment.",
-      "pricingType": "inspection_based",
+      "discountBadge": "Fee Waived > ₹499",
       "estimatedDuration": "30 mins",
+      "excluded": [
+        "Cost of actual electrical materials"
+      ],
       "highlights": [
         "Full electrical health check of house",
         "Transparent upfront estimate before work starts",
         "Visitation fee waived if job > ₹499"
       ],
+      "hindiName": "घर पर इलेक्ट्रीशियन विज़िट व कोटेशन",
+      "icon": "👨‍🔧",
+      "image": "assets/images/electrician.jpg",
       "included": [
         "Thorough multi-point inspection",
         "Detailed quote with transparent material costs",
         "Pay cash after inspection"
       ],
-      "excluded": [
-        "Cost of actual electrical materials"
-      ],
-      "active": true
+      "mrp": "₹149",
+      "name": "Doorstep consultation & inspection",
+      "priceNumber": 99,
+      "priceTag": "Visitation ₹99",
+      "pricingType": "inspection_based",
+      "rating": 4.89,
+      "reviews": "2.1k bookings in Patna",
+      "warranty": "Satisfaction Guaranteed"
     }
   ],
   "technicians": [
     {
       "id": "GB-TECH-01",
+      "active": true,
+      "avatar": "👷‍♂️",
+      "completedJobs": 142,
+      "isAvailable": true,
       "name": "Manoj Kumar",
       "phone": "+919876543210",
-      "rating": "4.92 ★ (142 repairs)",
-      "ratingScore": 4.92,
-      "completedJobs": 142,
-      "avatar": "👷‍♂️",
-      "vehicle": "Honda Activa (CG-07-XX-1234)",
       "primaryAreas": [
         "civic centre",
         "sector 6",
@@ -674,24 +675,24 @@
         "sector 4",
         "bhilai"
       ],
+      "rating": "4.92 ★ (142 repairs)",
+      "ratingScore": 4.92,
       "specialties": [
         "Fan installation",
         "Switchboard repair",
         "MCB wiring",
         "Short circuit triage"
       ],
-      "active": true,
-      "isAvailable": true
+      "vehicle": "Honda Activa (CG-07-XX-1234)"
     },
     {
       "id": "GB-TECH-02",
+      "active": true,
+      "avatar": "👨‍🔧",
+      "completedJobs": 210,
+      "isAvailable": true,
       "name": "Amit Verma",
       "phone": "+919876543211",
-      "rating": "4.87 ★ (210 repairs)",
-      "ratingScore": 4.87,
-      "completedJobs": 210,
-      "avatar": "👨‍🔧",
-      "vehicle": "Hero Splendor (CG-07-YY-5678)",
       "primaryAreas": [
         "nehru nagar",
         "smriti nagar",
@@ -699,24 +700,24 @@
         "priyadarshini",
         "bhilai"
       ],
+      "rating": "4.87 ★ (210 repairs)",
+      "ratingScore": 4.87,
       "specialties": [
         "Smart BLDC fans",
         "Inverter setup",
         "Chandelier lighting",
         "Submeter installation"
       ],
-      "active": true,
-      "isAvailable": true
+      "vehicle": "Hero Splendor (CG-07-YY-5678)"
     },
     {
       "id": "GB-TECH-03",
+      "active": true,
+      "avatar": "⚡",
+      "completedJobs": 320,
+      "isAvailable": true,
       "name": "Rajesh Sharma",
       "phone": "+919876543212",
-      "rating": "4.94 ★ (320 repairs)",
-      "ratingScore": 4.94,
-      "completedJobs": 320,
-      "avatar": "⚡",
-      "vehicle": "TVS Jupiter (CG-07-ZZ-9012)",
       "primaryAreas": [
         "supela",
         "power house",
@@ -724,23 +725,23 @@
         "radhika nagar",
         "bhilai"
       ],
+      "rating": "4.94 ★ (320 repairs)",
+      "ratingScore": 4.94,
       "specialties": [
         "Complete home rewiring",
         "Phase load balancing",
         "Heavy appliance lines"
       ],
-      "active": true,
-      "isAvailable": true
+      "vehicle": "TVS Jupiter (CG-07-ZZ-9012)"
     },
     {
       "id": "GB-TECH-04",
+      "active": true,
+      "avatar": "🔧",
+      "completedJobs": 98,
+      "isAvailable": true,
       "name": "Sunil Paswan",
       "phone": "+919876543213",
-      "rating": "4.82 ★ (98 repairs)",
-      "ratingScore": 4.82,
-      "completedJobs": 98,
-      "avatar": "🔧",
-      "vehicle": "Bajaj Pulsar (CG-07-AB-3456)",
       "primaryAreas": [
         "vaishali nagar",
         "milestone",
@@ -749,24 +750,24 @@
         "camp 2",
         "bhilai"
       ],
+      "rating": "4.82 ★ (98 repairs)",
+      "ratingScore": 4.82,
       "specialties": [
         "Motor starters",
         "Water pump wiring",
         "Socket replacement",
         "Geyser wiring"
       ],
-      "active": true,
-      "isAvailable": true
+      "vehicle": "Bajaj Pulsar (CG-07-AB-3456)"
     },
     {
       "id": "GB-TECH-05",
+      "active": true,
+      "avatar": "🧰",
+      "completedJobs": 165,
+      "isAvailable": true,
       "name": "Deepak Kumar",
       "phone": "+919876543214",
-      "rating": "4.89 ★ (165 repairs)",
-      "ratingScore": 4.89,
-      "completedJobs": 165,
-      "avatar": "🧰",
-      "vehicle": "Honda Shine (CG-07-CD-7890)",
       "primaryAreas": [
         "sector 9",
         "sector 10",
@@ -774,23 +775,23 @@
         "hospital sector",
         "bhilai"
       ],
+      "rating": "4.89 ★ (165 repairs)",
+      "ratingScore": 4.89,
       "specialties": [
         "Emergency outage",
         "Switchboard sparks",
         "Earthing installation"
       ],
-      "active": true,
-      "isAvailable": true
+      "vehicle": "Honda Shine (CG-07-CD-7890)"
     },
     {
       "id": "GB-TECH-06",
+      "active": true,
+      "avatar": "👷‍♂️",
+      "completedJobs": 410,
+      "isAvailable": true,
       "name": "Vikash Singh",
       "phone": "+919876543215",
-      "rating": "4.96 ★ (410 repairs)",
-      "ratingScore": 4.96,
-      "completedJobs": 410,
-      "avatar": "👷‍♂️",
-      "vehicle": "Hero Passion (CG-07-EF-2345)",
       "primaryAreas": [
         "risali",
         "ruabandha",
@@ -798,24 +799,183 @@
         "durg",
         "bhilai"
       ],
+      "rating": "4.96 ★ (410 repairs)",
+      "ratingScore": 4.96,
       "specialties": [
         "Commercial setup",
         "Distribution boxes",
         "3-phase panel boards"
       ],
-      "active": true,
-      "isAvailable": true
+      "vehicle": "Hero Passion (CG-07-EF-2345)"
     }
   ],
   "bookings": [
     {
-      "bookingId": "GB-2026-BHL-108",
-      "customerUid": "gb_user_919876543210",
-      "customerPhone": "+919876543210",
+      "bookingId": "GB-2026-BHL-458",
+      "addressSnapshot": {
+        "fullAddress": "Civic Centre, Bhilai"
+      },
+      "assignedAt": "2026-11-05T15:20:39.765Z",
+      "assignedTechnician": {
+        "id": "GB-TECH-01",
+        "name": "Manoj Kumar",
+        "phone": "+919876543210",
+        "rating": "4.92 ★ (142 repairs)",
+        "vehicle": "Honda Activa (CG-07-XX-1234)"
+      },
+      "bookingStatus": "ON_THE_WAY",
+      "cancellationReason": null,
+      "cancelledAt": null,
+      "completedAt": null,
+      "confirmedAt": "2026-11-05T15:20:29.754Z",
+      "createdAt": "2026-11-05T15:20:21.599Z",
       "customerName": "Ritesh Singh",
+      "customerNotes": "",
+      "customerPhone": "+919876543210",
+      "customerUid": "guest",
+      "estimatedEta": "30-45 mins",
+      "finalAmount": null,
+      "issueDescription": "",
+      "paymentMethod": "CASH_ON_DELIVERY",
+      "paymentStatus": "PENDING",
+      "preferredDate": "2026-11-05",
+      "preferredTimeSlot": "Today (30-45 mins)",
+      "pricingTypeSnapshot": "inspection_based",
+      "serviceId": "regular-fan-installation",
+      "serviceNameSnapshot": "Electrical Service Visit",
+      "statusHistory": [
+        {
+          "status": "PENDING_CONFIRMATION",
+          "timestamp": "2026-11-05T15:20:21.599Z",
+          "note": "Booking submitted. Bhilai operator confirmation call will arrive shortly."
+        },
+        {
+          "status": "CONFIRMED",
+          "timestamp": "2026-11-05T15:20:29.754Z",
+          "note": "Bhilai Operations verified booking with customer"
+        },
+        {
+          "status": "TECHNICIAN_ASSIGNED",
+          "timestamp": "2026-11-05T15:20:39.765Z",
+          "note": "Assigned verified Bhilai partner Manoj Kumar (4.92 ★ (142 repairs))"
+        },
+        {
+          "status": "ON_THE_WAY",
+          "timestamp": "2026-11-05T15:20:58.016Z",
+          "note": "Manoj Kumar has departed and is en route on Honda Activa (CG-07-XX-1234)"
+        }
+      ],
+      "technicianName": "Manoj Kumar",
+      "technicianPhone": "+919876543210",
+      "technicianRating": "4.92 ★ (142 repairs)",
+      "technicianVehicle": "Honda Activa (CG-07-XX-1234)",
+      "updatedAt": "2026-11-05T15:20:58.016Z"
+    },
+    {
+      "bookingId": "GB-2026-BHL-384",
+      "addressSnapshot": {
+        "fullAddress": {
+          "fullAddress": "Sector 6, Bhilai, Chhattisgarh"
+        }
+      },
+      "assignedAt": null,
+      "assignedTechnician": null,
+      "bookingStatus": "PENDING_CONFIRMATION",
+      "cancellationReason": null,
+      "cancelledAt": null,
+      "completedAt": null,
+      "confirmedAt": null,
+      "createdAt": "2026-11-05T15:18:18.360Z",
+      "customerName": "Ritesh Singh",
+      "customerNotes": "",
+      "customerPhone": "+919876543210",
+      "customerUid": "gb_google_g_test_sub_12345",
+      "estimatedEta": "30-45 mins",
+      "finalAmount": null,
+      "issueDescription": "",
+      "paymentMethod": "CASH_ON_DELIVERY",
+      "paymentStatus": "PENDING",
+      "preferredDate": "2026-11-05",
+      "preferredTimeSlot": "Today (30-45 mins)",
+      "pricingTypeSnapshot": "inspection_based",
+      "serviceId": "fan-installation",
+      "serviceNameSnapshot": "Electrical Service Visit",
+      "statusHistory": [
+        {
+          "status": "PENDING_CONFIRMATION",
+          "timestamp": "2026-11-05T15:18:18.360Z",
+          "note": "Booking submitted. Bhilai operator confirmation call will arrive shortly."
+        }
+      ],
+      "technicianName": "Vikash Singh",
+      "technicianPhone": "+919876543215",
+      "technicianRating": "4.96 ★ (410 repairs)",
+      "technicianVehicle": "Hero Passion (CG-07-EF-2345)",
+      "updatedAt": "2026-11-05T15:18:18.360Z"
+    },
+    {
+      "bookingId": "GB-2026-BHL-809",
+      "addressSnapshot": {
+        "fullAddress": "Civic Centre, Sector 6, Bhilai, Chhattisgarh"
+      },
+      "assignedAt": "2026-11-05T13:49:07.378Z",
+      "assignedTechnician": {
+        "id": "GB-TECH-01",
+        "name": "Manoj Kumar",
+        "phone": "+919876543210",
+        "rating": "4.92 ★ (142 repairs)",
+        "vehicle": "Honda Activa (CG-07-XX-1234)"
+      },
+      "bookingStatus": "ON_THE_WAY",
+      "cancellationReason": null,
+      "cancelledAt": null,
+      "completedAt": null,
+      "confirmedAt": "2026-11-05T13:48:39.409Z",
+      "createdAt": "2026-11-05T13:48:31.270Z",
+      "customerName": "Ritesh Singh (Test)",
+      "customerNotes": "",
+      "customerPhone": "+919876543210",
+      "customerUid": "guest",
+      "estimatedEta": "30-45 mins",
+      "finalAmount": null,
+      "issueDescription": "",
+      "paymentMethod": "CASH_ON_DELIVERY",
+      "paymentStatus": "PENDING",
+      "preferredDate": "2026-11-05",
+      "preferredTimeSlot": "Today, 30-45m",
+      "pricingTypeSnapshot": "inspection_based",
       "serviceId": "regular-fan-installation",
       "serviceNameSnapshot": "Regular Ceiling Fan Installation",
-      "pricingTypeSnapshot": "inspection_based",
+      "statusHistory": [
+        {
+          "status": "PENDING_CONFIRMATION",
+          "timestamp": "2026-11-05T13:48:31.270Z",
+          "note": "Booking submitted. Bhilai operator confirmation call will arrive shortly."
+        },
+        {
+          "status": "CONFIRMED",
+          "timestamp": "2026-11-05T13:48:39.409Z",
+          "note": "Bhilai Operations verified booking with customer"
+        },
+        {
+          "status": "TECHNICIAN_ASSIGNED",
+          "timestamp": "2026-11-05T13:49:07.378Z",
+          "note": "Assigned verified Bhilai partner Manoj Kumar (4.92 ★ (142 repairs))"
+        },
+        {
+          "status": "ON_THE_WAY",
+          "timestamp": "2026-11-05T13:49:44.747Z",
+          "note": "Manoj Kumar has departed and is en route on Honda Activa (CG-07-XX-1234)"
+        }
+      ],
+      "technicianName": "Manoj Kumar",
+      "technicianPhone": "+919876543210",
+      "technicianRating": "4.92 ★ (142 repairs)",
+      "technicianVehicle": "Honda Activa (CG-07-XX-1234)",
+      "updatedAt": "2026-11-05T13:49:44.747Z"
+    },
+    {
+      "bookingId": "GB-2026-BHL-108",
       "addressSnapshot": {
         "houseNo": "Plot 42",
         "street": "Near Civic Centre Park, Sector 6",
@@ -824,13 +984,7 @@
         "city": "Bhilai, Chhattisgarh",
         "fullAddress": "Plot 42, Near Civic Centre Park, Sector 6, Bhilai, Chhattisgarh - 490006"
       },
-      "preferredDate": "2026-11-05",
-      "preferredTimeSlot": "12:00 PM – 03:00 PM",
-      "issueDescription": "Fan speed regulation and blade balancing",
-      "customerNotes": "Please bring ladder",
-      "paymentMethod": "CASH_ON_DELIVERY",
-      "paymentStatus": "PENDING",
-      "bookingStatus": "TECHNICIAN_ASSIGNED",
+      "assignedAt": "2026-11-05T13:45:27.793Z",
       "assignedTechnician": {
         "id": "GB-TECH-01",
         "name": "Manoj Kumar",
@@ -838,45 +992,51 @@
         "rating": "4.92 ★ (142 repairs)",
         "vehicle": "Honda Activa (CG-07-XX-1234)"
       },
-      "technicianName": "Manoj Kumar",
-      "technicianPhone": "+919876543210",
-      "technicianRating": "4.92 ★ (142 repairs)",
-      "technicianVehicle": "Honda Activa (CG-07-XX-1234)",
+      "bookingStatus": "TECHNICIAN_ASSIGNED",
+      "cancellationReason": null,
+      "cancelledAt": null,
+      "completedAt": null,
+      "confirmedAt": "2026-11-05T13:45:27.793Z",
+      "createdAt": "2026-11-05T13:45:27.793Z",
+      "customerName": "Ritesh Singh",
+      "customerNotes": "Please bring ladder",
+      "customerPhone": "+919876543210",
+      "customerUid": "gb_user_919876543210",
       "estimatedEta": "30-45 mins",
       "finalAmount": null,
-      "createdAt": "2026-11-05T08:11:05.893Z",
-      "updatedAt": "2026-11-05T08:11:05.893Z",
-      "confirmedAt": "2026-11-05T08:11:05.893Z",
-      "assignedAt": "2026-11-05T08:11:05.893Z",
-      "completedAt": null,
-      "cancelledAt": null,
-      "cancellationReason": null,
+      "issueDescription": "Fan speed regulation and blade balancing",
+      "paymentMethod": "CASH_ON_DELIVERY",
+      "paymentStatus": "PENDING",
+      "preferredDate": "2026-11-05",
+      "preferredTimeSlot": "12:00 PM – 03:00 PM",
+      "pricingTypeSnapshot": "inspection_based",
+      "serviceId": "regular-fan-installation",
+      "serviceNameSnapshot": "Regular Ceiling Fan Installation",
       "statusHistory": [
         {
           "status": "PENDING_CONFIRMATION",
-          "timestamp": "2026-11-05T08:11:05.893Z",
+          "timestamp": "2026-11-05T13:45:27.793Z",
           "note": "Booking submitted by customer"
         },
         {
           "status": "CONFIRMED",
-          "timestamp": "2026-11-05T08:11:05.893Z",
+          "timestamp": "2026-11-05T13:45:27.793Z",
           "note": "Verified by Bhilai Operations"
         },
         {
           "status": "TECHNICIAN_ASSIGNED",
-          "timestamp": "2026-11-05T08:11:05.893Z",
+          "timestamp": "2026-11-05T13:45:27.793Z",
           "note": "Manoj Kumar assigned"
         }
-      ]
+      ],
+      "technicianName": "Manoj Kumar",
+      "technicianPhone": "+919876543210",
+      "technicianRating": "4.92 ★ (142 repairs)",
+      "technicianVehicle": "Honda Activa (CG-07-XX-1234)",
+      "updatedAt": "2026-11-05T13:45:27.793Z"
     },
     {
       "bookingId": "GB-2026-BHL-109",
-      "customerUid": "gb_user_919999999999",
-      "customerPhone": "+919999999999",
-      "customerName": "Pooja Verma",
-      "serviceId": "smart-bldc-fan",
-      "serviceNameSnapshot": "Smart/BLDC ceiling fan replace/install",
-      "pricingTypeSnapshot": "fixed_quote",
       "addressSnapshot": {
         "houseNo": "B-12, Surya Enclave",
         "street": "Nehru Nagar West",
@@ -885,34 +1045,51 @@
         "city": "Bhilai, Chhattisgarh",
         "fullAddress": "B-12, Surya Enclave, Nehru Nagar West, Bhilai - 490020"
       },
-      "preferredDate": "2026-11-05",
-      "preferredTimeSlot": "09:00 AM – 12:00 PM",
-      "issueDescription": "Installing 2 Atomberg smart fans with remote",
+      "assignedAt": "2026-11-05T14:12:32.503Z",
+      "assignedTechnician": {
+        "id": "GB-TECH-03",
+        "name": "Rajesh Sharma",
+        "phone": "+919876543212",
+        "rating": "4.94 ★ (320 repairs)",
+        "vehicle": "TVS Jupiter (CG-07-ZZ-9012)"
+      },
+      "bookingStatus": "TECHNICIAN_ASSIGNED",
+      "cancellationReason": null,
+      "cancelledAt": null,
+      "completedAt": null,
+      "confirmedAt": null,
+      "createdAt": "2026-11-05T13:45:27.793Z",
+      "customerName": "Pooja Verma",
       "customerNotes": "",
-      "paymentMethod": "CASH_ON_DELIVERY",
-      "paymentStatus": "PENDING",
-      "bookingStatus": "PENDING_CONFIRMATION",
-      "assignedTechnician": null,
-      "technicianName": "Amit Verma",
-      "technicianPhone": "+919876543211",
-      "technicianRating": "4.87 ★ (210 repairs)",
-      "technicianVehicle": "Hero Splendor (CG-07-YY-5678)",
+      "customerPhone": "+919999999999",
+      "customerUid": "gb_user_919999999999",
       "estimatedEta": "30-45 mins",
       "finalAmount": null,
-      "createdAt": "2026-11-05T08:11:05.893Z",
-      "updatedAt": "2026-11-05T08:11:05.893Z",
-      "confirmedAt": null,
-      "assignedAt": null,
-      "completedAt": null,
-      "cancelledAt": null,
-      "cancellationReason": null,
+      "issueDescription": "Installing 2 Atomberg smart fans with remote",
+      "paymentMethod": "CASH_ON_DELIVERY",
+      "paymentStatus": "PENDING",
+      "preferredDate": "2026-11-05",
+      "preferredTimeSlot": "09:00 AM – 12:00 PM",
+      "pricingTypeSnapshot": "fixed_quote",
+      "serviceId": "smart-bldc-fan",
+      "serviceNameSnapshot": "Smart/BLDC ceiling fan replace/install",
       "statusHistory": [
         {
           "status": "PENDING_CONFIRMATION",
-          "timestamp": "2026-11-05T08:11:05.893Z",
+          "timestamp": "2026-11-05T13:45:27.793Z",
           "note": "Booking received online"
+        },
+        {
+          "status": "TECHNICIAN_ASSIGNED",
+          "timestamp": "2026-11-05T14:12:32.503Z",
+          "note": "Admin assigned Rajesh Sharma (4.94 ★ (320 repairs))"
         }
-      ]
+      ],
+      "technicianName": "Rajesh Sharma",
+      "technicianPhone": "+919876543212",
+      "technicianRating": "4.94 ★ (320 repairs)",
+      "technicianVehicle": "TVS Jupiter (CG-07-ZZ-9012)",
+      "updatedAt": "2026-11-05T14:12:32.503Z"
     }
   ],
   "users": {
@@ -935,6 +1112,17 @@
       "role": "customer",
       "createdAt": "2026-11-05T11:49:52.177Z",
       "updatedAt": "2026-11-05T11:49:52.178Z"
+    },
+    "gb_google_g_test_sub_12345": {
+      "uid": "gb_google_g_test_sub_12345",
+      "authProvider": "google",
+      "email": "ritesh.singh.bhilai@gmail.com",
+      "displayName": "Ritesh Singh",
+      "photoURL": "",
+      "phoneNumber": "",
+      "role": "customer",
+      "createdAt": "2026-11-05T15:18:18.270Z",
+      "updatedAt": "2026-11-05T15:18:18.270Z"
     }
   },
   "emergencyTickets": []

@@ -63,9 +63,15 @@ async function handleApiRequest(req, res) {
     return false;
   }
 
+  // Ensure database sync from MongoDB Atlas is fully hydrated
+  await store.ensureInitialized();
+
   try {
     // 1. Health check
     if (pathname === '/api/health') {
+      const stats = await store.getAdminStats();
+      const services = await store.getServices(true);
+      const techs = await store.getTechnicians();
       sendJson(res, 200, {
         status: 'UP',
         service: 'GharBijli Bhilai Backend Engine',
@@ -73,9 +79,9 @@ async function handleApiRequest(req, res) {
         city: 'Bhilai, Chhattisgarh',
         database: 'MongoDB Atlas (Cluster: ghar-bijli)',
         timestamp: new Date().toISOString(),
-        totalBookings: store.data.bookings.length,
-        techniciansActive: store.data.technicians.filter(t => t.active).length,
-        totalServices: store.data.services.length
+        totalBookings: stats.totalBookings,
+        techniciansActive: techs.filter(t => t.active).length,
+        totalServices: services.length
       });
       return true;
     }
@@ -111,7 +117,7 @@ async function handleApiRequest(req, res) {
 
     // 2. Dynamic App Config & Server-Driven UI (100% Backend-Controlled)
     if (pathname === '/api/app-config' && method === 'GET') {
-      const config = store.getAppConfig();
+      const config = await store.getAppConfig();
       sendJson(res, 200, { success: true, config });
       return true;
     }
@@ -119,7 +125,7 @@ async function handleApiRequest(req, res) {
     // 3. Admin: Update App Config, Banners, Promos, Hero
     if (pathname === '/api/admin/app-config' && (method === 'PATCH' || method === 'POST')) {
       const body = await parseJsonBody(req);
-      const updated = store.updateAppConfig(body);
+      const updated = await store.updateAppConfig(body);
       sendJson(res, 200, { success: true, config: updated });
       return true;
     }
@@ -127,7 +133,7 @@ async function handleApiRequest(req, res) {
     // 4. Services Catalog: List
     if (pathname === '/api/services' && method === 'GET') {
       const all = query.all === 'true' || query.all === '1';
-      const services = store.getServices(all);
+      const services = await store.getServices(all);
       sendJson(res, 200, { success: true, count: services.length, services });
       return true;
     }
@@ -136,7 +142,7 @@ async function handleApiRequest(req, res) {
     if (pathname === '/api/admin/services' && method === 'POST') {
       const body = await parseJsonBody(req);
       try {
-        const added = store.addService(body);
+        const added = await store.addService(body);
         sendJson(res, 201, { success: true, service: added });
       } catch (err) {
         sendJson(res, 400, { error: err.message });
@@ -151,7 +157,7 @@ async function handleApiRequest(req, res) {
       if (method === 'PATCH' || method === 'POST' || method === 'PUT') {
         const body = await parseJsonBody(req);
         try {
-          const updated = store.updateService(serviceId, body);
+          const updated = await store.updateService(serviceId, body);
           sendJson(res, 200, { success: true, service: updated });
         } catch (err) {
           sendJson(res, 400, { error: err.message });
@@ -160,7 +166,7 @@ async function handleApiRequest(req, res) {
       }
       if (method === 'DELETE') {
         try {
-          const removed = store.deleteService(serviceId);
+          const removed = await store.deleteService(serviceId);
           sendJson(res, 200, { success: true, message: 'Service removed', service: removed });
         } catch (err) {
           sendJson(res, 400, { error: err.message });
@@ -171,7 +177,7 @@ async function handleApiRequest(req, res) {
 
     // 7. Categories: List
     if (pathname === '/api/categories' && method === 'GET') {
-      const categories = store.getCategories();
+      const categories = await store.getCategories();
       sendJson(res, 200, { success: true, count: categories.length, categories });
       return true;
     }
@@ -182,7 +188,7 @@ async function handleApiRequest(req, res) {
       const catId = adminCatMatch[1];
       const body = await parseJsonBody(req);
       try {
-        const updated = store.updateCategory(catId, body);
+        const updated = await store.updateCategory(catId, body);
         sendJson(res, 200, { success: true, category: updated });
       } catch (err) {
         sendJson(res, 400, { error: err.message });
@@ -221,7 +227,7 @@ async function handleApiRequest(req, res) {
         sendJson(res, 400, { error: 'User uid is required' });
         return true;
       }
-      const updated = store.updateUser(body.uid, {
+      const updated = await store.updateUser(body.uid, {
         displayName: body.displayName,
         defaultAddress: body.defaultAddress
       });
@@ -237,7 +243,7 @@ async function handleApiRequest(req, res) {
         return true;
       }
       try {
-        const user = store.upsertGoogleUser({
+        const user = await store.upsertGoogleUser({
           email: body.email,
           name: body.name || body.displayName,
           picture: body.picture || body.photoURL,
@@ -258,7 +264,7 @@ async function handleApiRequest(req, res) {
         return true;
       }
       try {
-        const user = store.upsertPhoneDirect({
+        const user = await store.upsertPhoneDirect({
           phone: body.phone,
           name: body.name,
           address: body.address
@@ -272,17 +278,18 @@ async function handleApiRequest(req, res) {
 
     // 11d. Admin: List Registered Users / Customers
     if (pathname === '/api/admin/users' && method === 'GET') {
-      const users = store.getAllUsers();
+      const users = await store.getAllUsers();
       sendJson(res, 200, { success: true, total: users.length, users });
       return true;
     }
 
     // 12. Technicians Directory
     if (pathname === '/api/technicians' && method === 'GET') {
+      const technicians = await store.getTechnicians();
       sendJson(res, 200, {
         success: true,
-        count: store.data.technicians.length,
-        technicians: store.getTechnicians()
+        count: technicians.length,
+        technicians: technicians
       });
       return true;
     }
@@ -291,7 +298,7 @@ async function handleApiRequest(req, res) {
     if (pathname === '/api/admin/technicians' && method === 'POST') {
       const body = await parseJsonBody(req);
       try {
-        const created = store.addTechnician(body);
+        const created = await store.addTechnician(body);
         sendJson(res, 201, { success: true, technician: created });
       } catch (err) {
         sendJson(res, 400, { error: err.message });
@@ -305,7 +312,7 @@ async function handleApiRequest(req, res) {
       const techId = adminTechMatch[1];
       const body = await parseJsonBody(req);
       try {
-        const updated = store.updateTechnician(techId, body);
+        const updated = await store.updateTechnician(techId, body);
         sendJson(res, 200, { success: true, technician: updated });
       } catch (err) {
         sendJson(res, 400, { error: err.message });
@@ -316,7 +323,7 @@ async function handleApiRequest(req, res) {
     if (adminTechMatch && method === 'DELETE') {
       const techId = adminTechMatch[1];
       try {
-        const deleted = store.deleteTechnician(techId);
+        const deleted = await store.deleteTechnician(techId);
         sendJson(res, 200, { success: true, technician: deleted });
       } catch (err) {
         sendJson(res, 400, { error: err.message });
@@ -326,7 +333,7 @@ async function handleApiRequest(req, res) {
 
     // 14. Bookings: List
     if (pathname === '/api/bookings' && method === 'GET') {
-      const bookings = store.getBookings({
+      const bookings = await store.getBookings({
         customerUid: query.customerUid,
         customerPhone: query.customerPhone,
         bookingStatus: query.status
@@ -342,34 +349,36 @@ async function handleApiRequest(req, res) {
         sendJson(res, 400, { error: 'Service ID is required' });
         return true;
       }
-      const booking = store.createBooking(body);
+      const booking = await store.createBooking(body);
       sendJson(res, 201, { success: true, booking });
       return true;
     }
 
     // 16. Admin: Overview KPI Stats
     if (pathname === '/api/admin/stats' && method === 'GET') {
-      const stats = store.getAdminStats();
+      const stats = await store.getAdminStats();
       sendJson(res, 200, { success: true, stats });
       return true;
     }
 
     // 17. Admin: All Bookings Feed
     if (pathname === '/api/admin/bookings' && method === 'GET') {
+      const bookings = await store.getBookings({});
       sendJson(res, 200, {
         success: true,
-        count: store.data.bookings.length,
-        bookings: store.data.bookings
+        count: bookings.length,
+        bookings: bookings
       });
       return true;
     }
 
     // 18. Admin: All Emergencies
     if (pathname === '/api/admin/emergencies' && method === 'GET') {
+      const emergencies = store.getEmergencyTickets ? await store.getEmergencyTickets() : (store.data.emergencyTickets || []);
       sendJson(res, 200, {
         success: true,
-        count: store.data.emergencyTickets.length,
-        emergencies: store.data.emergencyTickets
+        count: emergencies.length,
+        emergencies: emergencies
       });
       return true;
     }
@@ -389,7 +398,7 @@ async function handleApiRequest(req, res) {
 
       // GET /api/bookings/:id
       if (!subAction && method === 'GET') {
-        const booking = store.getBookingById(bookingId);
+        const booking = await store.getBookingById(bookingId);
         if (!booking) {
           sendJson(res, 404, { error: 'Booking not found' });
           return true;
@@ -406,7 +415,7 @@ async function handleApiRequest(req, res) {
           return true;
         }
         try {
-          const assigned = store.assignTechnician(bookingId, body.technicianId);
+          const assigned = await store.assignTechnician(bookingId, body.technicianId);
           sendJson(res, 200, { success: true, booking: assigned });
         } catch (err) {
           sendJson(res, 400, { error: err.message });
@@ -418,7 +427,7 @@ async function handleApiRequest(req, res) {
       if (subAction === 'cancel' && (method === 'PATCH' || method === 'POST')) {
         const body = await parseJsonBody(req);
         try {
-          const cancelled = store.cancelBooking(bookingId, body.reason, body.customerUid);
+          const cancelled = await store.cancelBooking(bookingId, body.reason, body.customerUid);
           sendJson(res, 200, { success: true, booking: cancelled });
         } catch (err) {
           sendJson(res, 400, { error: err.message });
@@ -433,7 +442,7 @@ async function handleApiRequest(req, res) {
           sendJson(res, 400, { error: 'Status is required' });
           return true;
         }
-        const updated = store.updateBookingStatus(
+        const updated = await store.updateBookingStatus(
           bookingId,
           body.status,
           body.note || '',
@@ -451,7 +460,7 @@ async function handleApiRequest(req, res) {
       if (subAction === 'review' && method === 'POST') {
         const body = await parseJsonBody(req);
         try {
-          const reviewed = store.submitReview(bookingId, body.rating, body.feedback);
+          const reviewed = await store.submitReview(bookingId, body.rating, body.feedback);
           sendJson(res, 200, { success: true, booking: reviewed });
         } catch (err) {
           sendJson(res, 400, { error: err.message });
@@ -463,7 +472,7 @@ async function handleApiRequest(req, res) {
     // 21. Emergency SOS (Bhilai)
     if (pathname === '/api/emergency' && method === 'POST') {
       const body = await parseJsonBody(req);
-      const ticket = store.createEmergencyTicket(body);
+      const ticket = await store.createEmergencyTicket(body);
       sendJson(res, 201, {
         success: true,
         message: 'Emergency Bhilai Electrician dispatched on high-priority SLA',

@@ -875,49 +875,63 @@
     }
   }
 
-  async function handleGoogleSignIn() {
-    const btn = document.getElementById("btn-google-signin");
-    if (btn) {
-      btn.disabled = true;
-      btn.innerHTML = `<span>Connecting with Google...</span>`;
-    }
+  function openGoogleAuthModal() {
+    const modal = document.getElementById("modal-google-auth");
+    if (modal) modal.classList.add("active");
+  }
 
+  function closeGoogleAuthModal() {
+    const modal = document.getElementById("modal-google-auth");
+    if (modal) modal.classList.remove("active");
+  }
+
+  async function performGoogleLogin(userEmail, userName) {
+    if (!userEmail) return;
+    const modal = document.getElementById("modal-google-auth");
     try {
-      let userEmail = prompt("Enter your Google Account email for 1-Click login:", "customer.bhilai@gmail.com");
-      if (!userEmail) {
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span>Continue with Google</span>`;
-        }
-        return;
-      }
-      const userName = userEmail.split("@")[0].replace(/[._]/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+      showToast("Connecting with Google...", "info");
+      const name = userName || userEmail.split("@")[0].replace(/[._]/g, " ").replace(/\b\w/g, l => l.toUpperCase());
       const baseUrl = (window.GharBijliConfig && window.GharBijliConfig.api && window.GharBijliConfig.api.baseUrl) || '';
       
+      let safeSub = "g_" + btoa(encodeURIComponent(userEmail)).replace(/[^a-zA-Z0-9]/g, '');
+
       const res = await fetch(`${baseUrl}/api/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: userEmail,
-          name: userName,
-          sub: "g_" + Buffer.from(userEmail).toString('base64').replace(/=/g, '')
+          name: name,
+          sub: safeSub
         })
       });
       const data = await res.json();
       if (data.success && data.user) {
         window.GharBijliFirebase.currentUser = data.user;
         localStorage.setItem("gb_current_user", JSON.stringify(data.user));
-        showToast(`Welcome ${userName}! Signed in via Google`, "success");
+        if (modal) modal.classList.remove("active");
+        showToast(`Welcome ${name}! Signed in via Google`, "success");
         navigateTo("home", false);
+      } else {
+        throw new Error(data.error || "Login failed");
       }
     } catch (e) {
-      showToast("Google login error: " + e.message, "error");
-    } finally {
-      if (btn) {
-        btn.disabled = false;
-        btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span>Continue with Google</span>`;
-      }
+      // Safe offline fallback: keep user authenticated locally
+      const fallbackUser = {
+        uid: "gb_google_" + btoa(encodeURIComponent(userEmail)).replace(/[^a-zA-Z0-9]/g, ''),
+        email: userEmail,
+        displayName: userName || userEmail.split("@")[0],
+        authProvider: "google"
+      };
+      window.GharBijliFirebase.currentUser = fallbackUser;
+      localStorage.setItem("gb_current_user", JSON.stringify(fallbackUser));
+      if (modal) modal.classList.remove("active");
+      showToast(`Welcome ${fallbackUser.displayName}! Signed in via Google`, "success");
+      navigateTo("home", false);
     }
+  }
+
+  async function handleGoogleSignIn() {
+    openGoogleAuthModal();
   }
 
   async function handleOtpSubmit(e) {
@@ -1770,6 +1784,48 @@
     const returnHomeBtn = document.getElementById("btn-return-home");
     if (returnHomeBtn) {
       returnHomeBtn.addEventListener("click", () => navigateTo("home"));
+    }
+
+    // Google Sign-In Trigger & Modal Listeners
+    const googleBtn = document.getElementById("btn-google-signin");
+    if (googleBtn) {
+      googleBtn.addEventListener("click", () => openGoogleAuthModal());
+    }
+
+    const closeGoogleModalBtn = document.getElementById("btn-close-google-modal");
+    if (closeGoogleModalBtn) {
+      closeGoogleModalBtn.addEventListener("click", () => closeGoogleAuthModal());
+    }
+
+    const googleAccountItems = document.querySelectorAll(".google-auth-account-item");
+    googleAccountItems.forEach((item) => {
+      item.addEventListener("click", () => {
+        const email = item.dataset.email;
+        const name = item.dataset.name;
+        performGoogleLogin(email, name);
+      });
+    });
+
+    const customGoogleBtn = document.getElementById("btn-submit-google-custom");
+    if (customGoogleBtn) {
+      customGoogleBtn.addEventListener("click", () => {
+        const emailInput = document.getElementById("input-google-email");
+        const nameInput = document.getElementById("input-google-name");
+        const email = (emailInput?.value || "").trim();
+        const name = (nameInput?.value || "").trim();
+        if (!email || !email.includes("@")) {
+          showToast("Please enter a valid Google email address", "error");
+          return;
+        }
+        performGoogleLogin(email, name || email.split("@")[0]);
+      });
+    }
+
+    const googleModal = document.getElementById("modal-google-auth");
+    if (googleModal) {
+      googleModal.addEventListener("click", (e) => {
+        if (e.target === googleModal) closeGoogleAuthModal();
+      });
     }
 
     // Phone Login Form

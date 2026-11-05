@@ -167,7 +167,17 @@ class BackendStore {
     };
     this.activeSimulators = new Map();
     this.load();
-    this.initMongoSync();
+    this.initPromise = this.initMongoSync();
+  }
+
+  async ensureInitialized() {
+    if (this.initPromise) {
+      try {
+        await this.initPromise;
+      } catch (err) {
+        console.warn('[BackendStore] ensureInitialized warning:', err.message);
+      }
+    }
   }
 
   async initMongoSync() {
@@ -330,7 +340,7 @@ class BackendStore {
     this.save();
   }
 
-  save() {
+  saveLocal() {
     try {
       const dir = path.dirname(DB_PATH);
       if (!fs.existsSync(dir)) {
@@ -346,49 +356,92 @@ class BackendStore {
         emergencyTickets: this.data.emergencyTickets
       }, null, 2), 'utf8');
     } catch (e) {
-      console.error("[BackendStore] Failed to write database:", e.message);
+      // Local write failed (e.g. read-only fs on serverless without /tmp)
     }
+  }
 
-    // Mirror to MongoDB Atlas asynchronously
-    if (mongoDb && typeof mongoDb.syncAllToMongo === 'function') {
-      mongoDb.syncAllToMongo(this.data).catch(e => {
-        console.warn("[BackendStore] MongoDB async sync error:", e.message);
-      });
-    }
+  async save() {
+    this.saveLocal();
   }
 
   // --- DYNAMIC APP CONFIG & CMS ---
-  getAppConfig() {
+  async getAppConfig() {
+    try {
+      const db = await mongoDb.getDb();
+      if (db) {
+        const doc = await db.collection('app_config').findOne({ _id: 'global_config' });
+        if (doc) {
+          const { _id, ...clean } = doc;
+          this.data.appConfig = clean;
+        }
+      }
+    } catch (err) {
+      console.warn('[BackendStore] getAppConfig fallback:', err.message);
+    }
     return {
       ...this.data.appConfig,
-      categories: this.data.categories.filter(c => c.active),
-      services: this.data.services.filter(s => s.active)
+      categories: (this.data.categories || []).filter(c => c.active !== false),
+      services: (this.data.services || []).filter(s => s.active !== false)
     };
   }
 
-  updateAppConfig(updates) {
+  async updateAppConfig(updates) {
     if (updates.app) Object.assign(this.data.appConfig.app, updates.app);
     if (updates.hero) Object.assign(this.data.appConfig.hero, updates.hero);
     if (updates.visitationPromo) Object.assign(this.data.appConfig.visitationPromo, updates.visitationPromo);
     if (updates.defaultArea) this.data.appConfig.defaultArea = updates.defaultArea;
     if (updates.localities) this.data.appConfig.localities = updates.localities;
-    this.save();
+
+    if (mongoDb && typeof mongoDb.syncAppConfigToMongo === 'function') {
+      await mongoDb.syncAppConfigToMongo(this.data.appConfig);
+    }
+    this.saveLocal();
     return this.data.appConfig;
   }
 
   // --- SERVICES & PRICING CONTROLLER ---
-  getServices(all = false) {
+  async getServices(all = false) {
+    try {
+      const db = await mongoDb.getDb();
+      if (db) {
+        const query = all ? {} : { active: { $ne: false } };
+        const services = await db.collection('services').find(query).toArray();
+        if (services && services.length) {
+          const cleaned = services.map(s => { const { _id, ...r } = s; return r; });
+          this.data.services = cleaned;
+          return cleaned;
+        }
+      }
+    } catch (err) {
+      console.warn('[BackendStore] getServices fallback:', err.message);
+    }
     if (all) return this.data.services;
-    return this.data.services.filter(s => s.active);
+    return this.data.services.filter(s => s.active !== false);
   }
 
-  getServiceById(id) {
+  async getServiceById(id) {
+    try {
+      const db = await mongoDb.getDb();
+      if (db) {
+        const s = await db.collection('services').findOne({ id });
+        if (s) {
+          const { _id, ...clean } = s;
+          return clean;
+        }
+      }
+    } catch (err) {}
     return this.data.services.find(s => s.id === id) || null;
   }
 
-  updateService(id, updates) {
-    const service = this.getServiceById(id);
-    if (!service) throw new Error("Service not found");
+  async updateService(id, updates) {
+    let service = this.data.services.find(s => s.id === id);
+    if (!service) {
+      try {
+        const db = await mongoDb.getDb();
+        if (db) service = await db.collection('services').findOne({ id });
+      } catch (e) {}
+    }
+    if (!service) throw new Error("Service not found: " + id);
 
     if (updates.priceNumber !== undefined) {
       service.priceNumber = Number(updates.priceNumber);
@@ -402,15 +455,22 @@ class BackendStore {
     if (updates.mrp !== undefined) service.mrp = updates.mrp;
     if (updates.discountBadge !== undefined) service.discountBadge = updates.discountBadge;
 
-    this.save();
+    const existingIdx = this.data.services.findIndex(s => s.id === id);
+    if (existingIdx >= 0) this.data.services[existingIdx] = service;
+    else this.data.services.push(service);
+
+    if (mongoDb && typeof mongoDb.syncServiceToMongo === 'function') {
+      await mongoDb.syncServiceToMongo(service);
+    }
+    this.saveLocal();
     return service;
   }
 
-  addService(payload) {
+  async addService(payload) {
     if (!payload.id || !payload.name) {
       throw new Error("Service ID and Name are required");
     }
-    if (this.getServiceById(payload.id)) {
+    if (await this.getServiceById(payload.id)) {
       throw new Error("Service ID already exists");
     }
 
@@ -441,39 +501,77 @@ class BackendStore {
     };
 
     this.data.services.push(newService);
-    this.save();
+    if (mongoDb && typeof mongoDb.syncServiceToMongo === 'function') {
+      await mongoDb.syncServiceToMongo(newService);
+    }
+    this.saveLocal();
     return newService;
   }
 
-  deleteService(id) {
+  async deleteService(id) {
     const idx = this.data.services.findIndex(s => s.id === id);
-    if (idx === -1) throw new Error("Service not found");
-    const removed = this.data.services.splice(idx, 1)[0];
-    this.save();
-    return removed;
+    let removed = null;
+    if (idx !== -1) removed = this.data.services.splice(idx, 1)[0];
+    if (mongoDb && typeof mongoDb.deleteServiceFromMongo === 'function') {
+      await mongoDb.deleteServiceFromMongo(id);
+    }
+    this.saveLocal();
+    return removed || { id };
   }
 
   // --- CATEGORIES CONTROLLER ---
-  getCategories() {
+  async getCategories() {
+    try {
+      const db = await mongoDb.getDb();
+      if (db) {
+        const cats = await db.collection('categories').find({}).sort({ order: 1 }).toArray();
+        if (cats && cats.length) {
+          this.data.categories = cats.map(c => { const { _id, ...r } = c; return r; });
+          return this.data.categories;
+        }
+      }
+    } catch (e) {}
     return this.data.categories;
   }
 
-  updateCategory(id, updates) {
+  async updateCategory(id, updates) {
     const cat = this.data.categories.find(c => c.id === id);
     if (!cat) throw new Error("Category not found");
     Object.assign(cat, updates);
-    this.save();
+    if (mongoDb && typeof mongoDb.syncCategoriesToMongo === 'function') {
+      await mongoDb.syncCategoriesToMongo([cat]);
+    }
+    this.saveLocal();
     return cat;
   }
 
   // --- BHILAI TECHNICIANS ---
-  getTechnicians() {
+  async getTechnicians() {
+    try {
+      const db = await mongoDb.getDb();
+      if (db) {
+        const techs = await db.collection('technicians').find({}).toArray();
+        if (techs && techs.length) {
+          this.data.technicians = techs.map(t => { const { _id, ...r } = t; return r; });
+          return this.data.technicians;
+        }
+      }
+    } catch (err) {
+      console.warn('[BackendStore] getTechnicians fallback:', err.message);
+    }
     return this.data.technicians;
   }
 
-  updateTechnician(id, updates) {
-    const tech = this.data.technicians.find(t => t.id === id);
-    if (!tech) throw new Error("Technician not found");
+  async updateTechnician(id, updates) {
+    let tech = this.data.technicians.find(t => t.id === id);
+    if (!tech) {
+      try {
+        const db = await mongoDb.getDb();
+        if (db) tech = await db.collection('technicians').findOne({ id });
+      } catch (e) {}
+    }
+    if (!tech) throw new Error("Technician not found: " + id);
+
     if (updates.name !== undefined) tech.name = updates.name;
     if (updates.phone !== undefined) tech.phone = updates.phone;
     if (updates.vehicle !== undefined) tech.vehicle = updates.vehicle;
@@ -493,11 +591,18 @@ class BackendStore {
     if (updates.active !== undefined) tech.active = Boolean(updates.active);
     if (updates.avatar !== undefined) tech.avatar = updates.avatar;
 
-    this.save();
+    const existingIdx = this.data.technicians.findIndex(t => t.id === id);
+    if (existingIdx >= 0) this.data.technicians[existingIdx] = tech;
+    else this.data.technicians.push(tech);
+
+    if (mongoDb && typeof mongoDb.syncTechnicianToMongo === 'function') {
+      await mongoDb.syncTechnicianToMongo(tech);
+    }
+    this.saveLocal();
     return tech;
   }
 
-  addTechnician(payload) {
+  async addTechnician(payload) {
     if (!payload.name || !payload.phone) {
       throw new Error("Name and phone number are required");
     }
@@ -514,19 +619,26 @@ class BackendStore {
       primaryAreas: Array.isArray(payload.primaryAreas) ? payload.primaryAreas : (payload.primaryAreas ? payload.primaryAreas.split(',').map(s=>s.trim().toLowerCase()) : ["bhilai"]),
       specialties: Array.isArray(payload.specialties) ? payload.specialties : (payload.specialties ? payload.specialties.split(',').map(s=>s.trim()) : ["General Electrical"]),
       active: payload.active !== undefined ? Boolean(payload.active) : true,
-      isAvailable: true
+      isAvailable: true,
+      createdAt: new Date().toISOString()
     };
     this.data.technicians.push(newTech);
-    this.save();
+    if (mongoDb && typeof mongoDb.syncTechnicianToMongo === 'function') {
+      await mongoDb.syncTechnicianToMongo(newTech);
+    }
+    this.saveLocal();
     return newTech;
   }
 
-  deleteTechnician(id) {
+  async deleteTechnician(id) {
     const idx = this.data.technicians.findIndex(t => t.id === id);
-    if (idx === -1) throw new Error("Technician not found");
-    const removed = this.data.technicians.splice(idx, 1)[0];
-    this.save();
-    return removed;
+    let removed = null;
+    if (idx !== -1) removed = this.data.technicians.splice(idx, 1)[0];
+    if (mongoDb && typeof mongoDb.deleteTechnicianFromMongo === 'function') {
+      await mongoDb.deleteTechnicianFromMongo(id);
+    }
+    this.saveLocal();
+    return removed || { id };
   }
 
   matchTechnician(addressText, preferredArea = "") {
@@ -551,7 +663,7 @@ class BackendStore {
   }
 
   // --- BOOKINGS ENGINE ---
-  createBooking(payload) {
+  async createBooking(payload) {
     const now = new Date();
     const nowIso = now.toISOString();
     const bookingId = payload.bookingId || ("GB-2026-BHL-" + Math.floor(100 + Math.random() * 900));
@@ -599,7 +711,10 @@ class BackendStore {
     };
 
     this.data.bookings.unshift(booking);
-    this.save();
+    if (mongoDb && typeof mongoDb.syncBookingToMongo === 'function') {
+      await mongoDb.syncBookingToMongo(booking);
+    }
+    await this.save();
 
     this.startAutoDispatchSimulator(booking.bookingId, matchedTech);
     return booking;
@@ -640,7 +755,25 @@ class BackendStore {
     this.activeSimulators.set(bookingId, t1);
   }
 
-  getBookings(filter = {}) {
+  async getBookings(filter = {}) {
+    try {
+      const db = await mongoDb.getDb();
+      if (db) {
+        const q = {};
+        if (filter.customerUid) q.customerUid = filter.customerUid;
+        if (filter.customerPhone) {
+          const cleanPhone = filter.customerPhone.replace(/\D/g, '').slice(-10);
+          q.customerPhone = { $regex: cleanPhone };
+        }
+        if (filter.bookingStatus) q.bookingStatus = filter.bookingStatus;
+        const bookings = await db.collection('bookings').find(q).sort({ createdAt: -1 }).toArray();
+        if (bookings && bookings.length) {
+          return bookings.map(b => { const { _id, ...r } = b; return r; });
+        }
+      }
+    } catch (err) {
+      console.warn('[BackendStore] getBookings fallback:', err.message);
+    }
     let result = this.data.bookings;
     if (filter.customerUid) {
       result = result.filter(b => b.customerUid === filter.customerUid);
@@ -658,12 +791,22 @@ class BackendStore {
     return result;
   }
 
-  getBookingById(bookingId) {
+  async getBookingById(bookingId) {
+    try {
+      const db = await mongoDb.getDb();
+      if (db) {
+        const b = await db.collection('bookings').findOne({ bookingId });
+        if (b) {
+          const { _id, ...clean } = b;
+          return clean;
+        }
+      }
+    } catch (err) {}
     return this.data.bookings.find(b => b.bookingId === bookingId) || null;
   }
 
-  updateBookingStatus(bookingId, newStatus, note = "", extraFields = {}) {
-    const booking = this.getBookingById(bookingId);
+  async updateBookingStatus(bookingId, newStatus, note = "", extraFields = {}) {
+    let booking = await this.getBookingById(bookingId);
     if (!booking) return null;
 
     if (newStatus === "CANCELLED") {
@@ -687,27 +830,41 @@ class BackendStore {
 
     Object.assign(booking, extraFields);
 
+    if (!booking.statusHistory) booking.statusHistory = [];
     booking.statusHistory.push({
       status: newStatus,
       timestamp: nowIso,
       note: note || `Status progressed to ${newStatus}`
     });
 
-    this.save();
+    const existingIdx = this.data.bookings.findIndex(b => b.bookingId === bookingId);
+    if (existingIdx >= 0) this.data.bookings[existingIdx] = booking;
+    else this.data.bookings.unshift(booking);
+
+    if (mongoDb && typeof mongoDb.syncBookingToMongo === 'function') {
+      await mongoDb.syncBookingToMongo(booking);
+    }
+    this.saveLocal();
     return booking;
   }
 
-  assignTechnician(bookingId, technicianId) {
-    const booking = this.getBookingById(bookingId);
+  async assignTechnician(bookingId, technicianId) {
+    const booking = await this.getBookingById(bookingId);
     if (!booking) throw new Error("Booking not found");
 
-    const tech = this.data.technicians.find(t => t.id === technicianId);
-    if (!tech) throw new Error("Technician not found");
+    let tech = this.data.technicians.find(t => t.id === technicianId);
+    if (!tech) {
+      try {
+        const db = await mongoDb.getDb();
+        if (db) tech = await db.collection('technicians').findOne({ id: technicianId });
+      } catch (e) {}
+    }
+    if (!tech) throw new Error("Technician not found: " + technicianId);
 
     this.stopSimulator(bookingId);
 
     const nowIso = new Date().toISOString();
-    return this.updateBookingStatus(bookingId, "TECHNICIAN_ASSIGNED", `Admin assigned ${tech.name} (${tech.rating})`, {
+    return await this.updateBookingStatus(bookingId, "TECHNICIAN_ASSIGNED", `Admin assigned ${tech.name} (${tech.rating})`, {
       assignedTechnician: {
         id: tech.id,
         name: tech.name,
@@ -723,8 +880,8 @@ class BackendStore {
     });
   }
 
-  cancelBooking(bookingId, reason, customerUid) {
-    const booking = this.getBookingById(bookingId);
+  async cancelBooking(bookingId, reason, customerUid) {
+    const booking = await this.getBookingById(bookingId);
     if (!booking) throw new Error("Booking not found");
 
     if (customerUid && booking.customerUid !== customerUid && booking.customerUid !== "guest") {
@@ -736,26 +893,26 @@ class BackendStore {
       throw new Error("Cannot cancel booking once partner is dispatched or work is in progress. Please call GharBijli Bhilai support.");
     }
 
-    return this.updateBookingStatus(bookingId, "CANCELLED", `Customer cancellation: ${reason || 'Customer request'}`, {
+    return await this.updateBookingStatus(bookingId, "CANCELLED", `Customer cancellation: ${reason || 'Customer request'}`, {
       cancellationReason: reason || "Customer request"
     });
   }
 
-  submitReview(bookingId, rating, feedback) {
-    const booking = this.getBookingById(bookingId);
+  async submitReview(bookingId, rating, feedback) {
+    const booking = await this.getBookingById(bookingId);
     if (!booking) throw new Error("Booking not found");
 
-    booking.review = {
-      rating: Number(rating) || 5,
-      feedback: feedback || "",
-      submittedAt: new Date().toISOString()
-    };
-    this.save();
-    return booking;
+    return await this.updateBookingStatus(bookingId, "COMPLETED", `Customer rated ${rating} stars: ${feedback}`, {
+      review: {
+        rating: Number(rating) || 5,
+        feedback: feedback || "",
+        submittedAt: new Date().toISOString()
+      }
+    });
   }
 
   // --- EMERGENCY SOS DISPATCH (BHILAI) ---
-  createEmergencyTicket(payload) {
+  async createEmergencyTicket(payload) {
     const nowIso = new Date().toISOString();
     const ticketId = "GB-SOS-" + Math.floor(1000 + Math.random() * 9000);
     const tech = this.matchTechnician(payload.address || "Bhilai", payload.area || "");
@@ -780,11 +937,40 @@ class BackendStore {
     };
 
     this.data.emergencyTickets.unshift(ticket);
-    this.save();
+    if (mongoDb && typeof mongoDb.syncEmergencyTicketToMongo === 'function') {
+      await mongoDb.syncEmergencyTicketToMongo(ticket);
+    }
+    this.saveLocal();
     return ticket;
   }
 
-  getAdminStats() {
+  async getAdminStats() {
+    try {
+      const db = await mongoDb.getDb();
+      if (db) {
+        const [totalBookings, pending, assigned, completed, cancelled, emergencies, activeTechs] = await Promise.all([
+          db.collection('bookings').countDocuments(),
+          db.collection('bookings').countDocuments({ bookingStatus: 'PENDING_CONFIRMATION' }),
+          db.collection('bookings').countDocuments({ bookingStatus: { $in: ['TECHNICIAN_ASSIGNED', 'ON_THE_WAY', 'IN_PROGRESS'] } }),
+          db.collection('bookings').countDocuments({ bookingStatus: 'COMPLETED' }),
+          db.collection('bookings').countDocuments({ bookingStatus: 'CANCELLED' }),
+          db.collection('emergency_tickets').countDocuments(),
+          db.collection('technicians').countDocuments({ active: { $ne: false } })
+        ]);
+        return {
+          totalBookings,
+          pendingCount: pending,
+          activeDispatchCount: assigned,
+          completedCount: completed,
+          cancelledCount: cancelled,
+          activeTechnicians: activeTechs,
+          emergencyCount: emergencies,
+          totalRevenue: completed * 249
+        };
+      }
+    } catch (e) {
+      console.warn('[BackendStore] getAdminStats fallback:', e.message);
+    }
     const bookings = this.data.bookings;
     const pending = bookings.filter(b => b.bookingStatus === 'PENDING_CONFIRMATION').length;
     const assigned = bookings.filter(b => ['TECHNICIAN_ASSIGNED', 'ON_THE_WAY', 'IN_PROGRESS'].includes(b.bookingStatus)).length;
@@ -893,20 +1079,20 @@ class BackendStore {
     return this.data.users[uid] || null;
   }
 
-  updateUser(uid, updates) {
+  async updateUser(uid, updates) {
     if (!this.data.users[uid]) {
       this.data.users[uid] = { uid, ...updates, updatedAt: new Date().toISOString() };
     } else {
       Object.assign(this.data.users[uid], updates, { updatedAt: new Date().toISOString() });
     }
-    this.save();
     if (mongoDb && typeof mongoDb.syncUserToMongo === 'function') {
-      mongoDb.syncUserToMongo(this.data.users[uid]);
+      await mongoDb.syncUserToMongo(this.data.users[uid]);
     }
+    await this.save();
     return this.data.users[uid];
   }
 
-  upsertGoogleUser({ email, name, picture, sub, googleId }) {
+  async upsertGoogleUser({ email, name, picture, sub, googleId }) {
     if (!email) throw new Error("Google email is required");
     const idKey = sub || googleId || email.replace(/[^a-zA-Z0-9]/g, '_');
     const uid = "gb_google_" + idKey;
@@ -932,14 +1118,14 @@ class BackendStore {
       });
     }
 
-    this.save();
     if (mongoDb && typeof mongoDb.syncUserToMongo === 'function') {
-      mongoDb.syncUserToMongo(this.data.users[uid]);
+      await mongoDb.syncUserToMongo(this.data.users[uid]);
     }
+    await this.save();
     return this.data.users[uid];
   }
 
-  upsertPhoneDirect({ phone, name, address }) {
+  async upsertPhoneDirect({ phone, name, address }) {
     if (!phone) throw new Error("Phone number is required");
     const cleaned = phone.replace(/\D/g, '');
     let normalized = cleaned;
@@ -965,14 +1151,23 @@ class BackendStore {
       this.data.users[uid].updatedAt = new Date().toISOString();
     }
 
-    this.save();
     if (mongoDb && typeof mongoDb.syncUserToMongo === 'function') {
-      mongoDb.syncUserToMongo(this.data.users[uid]);
+      await mongoDb.syncUserToMongo(this.data.users[uid]);
     }
+    await this.save();
     return this.data.users[uid];
   }
 
-  getAllUsers() {
+  async getAllUsers() {
+    try {
+      const db = await mongoDb.getDb();
+      if (db) {
+        const users = await db.collection('users').find({}).toArray();
+        if (users && users.length) {
+          return users.map(u => { const { _id, ...r } = u; return r; });
+        }
+      }
+    } catch (e) {}
     return Object.values(this.data.users || {});
   }
 }

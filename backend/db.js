@@ -183,6 +183,30 @@ async function syncEmergencyTicketToMongo(ticket) {
   }
 }
 
+async function syncTechnicianToMongo(tech) {
+  try {
+    const database = await getDb();
+    if (!database || !tech || !tech.id) return;
+    await database.collection('technicians').updateOne(
+      { id: tech.id },
+      { $set: tech },
+      { upsert: true }
+    );
+  } catch (err) {
+    console.warn('[MongoDB] syncTechnician error:', err.message);
+  }
+}
+
+async function deleteTechnicianFromMongo(techId) {
+  try {
+    const database = await getDb();
+    if (!database || !techId) return;
+    await database.collection('technicians').deleteOne({ id: techId });
+  } catch (err) {
+    console.warn('[MongoDB] deleteTechnician error:', err.message);
+  }
+}
+
 async function syncUserToMongo(user) {
   try {
     const database = await getDb();
@@ -256,5 +280,7 @@ module.exports = {
   syncBookingToMongo,
   syncEmergencyTicketToMongo,
   syncUserToMongo,
+  syncTechnicianToMongo,
+  deleteTechnicianFromMongo,
   syncAllToMongo
 };

@@ -403,7 +403,7 @@
         </div>
       </div>
       <div class="admin-header-actions">
-        <div class="status-pill-live" style="background: #ecfdf5; border-color: #86efac; color: #047857;">
+        <div id="mongo-status-pill" class="status-pill-live" style="background: #ecfdf5; border-color: #86efac; color: #047857; cursor: pointer;" onclick="checkMongoHealth(true)" title="Click to test live MongoDB Atlas connection">
           <span class="pulse-dot"></span>
           <span>MongoDB Atlas Connected</span>
         </div>
@@ -515,6 +515,7 @@
               <option value="COMPLETED">Completed (COD)</option>
               <option value="CANCELLED">Cancelled</option>
             </select>
+            <button class="btn btn-secondary" onclick="exportBookingsToCsv()" style="display: inline-flex; align-items: center; gap: 6px;">📥 Export CSV</button>
           </div>
         </div>
         <div class="table-responsive">
@@ -876,6 +877,34 @@
 
   <script>
     let appConfig = null;
+    const API_BASE = (window.location.protocol === 'file:') ? 'https://gharbijli-fwnz.vercel.app' : '';
+
+    async function checkMongoHealth(notify = false) {
+      const pill = document.getElementById('mongo-status-pill');
+      if (!pill) return;
+      pill.innerHTML = '<span class="pulse-dot" style="background:#f59e0b;"></span><span>Testing Atlas DB...</span>';
+      try {
+        const t0 = Date.now();
+        const res = await fetch(API_BASE + '/api/test-mongo');
+        const data = await res.json();
+        const elapsed = Date.now() - t0;
+        if (data && data.success) {
+          pill.style.background = '#ecfdf5';
+          pill.style.borderColor = '#86efac';
+          pill.style.color = '#047857';
+          pill.innerHTML = '<span class="pulse-dot" style="background:#22c55e;"></span><span>MongoDB Atlas Live (' + data.collections.length + ' cols, ' + elapsed + 'ms)</span>';
+          if (notify) showToast('✅ MongoDB Atlas Live: ' + data.collections.join(', ') + ' (' + elapsed + 'ms)');
+        } else {
+          throw new Error(data.error || 'Connection failed');
+        }
+      } catch (err) {
+        pill.style.background = '#fef2f2';
+        pill.style.borderColor = '#fca5a5';
+        pill.style.color = '#b91c1c';
+        pill.innerHTML = '<span class="pulse-dot" style="background:#ef4444;"></span><span>MongoDB Offline (Tap to Retry)</span>';
+        if (notify) showToast('❌ MongoDB Connection Error: ' + err.message);
+      }
+    }
     let allBookings = [];
     let allServices = [];
     let allTechs = [];
@@ -902,7 +931,7 @@
 
     async function fetchStats() {
       try {
-        const res = await fetch('/api/admin/stats');
+        const res = await fetch(`${API_BASE}/api/admin/stats`);
         const data = await res.json();
         if (data && data.stats) {
           const s = data.stats;
@@ -920,7 +949,7 @@
 
     async function fetchAppConfig() {
       try {
-        const res = await fetch('/api/app-config');
+        const res = await fetch(`${API_BASE}/api/app-config`);
         const data = await res.json();
         if (data && data.config) {
           appConfig = data.config;
@@ -949,7 +978,7 @@
 
     async function fetchBookings() {
       try {
-        const res = await fetch('/api/admin/bookings');
+        const res = await fetch(`${API_BASE}/api/admin/bookings`);
         const data = await res.json();
         if (data && data.bookings) {
           allBookings = data.bookings;
@@ -962,7 +991,7 @@
 
     async function fetchServices() {
       try {
-        const res = await fetch('/api/services?all=true');
+        const res = await fetch(`${API_BASE}/api/services?all=true`);
         const data = await res.json();
         if (data && data.services) {
           allServices = data.services;
@@ -975,7 +1004,7 @@
 
     async function fetchTechnicians() {
       try {
-        const res = await fetch('/api/technicians');
+        const res = await fetch(`${API_BASE}/api/technicians`);
         const data = await res.json();
         if (data && data.technicians) {
           allTechs = data.technicians;
@@ -989,7 +1018,7 @@
 
     async function fetchEmergencies() {
       try {
-        const res = await fetch('/api/admin/emergencies');
+        const res = await fetch(`${API_BASE}/api/admin/emergencies`);
         const data = await res.json();
         if (data && data.emergencies) {
           renderEmergenciesTable(data.emergencies);
@@ -1061,14 +1090,52 @@
                 </select>
               </td>
               <td>
-                <button class="btn btn-secondary" style="padding: 5px 12px; font-size: 12px;" onclick="openAssignModal('${b.bookingId}')">
-                  ${b.assignedTechnician ? 'Re-assign' : '⚡ Assign'}
-                </button>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                  <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 12px;" onclick="openAssignModal('${b.bookingId}')">
+                    ${b.assignedTechnician ? 'Re-assign' : '⚡ Assign'}
+                  </button>
+                  ${(b.technicianPhone || (b.assignedTechnician && b.assignedTechnician.phone)) ? `
+                    <a href="https://wa.me/${(b.assignedTechnician && b.assignedTechnician.phone ? b.assignedTechnician.phone : b.technicianPhone).replace(/\\D/g, '')}?text=${encodeURIComponent('⚡ *GharBijli Job Dispatch (Bhilai)*\\n\\n*Booking ID:* ' + b.bookingId + '\\n*Customer:* ' + (b.customerName || 'Customer') + '\\n*Phone:* ' + b.customerPhone + '\\n*Service:* ' + b.serviceNameSnapshot + '\\n*Address:* ' + (b.addressSnapshot ? b.addressSnapshot.fullAddress : 'Bhilai') + '\\n*Time:* ' + (b.preferredTimeSlot || 'Today') + '\\n*Payment:* Cash on Delivery\\n\\nPlease call customer before departure!')}" target="_blank" class="btn btn-secondary" style="padding: 5px 8px; font-size: 11.5px; color: #047857; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="Send Job Alert to Electrician on WhatsApp">
+                      📲 WA
+                    </a>
+                  ` : ''}
+                </div>
               </td>
             </tr>
           `;
         }).join('');
       }
+    }
+
+    function exportBookingsToCsv() {
+      if (!allBookings || allBookings.length === 0) {
+        alert("No bookings available to export.");
+        return;
+      }
+      const headers = ["Booking ID", "Customer Name", "Customer Phone", "Service", "Address", "Date", "Slot", "Status", "Technician Name", "Technician Phone", "Vehicle", "Created At"];
+      const rows = allBookings.map(b => [
+        b.bookingId,
+        `"${(b.customerName || '').replace(/"/g, '""')}"`,
+        b.customerPhone,
+        `"${(b.serviceNameSnapshot || '').replace(/"/g, '""')}"`,
+        `"${(b.addressSnapshot ? b.addressSnapshot.fullAddress : '').replace(/"/g, '""')}"`,
+        b.preferredDate || '',
+        `"${(b.preferredTimeSlot || '').replace(/"/g, '""')}"`,
+        b.bookingStatus,
+        `"${(b.technicianName || '').replace(/"/g, '""')}"`,
+        b.technicianPhone || '',
+        `"${(b.technicianVehicle || '').replace(/"/g, '""')}"`,
+        b.createdAt || ''
+      ]);
+      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `GharBijli_Bookings_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("📥 Exported bookings to CSV file!");
     }
 
     function renderServicesTable() {
@@ -1179,7 +1246,7 @@
       if (!currentAssignBookingId) return;
       const techId = document.getElementById("select-modal-tech").value;
       try {
-        const res = await fetch(`/api/bookings/${currentAssignBookingId}/assign`, {
+        const res = await fetch(`${API_BASE}/api/bookings/${currentAssignBookingId}/assign`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ technicianId: techId })
@@ -1201,7 +1268,7 @@
     async function updateBookingStatus(bookingId, status) {
       if (!status) return;
       try {
-        const res = await fetch(`/api/bookings/${bookingId}/status`, {
+        const res = await fetch(`${API_BASE}/api/bookings/${bookingId}/status`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ status })
@@ -1210,7 +1277,7 @@
         if (data.success) {
           showToast(`Updated ${bookingId} to ${status}`);
           await fetchBookings();
-          await fetchStats();
+          await checkMongoHealth(); fetchStats();
         } else {
           alert(data.error || "Status update failed");
         }
@@ -1224,7 +1291,7 @@
       const newPrice = Number(input.value);
       if (isNaN(newPrice) || newPrice <= 0) return alert("Enter valid price");
       try {
-        const res = await fetch(`/api/admin/services/${id}`, {
+        const res = await fetch(`${API_BASE}/api/admin/services/${id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ priceNumber: newPrice })
@@ -1240,7 +1307,7 @@
 
     async function saveServiceDuration(id, duration) {
       try {
-        await fetch(`/api/admin/services/${id}`, {
+        await fetch(`${API_BASE}/api/admin/services/${id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ estimatedDuration: duration })
@@ -1251,7 +1318,7 @@
 
     async function toggleServiceActive(id, active) {
       try {
-        await fetch(`/api/admin/services/${id}`, {
+        await fetch(`${API_BASE}/api/admin/services/${id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ active })
@@ -1265,7 +1332,7 @@
     async function deleteService(id) {
       if (!confirm("Are you sure you want to remove this service from the catalog?")) return;
       try {
-        const res = await fetch(`/api/admin/services/${id}`, { method: 'DELETE' });
+        const res = await fetch(`${API_BASE}/api/admin/services/${id}`, { method: 'DELETE' });
         const data = await res.json();
         if (data.success) {
           showToast("Service deleted");
@@ -1278,7 +1345,7 @@
 
     async function toggleTechnicianActive(id, active) {
       try {
-        await fetch(`/api/admin/technicians/${id}`, {
+        await fetch(`${API_BASE}/api/admin/technicians/${id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ active })
@@ -1312,7 +1379,7 @@
       };
 
       try {
-        const res = await fetch('/api/admin/app-config', {
+        const res = await fetch(`${API_BASE}/api/admin/app-config`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -1334,7 +1401,7 @@
       const randomName = names[Math.floor(Math.random() * names.length)];
 
       try {
-        const res = await fetch('/api/bookings', {
+        const res = await fetch(`${API_BASE}/api/bookings`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1358,7 +1425,7 @@
         if (data.success) {
           showToast(`⚡ Simulated new booking ${data.booking.bookingId} in ${randomSector}!`);
           await fetchBookings();
-          await fetchStats();
+          await checkMongoHealth(); fetchStats();
         }
       } catch (e) {
         alert(e.message);
@@ -1419,7 +1486,7 @@
       const pass = document.getElementById("input-admin-pass").value.trim();
       const errEl = document.getElementById("admin-login-error");
       try {
-        const res = await fetch('/api/admin/auth', {
+        const res = await fetch(`${API_BASE}/api/admin/auth`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ password: pass })
@@ -1486,7 +1553,7 @@
       };
 
       try {
-        const res = await fetch(`/api/admin/technicians/${techId}`, {
+        const res = await fetch(`${API_BASE}/api/admin/technicians/${techId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -1526,7 +1593,7 @@
       };
 
       try {
-        const res = await fetch('/api/admin/technicians', {
+        const res = await fetch(`${API_BASE}/api/admin/technicians`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -1547,7 +1614,7 @@
     async function deleteTechnicianPartner(id) {
       if (!confirm("Are you sure you want to remove this electrician from the pool?")) return;
       try {
-        const res = await fetch(`/api/admin/technicians/${id}`, { method: 'DELETE' });
+        const res = await fetch(`${API_BASE}/api/admin/technicians/${id}`, { method: 'DELETE' });
         const data = await res.json();
         if (data.success) {
           showToast("Electrician removed from pool");
@@ -1581,7 +1648,7 @@
     initAll();
     // Auto-refresh every 6 seconds for live operations
     setInterval(async () => {
-      await fetchStats();
+      await checkMongoHealth(); fetchStats();
       await fetchBookings();
       await fetchEmergencies();
     }, 6000);
