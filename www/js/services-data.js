@@ -1,7 +1,7 @@
 /**
  * GharBijli Service Catalog (Urban Company Exact Design Specification)
  * Complete electrical services mapped to 11 official Urban Company categories.
- * All prices in INR, COD / Pay after service model, 30-day warranty, Patna local rates.
+ * All prices in INR, COD / Pay after service model, 30-day warranty, Bhilai & Durg local rates.
  */
 
 const GharBijliCategories = [
@@ -352,7 +352,7 @@ const GharBijliServices = [
     priceNumber: 229,
     discountBadge: "34% OFF",
     warranty: "30-Day Guarantee",
-    description: "Digital energy submeter installation for tenant rooms, rental flats, or commercial shops in Patna.",
+    description: "Digital energy submeter installation for tenant rooms, rental flats, or commercial shops in Bhilai & Durg.",
     pricingType: "standard",
     estimatedDuration: "60 mins",
     highlights: [
@@ -490,7 +490,7 @@ const GharBijliServices = [
     image: "assets/images/electrician.jpg",
     badge: "Universal",
     rating: 4.89,
-    reviews: "2.1k bookings in Patna",
+    reviews: "2.1k bookings in Bhilai",
     mrp: "₹149",
     priceTag: "Visitation ₹99",
     priceNumber: 99,

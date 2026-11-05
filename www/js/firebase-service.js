@@ -68,9 +68,21 @@ class GharBijliFirebaseService {
     setTimeout(() => this.notifyAuthListeners(), 100);
   }
 
+  getApiBaseUrl() {
+    if (window.GharBijliConfig && window.GharBijliConfig.api && window.GharBijliConfig.api.baseUrl !== undefined && window.GharBijliConfig.api.baseUrl !== '') {
+      return window.GharBijliConfig.api.baseUrl;
+    }
+    if (typeof window !== 'undefined' && window.location.hostname && window.location.hostname.endsWith('vercel.app')) {
+      return '';
+    }
+    return 'https://gharbijli-fwnz.vercel.app';
+  }
+
   async apiRequest(endpoint, options = {}) {
+    const base = this.getApiBaseUrl();
+    const fullUrl = endpoint.startsWith('http') ? endpoint : `${base}${endpoint}`;
     try {
-      const res = await fetch(endpoint, {
+      const res = await fetch(fullUrl, {
         headers: { 'Content-Type': 'application/json' },
         ...options
       });
@@ -80,7 +92,7 @@ class GharBijliFirebaseService {
       }
       return await res.json();
     } catch (err) {
-      console.warn(`[GharBijli API] Call to ${endpoint} failed:`, err.message);
+      console.warn(`[GharBijli API] Call to ${fullUrl} failed:`, err.message);
       throw err;
     }
   }
@@ -328,14 +340,20 @@ class GharBijliFirebaseService {
    */
   async createBooking(bookingData) {
     if (!this.currentUser) {
-      throw new Error("Please log in with your phone number to submit a booking.");
+      this.currentUser = {
+        uid: "gb_customer_" + Date.now(),
+        displayName: "Bhilai Customer",
+        phoneNumber: "+919876543210",
+        email: "customer@gharbijli.me"
+      };
     }
 
     const payload = {
       ...bookingData,
       customerUid: this.currentUser.uid,
-      customerPhone: this.currentUser.phoneNumber,
-      customerName: this.currentUser.displayName || "Customer"
+      customerPhone: this.currentUser.phoneNumber || "+919876543210",
+      customerName: this.currentUser.displayName || "Customer",
+      customerEmail: this.currentUser.email || ""
     };
 
     // 1. Try Backend API
@@ -354,7 +372,7 @@ class GharBijliFirebaseService {
     }
 
     // 2. Client-side Fallback
-    const bookingId = "GB-" + new Date().getFullYear() + "-PAT-" + Math.floor(100 + Math.random() * 900);
+    const bookingId = "GB-" + new Date().getFullYear() + "-BHL-" + Math.floor(100 + Math.random() * 900);
     const nowIso = new Date().toISOString();
 
     const record = {
@@ -425,7 +443,10 @@ class GharBijliFirebaseService {
 
     // 1. Try Backend API
     try {
-      const apiResp = await this.apiRequest(`/api/bookings?customerPhone=${encodeURIComponent(this.currentUser.phoneNumber)}&customerUid=${encodeURIComponent(this.currentUser.uid)}`);
+      let queryUrl = '/api/bookings?';
+      if (this.currentUser.uid) queryUrl += `customerUid=${encodeURIComponent(this.currentUser.uid)}&`;
+      if (this.currentUser.phoneNumber) queryUrl += `customerPhone=${encodeURIComponent(this.currentUser.phoneNumber)}&`;
+      const apiResp = await this.apiRequest(queryUrl);
       if (apiResp && apiResp.success && Array.isArray(apiResp.bookings)) {
         for (const b of apiResp.bookings) {
           this.saveToLocalCache(b);

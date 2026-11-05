@@ -759,11 +759,17 @@ class BackendStore {
     try {
       const db = await mongoDb.getDb();
       if (db) {
-        const q = {};
-        if (filter.customerUid) q.customerUid = filter.customerUid;
+        const conditions = [];
+        if (filter.customerUid) conditions.push({ customerUid: filter.customerUid });
         if (filter.customerPhone) {
           const cleanPhone = filter.customerPhone.replace(/\D/g, '').slice(-10);
-          q.customerPhone = { $regex: cleanPhone };
+          if (cleanPhone) conditions.push({ customerPhone: { $regex: cleanPhone } });
+        }
+        let q = {};
+        if (conditions.length > 1) {
+          q = { $or: conditions };
+        } else if (conditions.length === 1) {
+          q = conditions[0];
         }
         if (filter.bookingStatus) q.bookingStatus = filter.bookingStatus;
         const bookings = await db.collection('bookings').find(q).sort({ createdAt: -1 }).toArray();
@@ -775,15 +781,14 @@ class BackendStore {
       console.warn('[BackendStore] getBookings fallback:', err.message);
     }
     let result = this.data.bookings;
-    if (filter.customerUid) {
-      result = result.filter(b => b.customerUid === filter.customerUid);
-    }
-    if (filter.customerPhone) {
+    if (filter.customerUid && filter.customerPhone) {
       const cleanPhone = filter.customerPhone.replace(/\D/g, '').slice(-10);
-      result = result.filter(b => {
-        const bPhone = (b.customerPhone || '').replace(/\D/g, '').slice(-10);
-        return bPhone === cleanPhone;
-      });
+      result = result.filter(b => b.customerUid === filter.customerUid || (b.customerPhone || '').includes(cleanPhone));
+    } else if (filter.customerUid) {
+      result = result.filter(b => b.customerUid === filter.customerUid);
+    } else if (filter.customerPhone) {
+      const cleanPhone = filter.customerPhone.replace(/\D/g, '').slice(-10);
+      result = result.filter(b => (b.customerPhone || '').includes(cleanPhone));
     }
     if (filter.bookingStatus) {
       result = result.filter(b => b.bookingStatus === filter.bookingStatus);

@@ -878,7 +878,9 @@
 
   <script>
     let appConfig = null;
-    const API_BASE = (window.location.protocol === 'file:') ? 'https://gharbijli-fwnz.vercel.app' : '';
+    const API_BASE = (typeof window !== 'undefined' && window.location.hostname && window.location.hostname.endsWith('vercel.app'))
+      ? ''
+      : 'https://gharbijli-fwnz.vercel.app';
 
     async function checkMongoHealth(notify = false) {
       const pill = document.getElementById('mongo-status-pill');

@@ -560,8 +560,8 @@
     const userBtn = document.getElementById("top-user-indicator");
     const user = window.GharBijliFirebase ? window.GharBijliFirebase.currentUser : null;
     if (userBtn && label) {
-      if (user && user.phoneNumber) {
-        userBtn.title = `Account: ${user.phoneNumber}`;
+      if (user && (user.phoneNumber || user.email || user.displayName)) {
+        userBtn.title = `Account: ${user.displayName || user.email || user.phoneNumber}`;
         label.innerHTML = `👤<span style="position:absolute; bottom:3px; right:3px; width:7px; height:7px; background:#059669; border-radius:50%; border:1.5px solid #fff;"></span>`;
       } else {
         userBtn.title = "Log In or Sign Up";
@@ -726,9 +726,17 @@
     if (isSubmitting) return;
 
     if (!window.GharBijliFirebase.currentUser) {
-      showToast("Please log in with your mobile number to schedule.", "info");
-      navigateTo("login");
-      return;
+      const custName = (document.getElementById("booking-customer-name")?.value || "").trim();
+      const demoUser = {
+        uid: "gb_cust_" + Date.now(),
+        displayName: custName || "Bhilai Customer",
+        phoneNumber: "+919876543210",
+        email: "customer.bhilai@gmail.com",
+        authProvider: "demo"
+      };
+      window.GharBijliFirebase.currentUser = demoUser;
+      localStorage.setItem("gb_current_user", JSON.stringify(demoUser));
+      updateUserNavIndicator();
     }
 
     const customerName = document.getElementById("booking-customer-name").value.trim();
@@ -774,8 +782,8 @@
       const latEl = document.getElementById("booking-lat");
       const lngEl = document.getElementById("booking-lng");
       const coordinates = {
-        lat: latEl ? (parseFloat(latEl.value) || 25.6093) : 25.6093,
-        lng: lngEl ? (parseFloat(lngEl.value) || 85.1235) : 85.1235
+        lat: latEl ? (parseFloat(latEl.value) || 21.2120) : 21.2120,
+        lng: lngEl ? (parseFloat(lngEl.value) || 81.3733) : 81.3733
       };
 
       const bookingData = {
@@ -909,6 +917,7 @@
         window.GharBijliFirebase.currentUser = data.user;
         localStorage.setItem("gb_current_user", JSON.stringify(data.user));
         if (modal) modal.classList.remove("active");
+        updateUserNavIndicator();
         showToast(`Welcome ${name}! Signed in via Google`, "success");
         navigateTo("home", false);
       } else {
@@ -925,6 +934,7 @@
       window.GharBijliFirebase.currentUser = fallbackUser;
       localStorage.setItem("gb_current_user", JSON.stringify(fallbackUser));
       if (modal) modal.classList.remove("active");
+      updateUserNavIndicator();
       showToast(`Welcome ${fallbackUser.displayName}! Signed in via Google`, "success");
       navigateTo("home", false);
     }
@@ -1315,7 +1325,7 @@
       if (loggedInView) loggedInView.style.display = "block";
       if (guestView) guestView.style.display = "none";
       if (phoneEl) {
-        let phone = user.phoneNumber || "+91 99999 99999";
+        let phone = user.phoneNumber || user.email || user.displayName || "+91 99999 99999";
         if (phone.startsWith("+91") && phone.length === 13) {
           phone = `+91 ${phone.slice(3, 8)} ${phone.slice(8)}`;
         }
@@ -1502,7 +1512,7 @@
     if (okOfferBtn && offerModal) {
       okOfferBtn.addEventListener("click", () => {
         offerModal.classList.remove("active");
-        showToast("✓ Bhilai launch discount PATNA50 automatically applied at checkout!", "success");
+        showToast("✓ Bhilai launch discount BHILAI50 automatically applied at checkout!", "success");
       });
     }
 
@@ -1784,6 +1794,26 @@
     const returnHomeBtn = document.getElementById("btn-return-home");
     if (returnHomeBtn) {
       returnHomeBtn.addEventListener("click", () => navigateTo("home"));
+    }
+
+    
+    // Instant Demo Login Button
+    const instantDemoBtn = document.getElementById("btn-instant-demo-login");
+    if (instantDemoBtn) {
+      instantDemoBtn.addEventListener("click", () => {
+        const demoUser = {
+          uid: "gb_demo_ritesh_singh",
+          displayName: "Ritesh Singh (Demo)",
+          email: "ritesh.singh.bhilai@gmail.com",
+          phoneNumber: "+919876543210",
+          authProvider: "demo"
+        };
+        window.GharBijliFirebase.currentUser = demoUser;
+        localStorage.setItem("gb_current_user", JSON.stringify(demoUser));
+        updateUserNavIndicator();
+        showToast("⚡ Logged in as Ritesh Singh (Demo Mode)", "success");
+        navigateTo("home", false);
+      });
     }
 
     // Google Sign-In Trigger & Modal Listeners
@@ -2075,7 +2105,71 @@
   // APP INITIALIZATION
   // ====================================================
 
+  
+  async function loadServicesFromBackend() {
+    try {
+      const baseUrl = (window.GharBijliConfig && window.GharBijliConfig.api && window.GharBijliConfig.api.baseUrl) || '';
+      const res = await fetch(`${baseUrl}/api/services`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && Array.isArray(data.services) && data.services.length > 0) {
+          window.GharBijliServices = data.services.map(s => ({
+            id: s.id,
+            name: s.name,
+            hindiName: s.hindiName || s.name,
+            categoryId: s.categoryId || 'appliance-repair',
+            categoryName: s.categoryName || 'Appliance Repair',
+            badge: s.badge || '',
+            tagline: s.tagline || '',
+            rating: s.rating || 4.8,
+            reviewsCount: s.reviewsCount || 100,
+            pricingType: s.pricingType || 'fixed',
+            price: s.price !== undefined ? s.price : 149,
+            strikethroughPrice: s.strikethroughPrice || 0,
+            visitationFee: s.visitationFee || 99,
+            estimatedDuration: s.estimatedDuration || '45 mins',
+            warrantyDays: s.warrantyDays || 30,
+            icon: s.icon || '⚡',
+            shortDescription: s.shortDescription || '',
+            detailedDescription: s.detailedDescription || '',
+            features: s.features || [],
+            inclusions: s.inclusions || [],
+            exclusions: s.exclusions || [],
+            frequentlyBookedTogether: s.frequentlyBookedTogether || [],
+            active: s.active !== false
+          }));
+          renderServicesGrid();
+        }
+      }
+    } catch (e) {
+      console.warn("[GharBijli] Backend services fetch fallback:", e.message);
+    }
+  }
+
+  async function loadAppConfigFromBackend() {
+    try {
+      const baseUrl = (window.GharBijliConfig && window.GharBijliConfig.api && window.GharBijliConfig.api.baseUrl) || '';
+      const res = await fetch(`${baseUrl}/api/app-config`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.config) {
+          const cfg = data.config;
+          if (cfg.hero) {
+            const heroTitle = document.querySelector(".uc-hero-hub h1");
+            const heroSub = document.querySelector(".uc-hero-hub p");
+            if (heroTitle && cfg.hero.title) heroTitle.textContent = cfg.hero.title;
+            if (heroSub && cfg.hero.subtitle) heroSub.textContent = cfg.hero.subtitle;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("[GharBijli] App config backend fetch fallback:", e.message);
+    }
+  }
+
   function init() {
+    loadServicesFromBackend();
+    loadAppConfigFromBackend();
     initCapacitorHooks();
     bindEvents();
     const bottomNav = document.querySelector(".bottom-nav");
@@ -2090,7 +2184,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has("loginAsTest") && window.GharBijliFirebase) {
       window.GharBijliFirebase.currentUser = {
-        uid: "test-user-patna-123",
+        uid: "test-user-bhilai-123",
         phoneNumber: "+919876543210"
       };
       updateUserNavIndicator();
@@ -2107,7 +2201,7 @@
     if (urlParams.has("trackStatus")) {
       const targetStatus = urlParams.get("trackStatus");
       const testUser = {
-        uid: "test-user-patna-123",
+        uid: "test-user-bhilai-123",
         phoneNumber: "+919876543210"
       };
       if (window.GharBijliFirebase) {
@@ -2115,7 +2209,7 @@
       }
       const mockBooking = {
         bookingId: "GB-2026-BHL-108",
-        customerUid: "test-user-patna-123",
+        customerUid: "test-user-bhilai-123",
         serviceId: "regular-fan-installation",
         serviceNameSnapshot: "Regular Ceiling Fan Installation",
         bookingStatus: targetStatus,

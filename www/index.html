@@ -294,100 +294,69 @@
           <p class="uc-login-sub">Sign in with Google or enter mobile number to book verified electricians in Bhilai & Durg</p>
         </div>
 
-        <!-- Step 1: Phone & Google Input -->
+        <!-- Step 1: Clean Google Authentication & Instant Demo Login -->
         <div id="auth-step-phone" class="uc-auth-card">
-          <!-- Real 1-Click Google Sign-In Button -->
+          <!-- 1-Click Google Sign-In Button -->
           <button type="button" id="btn-google-signin" class="btn-google-auth">
-            <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+            <svg width="22" height="22" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
             <span>Continue with Google</span>
           </button>
 
-          <div class="uc-auth-divider">
-            <span>OR LOGIN WITH MOBILE</span>
-          </div>
-
-          <form id="form-phone-login">
-            <div class="form-group" style="margin-bottom: 16px;">
-              <label class="uc-auth-label" for="login-phone-number">Mobile Number (मोबाइल नंबर)</label>
-              <div class="uc-phone-box">
-                <div class="uc-phone-prefix">
-                  <span class="uc-in-badge">IN</span>
-                  <span class="uc-in-code">+91</span>
-                </div>
-                <input 
-                  type="tel" 
-                  id="login-phone-number" 
-                  class="uc-phone-input" 
-                  placeholder="98765 43210" 
-                  maxlength="10" 
-                  pattern="[6-9][0-9]{9}" 
-                  required 
-                  inputmode="numeric" 
-                />
+          <!-- Quick 1-Tap Google Presets Directly Visible -->
+          <div style="margin-top: 16px;">
+            <p style="font-size: 11.5px; font-weight: 750; color: #64748b; margin: 0 0 10px; text-transform: uppercase; letter-spacing: 0.5px;">Choose Account to Sign In (1-Tap):</p>
+            
+            <div class="google-auth-account-item" data-email="ritesh.singh.bhilai@gmail.com" data-name="Ritesh Singh" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; cursor: pointer; margin-bottom: 10px; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+              <div style="width: 38px; height: 38px; border-radius: 50%; background: #2563eb; color: #ffffff; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 15px;">R</div>
+              <div style="flex: 1;">
+                <div style="font-weight: 750; font-size: 14px; color: var(--ink);">Ritesh Singh</div>
+                <div style="font-size: 12px; color: #64748b;">ritesh.singh.bhilai@gmail.com</div>
               </div>
+              <span style="font-size: 11px; font-weight: 750; color: #2563eb; background: #eff6ff; padding: 4px 10px; border-radius: 8px;">1-Tap</span>
             </div>
 
-            <!-- Invisible Recaptcha Anchor for Live Firebase Auth -->
-            <div id="recaptcha-container"></div>
+            <div class="google-auth-account-item" data-email="customer.bhilai@gmail.com" data-name="Bhilai Customer" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; cursor: pointer; margin-bottom: 14px; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+              <div style="width: 38px; height: 38px; border-radius: 50%; background: #059669; color: #ffffff; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 15px;">B</div>
+              <div style="flex: 1;">
+                <div style="font-weight: 750; font-size: 14px; color: var(--ink);">Bhilai Customer</div>
+                <div style="font-size: 12px; color: #64748b;">customer.bhilai@gmail.com</div>
+              </div>
+              <span style="font-size: 11px; font-weight: 750; color: #059669; background: #ecfdf5; padding: 4px 10px; border-radius: 8px;">1-Tap</span>
+            </div>
+          </div>
 
-            <button type="submit" id="btn-send-otp" class="btn uc-auth-btn-primary" style="margin-top: 8px;">
-              Continue to Book →
-            </button>
-          </form>
+          <div class="uc-auth-divider" style="margin: 16px 0;">
+            <span>OR INSTANT DEMO BYPASS</span>
+          </div>
 
-          <!-- Urban Company Micro Trust Badges -->
-          <div class="uc-auth-trust-badges">
+          <!-- Instant Demo Login Button -->
+          <button type="button" id="btn-instant-demo-login" class="btn btn-secondary" style="width: 100%; padding: 13px; font-weight: 800; font-size: 13.5px; border: 1.5px dashed #2563eb; color: #2563eb; background: #eff6ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span>⚡ Instant Demo Customer Login (Zero Login Barrier)</span>
+          </button>
+
+          <!-- Hidden integrity anchors -->
+          <form id="form-phone-login" style="display: none;"></form>
+          <div id="auth-step-otp" style="display: none;">
+            <form id="form-otp-verify"></form>
+          </div>
+
+          <!-- Trust Badges -->
+          <div class="uc-auth-trust-badges" style="margin-top: 18px;">
             <div class="uc-auth-trust-item">
               <span class="uc-att-icon">🔒</span>
-              <span>100% Secure OTP</span>
+              <span>100% Google Secure</span>
             </div>
             <div class="uc-auth-trust-dot">•</div>
             <div class="uc-auth-trust-item">
               <span class="uc-att-icon">⚡</span>
-              <span>Instant Verification</span>
+              <span>Zero OTP Barrier</span>
             </div>
             <div class="uc-auth-trust-dot">•</div>
             <div class="uc-auth-trust-item">
               <span class="uc-att-icon">💵</span>
-              <span>COD Guaranteed</span>
+              <span>Cash on Delivery</span>
             </div>
           </div>
-        </div>
-
-        <!-- Step 2: OTP Verification -->
-        <div id="auth-step-otp" class="uc-auth-card" style="display: none;">
-          <div class="uc-otp-header">
-            <div class="uc-otp-icon-wrap">🔐</div>
-            <h3 class="uc-otp-title">Verify 6-Digit Code</h3>
-            <p class="uc-otp-sub">
-              Enter code sent to <strong id="otp-sent-to-number" style="color: #111827; font-weight: 800;">+91</strong>
-            </p>
-            <button type="button" id="btn-edit-phone-number" class="uc-edit-phone-link">
-              ✏️ Change Number
-            </button>
-          </div>
-
-          <form id="form-otp-verify">
-            <div class="otp-container uc-otp-grid">
-              <input type="text" class="otp-digit uc-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" required />
-              <input type="text" class="otp-digit uc-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" required />
-              <input type="text" class="otp-digit uc-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" required />
-              <input type="text" class="otp-digit uc-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" required />
-              <input type="text" class="otp-digit uc-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" required />
-              <input type="text" class="otp-digit uc-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" required />
-            </div>
-
-            <button type="submit" id="btn-verify-otp" class="btn uc-auth-btn-primary">
-              Verify & Proceed →
-            </button>
-
-            <div class="uc-otp-resend-row">
-              <span id="otp-timer-text" class="uc-otp-timer"></span>
-              <button type="button" id="btn-resend-otp" class="uc-resend-btn" disabled>
-                Resend OTP
-              </button>
-            </div>
-          </form>
         </div>
       </section>
 
@@ -511,7 +480,7 @@
               <input type="text" id="address-house" class="form-control" placeholder="e.g. Flat 302, Green Enclave" required />
             </div>
 
-            <!-- Quick Patna Locality Selector Chips -->
+            <!-- Quick Bhilai Locality Selector Chips -->
             <div class="form-group">
               <label class="form-label">Street / Colony / Area *</label>
               <input type="text" id="address-street" class="form-control" placeholder="e.g. Bailey Road, Near Saguna More" required />
@@ -722,7 +691,7 @@
                 <h3 id="profile-display-phone" class="uc-profile-phone">+91 9876543210</h3>
               </div>
               <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
-                <span class="uc-verified-badge">✓ Verified Patna Customer</span>
+                <span class="uc-verified-badge">✓ Verified Bhilai & Durg Customer</span>
               </div>
             </div>
           </div>
@@ -859,7 +828,7 @@
           </div>
         </div>
 
-        <!-- Patna Emergency SOS Card -->
+        <!-- Bhilai Emergency SOS Card -->
         <div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border: 1.5px solid #fecaca; border-radius: 18px; padding: 18px; margin-bottom: 20px; box-shadow: 0 4px 14px rgba(220, 38, 38, 0.08);">
           <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
             <div style="width: 36px; height: 36px; border-radius: 50%; background: #dc2626; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);">
@@ -902,7 +871,7 @@
           <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border-light);">
             <div style="font-size: 13.5px; font-weight: 750; color: var(--ink);">How fast will the electrician arrive?</div>
             <div style="font-size: 12px; color: var(--ink-muted); margin-top: 4px; line-height: 1.4;">
-              For urgent bookings, our nearest verified partner reaches your doorstep within 30 to 45 minutes across Patna.
+              For urgent bookings, our nearest verified partner reaches your doorstep within 30 to 45 minutes across Bhilai & Durg.
             </div>
           </div>
 
@@ -1025,7 +994,7 @@
       </div>
     </div>
 
-    <!-- Patna Locality Selector Bottom Sheet Modal -->
+    <!-- Bhilai Locality Selector Bottom Sheet Modal -->
     <div id="area-modal" class="modal-overlay">
       <div class="modal-sheet">
         <div class="modal-sheet-handle"></div>
@@ -1131,7 +1100,7 @@
       <div class="modal-sheet">
         <div class="modal-sheet-handle"></div>
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-          <h3 style="font-size: 17px; font-weight: 850; color: #111827;">🎉 Patna Special Offer</h3>
+          <h3 style="font-size: 17px; font-weight: 850; color: #111827;">🎉 Bhilai Special Offer</h3>
           <button type="button" class="modal-close-btn" id="btn-close-offer-modal">✕</button>
         </div>
         <div style="background: #ecfdf5; border: 1.5px solid #a7f3d0; border-radius: 14px; padding: 16px; text-align: center; margin-bottom: 14px;">
@@ -1163,7 +1132,7 @@
           <div style="width: 34px;"></div>
         </div>
 
-        <!-- Map Search Box with Patna Suggestions -->
+        <!-- Map Search Box with Bhilai Suggestions -->
         <div class="map-search-wrap">
           <span style="font-size: 15px;">🔍</span>
           <input type="text" id="map-search-input" placeholder="Search Bhilai area (Civic Centre, Nehru Nagar)..." autocomplete="off" />

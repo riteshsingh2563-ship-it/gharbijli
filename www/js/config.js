@@ -17,11 +17,9 @@ const GharBijliConfig = {
   },
 
   api: {
-    baseUrl: (typeof window !== 'undefined' && (window.location.hostname === 'localhost' && window.location.port === '3000'))
+    baseUrl: (typeof window !== 'undefined' && window.location.hostname && window.location.hostname.endsWith('vercel.app'))
       ? ''
-      : (typeof window !== 'undefined' && window.location.hostname.endsWith('vercel.app'))
-        ? ''
-        : 'https://gharbijli-fwnz.vercel.app'
+      : 'https://gharbijli-fwnz.vercel.app'
   },
 
   /**
