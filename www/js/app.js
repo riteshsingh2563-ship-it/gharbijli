@@ -1797,6 +1797,11 @@
     const googleBtn = document.getElementById("btn-google-signin");
     if (googleBtn) {
       googleBtn.addEventListener("click", async () => {
+        const isMobileApp = (typeof window !== 'undefined' && (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.protocol === 'capacitor:'));
+        if (isMobileApp) {
+          openGoogleAuthModal();
+          return;
+        }
         try {
           showToast("Opening Google Sign-In...", "info");
           if (window.GharBijliFirebase && typeof window.GharBijliFirebase.signInWithGoogle === 'function') {
@@ -1808,14 +1813,7 @@
             openGoogleAuthModal();
           }
         } catch (err) {
-          if (err.code === 'auth/popup-closed-by-user') {
-            showToast("Google Sign-In was closed. Please try again.", "info");
-          } else if (err.code === 'auth/cancelled-popup-request') {
-            // Handled
-          } else {
-            // If popup is blocked in WebView, fallback to clean email modal
-            openGoogleAuthModal();
-          }
+          openGoogleAuthModal();
         }
       });
     }

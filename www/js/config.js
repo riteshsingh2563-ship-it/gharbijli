@@ -37,13 +37,14 @@ const GharBijliConfig = {
   },
 
   firebase: {
-    apiKey: "AIzaSyAZcv417lg-Ljz3RfUTlp5oZIBHpFGwfAE",
+    apiKey: "AIzaSyAmQMhpBSC2dEqIXNRYHu_xBDAgktOnb4c",
     authDomain: "ghar-bijli.firebaseapp.com",
     projectId: "ghar-bijli",
     storageBucket: "ghar-bijli.firebasestorage.app",
     messagingSenderId: "491757786499",
-    appId: "1:491757786499:web:4155e3dadb619880ccd2b6",
-    measurementId: "G-GHNT0MM607"
+    appId: "1:491757786499:android:d9ecd49db66645a3ccd2b6",
+    measurementId: "G-GHNT0MM607",
+    googleClientId: "491757786499-9co00a1jh1pesd8m0tonkkilo9abc06k.apps.googleusercontent.com"
   },
 
   auth: {
