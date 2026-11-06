@@ -132,7 +132,19 @@ class GharBijliFirebaseService {
       if (!nativeAuth?.signInWithGoogle) {
         throw new Error('Native Google sign-in is unavailable. Sync and install the updated Android app.');
       }
-      const result = await nativeAuth.signInWithGoogle();
+      let result;
+      try {
+        result = await nativeAuth.signInWithGoogle();
+      } catch (nativeError) {
+        const errorText = `${nativeError?.code || ''} ${nativeError?.message || String(nativeError)}`;
+        const isAccountReauthFailure = /\b16\b/.test(errorText) && /account reauth failed/i.test(errorText);
+        if (!isAccountReauthFailure) throw nativeError;
+
+        // Credential Manager can fail reauth for a selected cached Google account.
+        // Retry this specific error through the plugin's supported legacy Google Sign-In flow.
+        console.warn('[GharBijli] Google Credential Manager reauth failed; retrying with native Google Sign-In fallback.');
+        result = await nativeAuth.signInWithGoogle({ useCredentialManager: false });
+      }
       const idToken = result?.credential?.idToken;
       if (!idToken) throw new Error('Google sign-in did not return an ID token.');
       const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
