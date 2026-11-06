@@ -4,6 +4,16 @@
   "webDir": "www",
   "bundledWebRuntime": false,
   "backgroundColor": "#fffaf5",
+  "server": {
+    "allowNavigation": [
+      "accounts.google.com",
+      "*.google.com",
+      "*.googleapis.com",
+      "*.firebaseapp.com",
+      "ghar-bijli.firebaseapp.com",
+      "gharbijli-fwnz.vercel.app"
+    ]
+  },
   "android": {
     "allowMixedContent": false,
     "captureInput": true,

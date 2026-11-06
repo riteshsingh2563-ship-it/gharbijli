@@ -60,9 +60,16 @@ class GharBijliFirebaseService {
     try {
       const stored = localStorage.getItem("gb_current_user");
       if (stored) {
-        this.currentUser = JSON.parse(stored);
+        const u = JSON.parse(stored);
+        if (u && u.uid && (u.uid.startsWith("gb_demo_") || u.uid.startsWith("test-user-"))) {
+          localStorage.removeItem("gb_current_user");
+          this.currentUser = null;
+        } else {
+          this.currentUser = u;
+        }
       }
     } catch (e) {
+      localStorage.removeItem("gb_current_user");
       this.currentUser = null;
     }
     setTimeout(() => this.notifyAuthListeners(), 100);
@@ -112,10 +119,9 @@ class GharBijliFirebaseService {
    */
   async signInWithGoogle() {
     if (typeof firebase === 'undefined' || !firebase.auth) {
-      throw new Error("Google Authentication service is loading. Please retry in a moment.");
+      throw new Error("Authentication service initializing, please tap again in a moment.");
     }
     
-    // Ensure app initialized
     if (!firebase.apps.length && this.config && this.config.firebase) {
       firebase.initializeApp(this.config.firebase);
     }
@@ -140,7 +146,6 @@ class GharBijliFirebaseService {
         this.currentUser = verifiedUser;
         localStorage.setItem('gb_current_user', JSON.stringify(verifiedUser));
 
-        // Sync to MongoDB Atlas backend
         try {
           await this.apiRequest('/api/auth/google', {
             method: 'POST',
@@ -159,7 +164,12 @@ class GharBijliFirebaseService {
         return verifiedUser;
       }
     } catch (popupErr) {
-      console.warn("[GharBijli] Google popup auth error:", popupErr.message);
+      console.warn("[GharBijli] Google popup auth error:", popupErr.code, popupErr.message);
+      if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/operation-not-supported-in-this-environment') {
+        // Fallback to redirect inside app
+        await firebase.auth().signInWithRedirect(provider);
+        return null;
+      }
       throw popupErr;
     }
   }

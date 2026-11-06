@@ -1797,23 +1797,22 @@
     const googleBtn = document.getElementById("btn-google-signin");
     if (googleBtn) {
       googleBtn.addEventListener("click", async () => {
-        const isMobileApp = (typeof window !== 'undefined' && (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.protocol === 'capacitor:'));
-        if (isMobileApp) {
-          openGoogleAuthModal();
-          return;
-        }
         try {
-          showToast("Opening Google Sign-In...", "info");
+          showToast("Opening Google Account Chooser...", "info");
           if (window.GharBijliFirebase && typeof window.GharBijliFirebase.signInWithGoogle === 'function') {
             const user = await window.GharBijliFirebase.signInWithGoogle();
-            updateUserNavIndicator();
-            showToast(`Welcome ${user.displayName}! Signed in via Google`, "success");
-            navigateTo("home", false);
-          } else {
-            openGoogleAuthModal();
+            if (user) {
+              updateUserNavIndicator();
+              showToast(`Welcome ${user.displayName}! Signed in with Google`, "success");
+              navigateTo("home", false);
+            }
           }
         } catch (err) {
-          openGoogleAuthModal();
+          if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+            showToast("Google sign-in cancelled.", "info");
+          } else {
+            showToast(`Google Sign-In: ${err.message || "Failed to connect"}`, "error");
+          }
         }
       });
     }
@@ -2164,6 +2163,38 @@
   }
 
   function init() {
+    // Check if returning from Google Auth redirect
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+      firebase.auth().getRedirectResult().then(async (result) => {
+        if (result && result.user) {
+          const u = result.user;
+          const verifiedUser = {
+            uid: u.uid,
+            email: u.email,
+            displayName: u.displayName || (u.email ? u.email.split('@')[0] : 'User'),
+            photoURL: u.photoURL || '',
+            phoneNumber: u.phoneNumber || '',
+            authProvider: 'google'
+          };
+          window.GharBijliFirebase.currentUser = verifiedUser;
+          localStorage.setItem('gb_current_user', JSON.stringify(verifiedUser));
+          const baseUrl = (window.GharBijliConfig && window.GharBijliConfig.api && window.GharBijliConfig.api.baseUrl) || '';
+          await fetch(`${baseUrl}/api/auth/google`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: verifiedUser.email,
+              name: verifiedUser.displayName,
+              picture: verifiedUser.photoURL,
+              sub: verifiedUser.uid
+            })
+          }).catch(() => {});
+          updateUserNavIndicator();
+          showToast(`Welcome ${verifiedUser.displayName}! Signed in with Google`, "success");
+          navigateTo("home", false);
+        }
+      }).catch((e) => console.warn("[GharBijli] Redirect auth check:", e.message));
+    }
     loadServicesFromBackend();
     loadAppConfigFromBackend();
     initCapacitorHooks();
