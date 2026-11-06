@@ -1,3 +1,16 @@
+
+  window.onGoogleLoginSuccess = function(user) {
+    const bottomNav = document.querySelector(".bottom-nav");
+    const floatMenu = document.getElementById("btn-floating-menu");
+    const backLoginBtn = document.getElementById("btn-back-login");
+    if (bottomNav) bottomNav.style.display = "flex";
+    if (floatMenu) floatMenu.style.display = "inline-flex";
+    if (backLoginBtn) backLoginBtn.style.display = "flex";
+    updateUserNavIndicator();
+    showToast(`Welcome ${user.displayName}! Signed in with Google`, "success");
+    navigateTo("home", false);
+  };
+
 /**
  * GharBijli Android Application Controller
  * High-End Mobile Consumer UI, Navigation, Instant Search, Categorization, Booking & Tracking
@@ -1798,20 +1811,18 @@
     if (googleBtn) {
       googleBtn.addEventListener("click", async () => {
         try {
-          showToast("Opening Google Account Chooser...", "info");
+          showToast("Connecting with Google...", "info");
           if (window.GharBijliFirebase && typeof window.GharBijliFirebase.signInWithGoogle === 'function') {
             const user = await window.GharBijliFirebase.signInWithGoogle();
             if (user) {
-              updateUserNavIndicator();
-              showToast(`Welcome ${user.displayName}! Signed in with Google`, "success");
-              navigateTo("home", false);
+              window.onGoogleLoginSuccess(user);
             }
           }
         } catch (err) {
           if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
             showToast("Google sign-in cancelled.", "info");
           } else {
-            showToast(`Google Sign-In: ${err.message || "Failed to connect"}`, "error");
+            showToast(`Google Sign-In: ${err.message || "Connection failed"}`, "error");
           }
         }
       });
@@ -2163,49 +2174,35 @@
   }
 
   function init() {
-    // Check if returning from Google Auth redirect
-    if (typeof firebase !== 'undefined' && firebase.auth) {
-      firebase.auth().getRedirectResult().then(async (result) => {
-        if (result && result.user) {
-          const u = result.user;
-          const verifiedUser = {
-            uid: u.uid,
-            email: u.email,
-            displayName: u.displayName || (u.email ? u.email.split('@')[0] : 'User'),
-            photoURL: u.photoURL || '',
-            phoneNumber: u.phoneNumber || '',
-            authProvider: 'google'
-          };
-          window.GharBijliFirebase.currentUser = verifiedUser;
-          localStorage.setItem('gb_current_user', JSON.stringify(verifiedUser));
-          const baseUrl = (window.GharBijliConfig && window.GharBijliConfig.api && window.GharBijliConfig.api.baseUrl) || '';
-          await fetch(`${baseUrl}/api/auth/google`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email: verifiedUser.email,
-              name: verifiedUser.displayName,
-              picture: verifiedUser.photoURL,
-              sub: verifiedUser.uid
-            })
-          }).catch(() => {});
-          updateUserNavIndicator();
-          showToast(`Welcome ${verifiedUser.displayName}! Signed in with Google`, "success");
-          navigateTo("home", false);
-        }
-      }).catch((e) => console.warn("[GharBijli] Redirect auth check:", e.message));
-    }
-    loadServicesFromBackend();
-    loadAppConfigFromBackend();
     initCapacitorHooks();
     bindEvents();
+
     const bottomNav = document.querySelector(".bottom-nav");
-    if (bottomNav) bottomNav.style.display = "flex";
     const floatMenu = document.getElementById("btn-floating-menu");
     const stickyDiscount = document.getElementById("sticky-bottom-discount");
-    if (floatMenu) floatMenu.style.display = "inline-flex";
-    if (stickyDiscount) stickyDiscount.style.display = "none";
-    renderHomeScreen();
+    const backLoginBtn = document.getElementById("btn-back-login");
+
+    // Check if user is already genuinely authenticated with Google
+    const user = window.GharBijliFirebase ? window.GharBijliFirebase.currentUser : null;
+    const isAuthenticUser = user && user.email && !user.uid.startsWith("gb_demo_") && !user.uid.startsWith("test-user-");
+
+    if (isAuthenticUser) {
+      if (bottomNav) bottomNav.style.display = "flex";
+      if (floatMenu) floatMenu.style.display = "inline-flex";
+      if (stickyDiscount) stickyDiscount.style.display = "none";
+      if (backLoginBtn) backLoginBtn.style.display = "flex";
+      renderHomeScreen();
+      loadServicesFromBackend();
+      loadAppConfigFromBackend();
+      navigateTo("home", false);
+    } else {
+      // DEFAULT SCREEN IS LOGIN!
+      if (bottomNav) bottomNav.style.display = "none";
+      if (floatMenu) floatMenu.style.display = "none";
+      if (stickyDiscount) stickyDiscount.style.display = "none";
+      if (backLoginBtn) backLoginBtn.style.display = "none";
+      navigateTo("login", false);
+    }
 
     // Query parameter triggers for automated testing
     const urlParams = new URLSearchParams(window.location.search);

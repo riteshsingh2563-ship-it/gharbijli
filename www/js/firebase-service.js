@@ -20,7 +20,6 @@ class GharBijliFirebaseService {
   }
 
   async init() {
-    // Check if live Firebase SDK is loaded on window and config is populated
     const isConfigured = this.config.firebase && 
                          this.config.firebase.apiKey && 
                          !this.config.firebase.apiKey.includes("PLACEHOLDER");
@@ -34,13 +33,30 @@ class GharBijliFirebaseService {
         this.db = firebase.firestore();
         this.isLiveFirebase = true;
 
-        this.auth.onAuthStateChanged((user) => {
-          this.currentUser = user ? {
-            uid: user.uid,
-            phoneNumber: user.phoneNumber,
-            displayName: user.displayName || ""
-          } : null;
-          this.notifyAuthListeners();
+        // Auto-check redirect result on startup (for in-app mobile Google Sign-In)
+        this.auth.getRedirectResult().then(async (result) => {
+          if (result && result.user) {
+            console.log("[GharBijli] Redirect login successful:", result.user.email);
+            await this.handleAuthSuccess(result.user);
+            if (typeof window.onGoogleLoginSuccess === 'function') {
+              window.onGoogleLoginSuccess(this.currentUser);
+            }
+          }
+        }).catch((err) => {
+          console.warn("[GharBijli] Redirect auth check:", err.message);
+        });
+
+        // Listen for live auth state changes
+        this.auth.onAuthStateChanged(async (user) => {
+          if (user) {
+            await this.handleAuthSuccess(user);
+          } else {
+            if (this.currentUser && this.currentUser.authProvider === 'google') {
+              this.currentUser = null;
+              localStorage.removeItem("gb_current_user");
+            }
+            this.notifyAuthListeners();
+          }
         });
 
         console.log("[GharBijli] Initialized with live Firebase backend.");
@@ -49,7 +65,6 @@ class GharBijliFirebaseService {
         this.initLocalAdapter();
       }
     } else {
-      console.log("[GharBijli] Using backend API & local persistent adapter.");
       this.initLocalAdapter();
     }
   }
@@ -118,12 +133,15 @@ class GharBijliFirebaseService {
    * Triggers official Google account selector / popup
    */
   async signInWithGoogle() {
-    if (typeof firebase === 'undefined' || !firebase.auth) {
-      throw new Error("Authentication service initializing, please tap again in a moment.");
-    }
-    
-    if (!firebase.apps.length && this.config && this.config.firebase) {
-      firebase.initializeApp(this.config.firebase);
+    if (!this.auth) {
+      if (typeof firebase !== 'undefined' && firebase.auth) {
+        if (!firebase.apps.length && this.config && this.config.firebase) {
+          firebase.initializeApp(this.config.firebase);
+        }
+        this.auth = firebase.auth();
+      } else {
+        throw new Error("Authentication service is initializing. Please tap again in a moment.");
+      }
     }
 
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -131,47 +149,57 @@ class GharBijliFirebaseService {
     provider.addScope('profile');
     provider.setCustomParameters({ prompt: 'select_account' });
 
-    try {
-      const result = await firebase.auth().signInWithPopup(provider);
+    const isMobileApp = (typeof window !== 'undefined' && (
+      window.location.protocol === 'file:' || 
+      window.location.hostname === 'localhost' || 
+      window.location.protocol === 'capacitor:' ||
+      window.Capacitor !== undefined
+    ));
+
+    if (isMobileApp) {
+      // In mobile app WebView, use signInWithRedirect so it opens inside app without popup blocking
+      console.log("[GharBijli] Mobile environment: triggering in-app Google redirect...");
+      await this.auth.signInWithRedirect(provider);
+      return null;
+    } else {
+      // Desktop web: use standard popup
+      const result = await this.auth.signInWithPopup(provider);
       if (result && result.user) {
-        const u = result.user;
-        const verifiedUser = {
-          uid: u.uid,
-          email: u.email,
-          displayName: u.displayName || (u.email ? u.email.split('@')[0] : 'User'),
-          photoURL: u.photoURL || '',
-          phoneNumber: u.phoneNumber || '',
-          authProvider: 'google'
-        };
-        this.currentUser = verifiedUser;
-        localStorage.setItem('gb_current_user', JSON.stringify(verifiedUser));
-
-        try {
-          await this.apiRequest('/api/auth/google', {
-            method: 'POST',
-            body: JSON.stringify({
-              email: verifiedUser.email,
-              name: verifiedUser.displayName,
-              picture: verifiedUser.photoURL,
-              sub: verifiedUser.uid
-            })
-          });
-        } catch (syncErr) {
-          console.warn("[GharBijli] Mongo user sync note:", syncErr.message);
-        }
-
-        this.notifyAuthListeners();
-        return verifiedUser;
+        return await this.handleAuthSuccess(result.user);
       }
-    } catch (popupErr) {
-      console.warn("[GharBijli] Google popup auth error:", popupErr.code, popupErr.message);
-      if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/operation-not-supported-in-this-environment') {
-        // Fallback to redirect inside app
-        await firebase.auth().signInWithRedirect(provider);
-        return null;
-      }
-      throw popupErr;
     }
+  }
+
+  
+  async handleAuthSuccess(u) {
+    const verifiedUser = {
+      uid: u.uid,
+      email: u.email,
+      displayName: u.displayName || (u.email ? u.email.split('@')[0] : "Customer"),
+      photoURL: u.photoURL || "",
+      phoneNumber: u.phoneNumber || "",
+      authProvider: "google"
+    };
+    this.currentUser = verifiedUser;
+    localStorage.setItem("gb_current_user", JSON.stringify(verifiedUser));
+
+    // Sync to MongoDB Atlas backend
+    try {
+      await this.apiRequest('/api/auth/google', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: verifiedUser.email,
+          name: verifiedUser.displayName,
+          picture: verifiedUser.photoURL,
+          sub: verifiedUser.uid
+        })
+      });
+    } catch (syncErr) {
+      console.warn("[GharBijli] Mongo auth sync note:", syncErr.message);
+    }
+
+    this.notifyAuthListeners();
+    return verifiedUser;
   }
 
   notifyAuthListeners() {
