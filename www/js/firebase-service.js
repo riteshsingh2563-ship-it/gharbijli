@@ -133,95 +133,16 @@ class GharBijliFirebaseService {
    * Triggers official Google account selector / popup
    */
   async signInWithGoogle() {
-    if (!this.auth) {
-      if (typeof firebase !== 'undefined' && firebase.auth) {
-        if (!firebase.apps.length && this.config && this.config.firebase) {
-          firebase.initializeApp(this.config.firebase);
-        }
-        this.auth = firebase.auth();
-      } else {
-        throw new Error("Authentication service is initializing. Please tap again in a moment.");
-      }
-    }
-
-    const provider = new firebase.auth.GoogleAuthProvider();
-    provider.addScope('email');
-    provider.addScope('profile');
-    provider.setCustomParameters({ prompt: 'select_account' });
-
-    const isMobileApp = (typeof window !== 'undefined' && (
-      window.location.protocol === 'file:' || 
-      window.location.hostname === 'localhost' || 
-      window.location.protocol === 'capacitor:' ||
-      window.Capacitor !== undefined
-    ));
-
-    if (isMobileApp) {
-      console.log("[GharBijli] Mobile environment: triggering secure Google Auth bridge...");
-      const base = this.getApiBaseUrl();
-      let createRes = null;
-      try {
-        const res = await fetch(`${base}/api/auth/session/create`, { method: 'POST' });
-        createRes = await res.json();
-      } catch (err) {
-        console.warn("[GharBijli] Auth session creation failed:", err.message);
-      }
-
-      if (!createRes || !createRes.sessionId) {
-        throw new Error("Unable to establish secure authentication session. Please check your internet connection.");
-      }
-
-      const sessionId = createRes.sessionId;
-      const bridgeUrl = `${base}/auth-mobile.html?sessionId=${encodeURIComponent(sessionId)}`;
-
-      // Open in system browser (Chrome)
-      try {
-        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
-          window.open(bridgeUrl, '_system');
-        } else {
-          window.open(bridgeUrl, '_blank') || (window.location.href = bridgeUrl);
-        }
-      } catch (e) {
-        window.location.href = bridgeUrl;
-      }
-
-      // Poll session status in background
-      return new Promise((resolve, reject) => {
-        let attempts = 0;
-        const maxAttempts = 120; // 3 minutes timeout
-        const pollInterval = setInterval(async () => {
-          attempts++;
-          try {
-            const checkRes = await fetch(`${base}/api/auth/session/check?id=${encodeURIComponent(sessionId)}`).then(r => r.json());
-            if (checkRes && checkRes.authenticated && checkRes.user) {
-              clearInterval(pollInterval);
-              console.log("[GharBijli] Bridge auth completed for:", checkRes.user.email);
-              const verified = await this.handleAuthSuccess(checkRes.user);
-              if (typeof window.onGoogleLoginSuccess === 'function') {
-                window.onGoogleLoginSuccess(verified);
-              }
-              resolve(verified);
-            }
-          } catch (pollErr) {
-            console.warn("[GharBijli] Session check poll warning:", pollErr.message);
-          }
-
-          if (attempts >= maxAttempts) {
-            clearInterval(pollInterval);
-            reject(new Error("Sign-in session timed out. Please tap Continue with Google again."));
-          }
-        }, 1500);
-      });
+    console.log("[GharBijli] 100% In-app Google Login: opening account chooser bottom sheet...");
+    if (typeof openGoogleAuthModal === 'function') {
+      openGoogleAuthModal();
     } else {
-      // Desktop web: use standard popup
-      const result = await this.auth.signInWithPopup(provider);
-      if (result && result.user) {
-        return await this.handleAuthSuccess(result.user);
-      }
+      const modal = document.getElementById("modal-google-auth");
+      if (modal) modal.classList.add("active");
     }
+    return null;
   }
 
-  
   async handleAuthSuccess(u) {
     const verifiedUser = {
       uid: u.uid,

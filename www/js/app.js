@@ -843,7 +843,7 @@
 
   async function handlePhoneSubmit(e) {
     e.preventDefault();
-    const phoneInput = document.getElementById("login-phone-number");
+    const phoneInput = document.getElementById("login-phone-number") || document.getElementById("input-phone");
     const rawDigits = phoneInput.value.replace(/\D/g, "");
 
     if (rawDigits.length !== 10) {
@@ -1809,29 +1809,16 @@
     // Google Sign-In Trigger & Modal Listeners
     const googleBtn = document.getElementById("btn-google-signin");
     if (googleBtn) {
-      googleBtn.addEventListener("click", async () => {
-        const origContent = googleBtn.innerHTML;
-        try {
-          googleBtn.disabled = true;
-          googleBtn.style.opacity = "0.75";
-          googleBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke="#ff6f00" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4"></circle></svg> <span>Waiting for Google login...</span>`;
-          showToast("Opening Google Account Chooser...", "info");
-          if (window.GharBijliFirebase && typeof window.GharBijliFirebase.signInWithGoogle === 'function') {
-            const user = await window.GharBijliFirebase.signInWithGoogle();
-            if (user) {
-              window.onGoogleLoginSuccess(user);
-            }
-          }
-        } catch (err) {
-          googleBtn.disabled = false;
-          googleBtn.style.opacity = "1";
-          googleBtn.innerHTML = origContent;
-          if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
-            showToast("Google sign-in cancelled.", "info");
-          } else {
-            showToast(`Google Sign-In: ${err.message || "Connection failed"}`, "error");
-          }
-        }
+      googleBtn.addEventListener("click", () => {
+        openGoogleAuthModal();
+      });
+    }
+
+    const toggleCustomGoogleBtn = document.getElementById("btn-toggle-custom-google");
+    const drawerCustomGoogle = document.getElementById("drawer-custom-google");
+    if (toggleCustomGoogleBtn && drawerCustomGoogle) {
+      toggleCustomGoogleBtn.addEventListener("click", () => {
+        drawerCustomGoogle.style.display = (drawerCustomGoogle.style.display === "none" || !drawerCustomGoogle.style.display) ? "block" : "none";
       });
     }
 
