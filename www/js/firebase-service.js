@@ -1,7 +1,7 @@
 /**
  * GharBijli Firebase & Central Backend Service Adapter
  * Secure abstraction layer connecting to GharBijli REST Backend API,
- * Cloud Firestore, and Phone Auth with local fallback.
+ * Firebase Authentication with the GharBijli REST API.
  */
 
 class GharBijliFirebaseService {
@@ -10,7 +10,6 @@ class GharBijliFirebaseService {
     this.isLiveFirebase = false;
     this.hasBackendApi = true;
     this.auth = null;
-    this.db = null;
     this.currentUser = null;
     this.authListeners = [];
     this.recaptchaVerifier = null;
@@ -30,26 +29,15 @@ class GharBijliFirebaseService {
           firebase.initializeApp(this.config.firebase);
         }
         this.auth = firebase.auth();
-        this.db = firebase.firestore();
         this.isLiveFirebase = true;
-
-        // Auto-check redirect result on startup (for in-app mobile Google Sign-In)
-        this.auth.getRedirectResult().then(async (result) => {
-          if (result && result.user) {
-            console.log("[GharBijli] Redirect login successful:", result.user.email);
-            await this.handleAuthSuccess(result.user);
-            if (typeof window.onGoogleLoginSuccess === 'function') {
-              window.onGoogleLoginSuccess(this.currentUser);
-            }
-          }
-        }).catch((err) => {
-          console.warn("[GharBijli] Redirect auth check:", err.message);
-        });
 
         // Listen for live auth state changes
         this.auth.onAuthStateChanged(async (user) => {
           if (user) {
             await this.handleAuthSuccess(user);
+            if (typeof window.onGoogleLoginSuccess === 'function') {
+              window.onGoogleLoginSuccess(this.currentUser);
+            }
           } else {
             if (this.currentUser && this.currentUser.authProvider === 'google') {
               this.currentUser = null;
@@ -71,22 +59,9 @@ class GharBijliFirebaseService {
 
   initLocalAdapter() {
     this.isLiveFirebase = false;
-    // Load persisted local user session
-    try {
-      const stored = localStorage.getItem("gb_current_user");
-      if (stored) {
-        const u = JSON.parse(stored);
-        if (u && u.uid && (u.uid.startsWith("gb_demo_") || u.uid.startsWith("test-user-"))) {
-          localStorage.removeItem("gb_current_user");
-          this.currentUser = null;
-        } else {
-          this.currentUser = u;
-        }
-      }
-    } catch (e) {
-      localStorage.removeItem("gb_current_user");
-      this.currentUser = null;
-    }
+    // A cached profile is not proof of authentication; require Firebase to restore a session.
+    localStorage.removeItem('gb_current_user');
+    this.currentUser = null;
     setTimeout(() => this.notifyAuthListeners(), 100);
   }
 
@@ -103,19 +78,37 @@ class GharBijliFirebaseService {
   async apiRequest(endpoint, options = {}) {
     const base = this.getApiBaseUrl();
     const fullUrl = endpoint.startsWith('http') ? endpoint : `${base}${endpoint}`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
     try {
+      const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+      if (this.config.firebase && this.config.firebase.apiKey) {
+        headers['X-Firebase-Api-Key'] = this.config.firebase.apiKey;
+      }
+      if (this.auth && this.auth.currentUser) {
+        headers.Authorization = `Bearer ${await this.auth.currentUser.getIdToken()}`;
+      }
       const res = await fetch(fullUrl, {
-        headers: { 'Content-Type': 'application/json' },
+        headers,
+        signal: controller.signal,
         ...options
       });
-      if (!res.ok) {
-        const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.error || `HTTP ${res.status}`);
+      const contentType = res.headers.get('content-type') || '';
+      const responseText = await res.text();
+      let data;
+      if (contentType.includes('application/json')) {
+        try { data = responseText ? JSON.parse(responseText) : {}; }
+        catch (_) { throw new Error(`Server returned invalid JSON (HTTP ${res.status})`); }
+      } else {
+        throw new Error(`Server returned an unexpected response (HTTP ${res.status})`);
       }
-      return await res.json();
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      return data;
     } catch (err) {
       console.warn(`[GharBijli API] Call to ${fullUrl} failed:`, err.message);
       throw err;
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
@@ -133,14 +126,22 @@ class GharBijliFirebaseService {
    * Triggers official Google account selector / popup
    */
   async signInWithGoogle() {
-    console.log("[GharBijli] 100% In-app Google Login: opening account chooser bottom sheet...");
-    if (typeof openGoogleAuthModal === 'function') {
-      openGoogleAuthModal();
-    } else {
-      const modal = document.getElementById("modal-google-auth");
-      if (modal) modal.classList.add("active");
+    const nativeAuth = window.Capacitor?.Plugins?.FirebaseAuthentication ||
+      (window.Capacitor?.registerPlugin ? window.Capacitor.registerPlugin('FirebaseAuthentication') : null);
+    if (window.Capacitor?.isNativePlatform?.()) {
+      if (!nativeAuth?.signInWithGoogle) {
+        throw new Error('Native Google sign-in is unavailable. Sync and install the updated Android app.');
+      }
+      const result = await nativeAuth.signInWithGoogle();
+      const idToken = result?.credential?.idToken;
+      if (!idToken) throw new Error('Google sign-in did not return an ID token.');
+      const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
+      const signedIn = await this.auth.signInWithCredential(credential);
+      return this.handleAuthSuccess(signedIn.user);
     }
-    return null;
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const signedIn = await this.auth.signInWithPopup(provider);
+    return this.handleAuthSuccess(signedIn.user);
   }
 
   async handleAuthSuccess(u) {
@@ -157,19 +158,21 @@ class GharBijliFirebaseService {
 
     // Sync to MongoDB Atlas backend
     try {
-      await this.apiRequest('/api/auth/google', {
+      const idToken = this.auth && this.auth.currentUser ? await this.auth.currentUser.getIdToken() : null;
+      if (!idToken) throw new Error('Missing Firebase ID token');
+      const sync = await this.apiRequest('/api/auth/google', {
         method: 'POST',
         body: JSON.stringify({
-          email: verifiedUser.email,
-          name: verifiedUser.displayName,
-          picture: verifiedUser.photoURL,
-          sub: verifiedUser.uid
+          idToken,
+          apiKey: this.config.firebase.apiKey
         })
       });
+      if (sync.user) Object.assign(verifiedUser, sync.user, { uid: u.uid, authProvider: 'google' });
     } catch (syncErr) {
       console.warn("[GharBijli] Mongo auth sync note:", syncErr.message);
     }
 
+    localStorage.setItem("gb_current_user", JSON.stringify(verifiedUser));
     this.notifyAuthListeners();
     return verifiedUser;
   }
@@ -190,6 +193,8 @@ class GharBijliFirebaseService {
    * @param {string} recaptchaContainerId - ID of DOM element for reCAPTCHA
    */
   async requestPhoneOtp(rawPhoneNumber, recaptchaContainerId = "recaptcha-container") {
+    throw new Error('Phone sign-in is disabled. Add your mobile number in profile setup instead.');
+    /* legacy handler retained temporarily for old installations */
     let cleaned = rawPhoneNumber.replace(/\D/g, '');
     if (cleaned.length === 10) {
       cleaned = "+91" + cleaned;
@@ -270,6 +275,8 @@ class GharBijliFirebaseService {
    * @param {string} code - 6 digit verification code
    */
   async verifyOtpCode(code) {
+    throw new Error('OTP sign-in is disabled. Sign in with Google instead.');
+    /* legacy handler retained temporarily for old installations */
     if (!this.confirmationResult) {
       throw new Error("No active OTP request found. Please request a new code.");
     }
@@ -343,37 +350,17 @@ class GharBijliFirebaseService {
       accountStatus: "active"
     };
 
-    // Try backend API
+    // The REST API and MongoDB are the canonical profile store.
     try {
       await this.apiRequest('/api/auth/profile', {
         method: 'POST',
         body: JSON.stringify(profile)
       });
     } catch (e) {}
-
-    if (this.isLiveFirebase) {
-      try {
-        const userRef = this.db.collection("users").doc(user.uid);
-        const snap = await userRef.get();
-        if (!snap.exists) {
-          profile.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-          await userRef.set(profile);
-        } else {
-          await userRef.set(profile, { merge: true });
-        }
-      } catch (err) {
-        console.warn("Failed to sync profile to Firestore:", err);
-      }
-    } else {
-      const allUsers = JSON.parse(localStorage.getItem("gb_users_db") || "{}");
-      if (!allUsers[user.uid]) {
-        profile.createdAt = new Date().toISOString();
-      } else {
-        profile.createdAt = allUsers[user.uid].createdAt;
-      }
-      allUsers[user.uid] = profile;
-      localStorage.setItem("gb_users_db", JSON.stringify(allUsers));
-    }
+    const allUsers = JSON.parse(localStorage.getItem("gb_users_db") || "{}");
+    profile.createdAt = allUsers[user.uid]?.createdAt || new Date().toISOString();
+    allUsers[user.uid] = profile;
+    localStorage.setItem("gb_users_db", JSON.stringify(allUsers));
   }
 
   /**
@@ -473,10 +460,18 @@ class GharBijliFirebaseService {
     return this.currentUser;
   }
 
+  async getUserProfile() {
+    if (!this.currentUser) return null;
+    const params = new URLSearchParams({ uid: this.currentUser.uid });
+    const result = await this.apiRequest(`/api/auth/profile?${params.toString()}`);
+    return result.user || null;
+  }
+
   async getCustomerBookings() {
     if (!this.currentUser) return [];
 
     // 1. Try Backend API
+    let apiError = null;
     try {
       let queryUrl = '/api/bookings?';
       if (this.currentUser.uid) queryUrl += `customerUid=${encodeURIComponent(this.currentUser.uid)}&`;
@@ -491,27 +486,16 @@ class GharBijliFirebaseService {
       }
     } catch (apiErr) {
       console.warn("[GharBijli] API getCustomerBookings fallback:", apiErr.message);
+      apiError = apiErr;
     }
 
-    // 2. Firebase SDK Fallback
-    if (this.isLiveFirebase) {
-      const snap = await this.db.collection("bookings")
-        .where("customerUid", "==", this.currentUser.uid)
-        .orderBy("createdAt", "desc")
-        .get();
-
-      return snap.docs.map(doc => {
-        const data = doc.data();
-        return {
-          ...data,
-          createdAt: data.createdAt && data.createdAt.toDate ? data.createdAt.toDate().toISOString() : data.createdAt,
-          updatedAt: data.updatedAt && data.updatedAt.toDate ? data.updatedAt.toDate().toISOString() : data.updatedAt
-        };
-      });
-    } else {
-      const bookings = JSON.parse(localStorage.getItem("gb_bookings_db") || "[]");
-      return bookings.filter(b => b.customerUid === this.currentUser.uid || b.customerPhone === this.currentUser.phoneNumber);
-    }
+    const bookings = JSON.parse(localStorage.getItem("gb_bookings_db") || "[]");
+    const cached = bookings.filter(b => b.customerUid === this.currentUser.uid ||
+      (this.currentUser.email && b.customerEmail === this.currentUser.email) ||
+      (this.currentUser.phoneNumber && b.customerPhone === this.currentUser.phoneNumber));
+    if (cached.length) return cached;
+    if (apiError) throw apiError;
+    return [];
   }
 
   /**
@@ -529,19 +513,8 @@ class GharBijliFirebaseService {
       // Fall through to local/Firebase
     }
 
-    if (this.isLiveFirebase) {
-      const doc = await this.db.collection("bookings").doc(bookingId).get();
-      if (!doc.exists) return null;
-      const data = doc.data();
-      return {
-        ...data,
-        createdAt: data.createdAt && data.createdAt.toDate ? data.createdAt.toDate().toISOString() : data.createdAt,
-        updatedAt: data.updatedAt && data.updatedAt.toDate ? data.updatedAt.toDate().toISOString() : data.updatedAt
-      };
-    } else {
-      const bookings = JSON.parse(localStorage.getItem("gb_bookings_db") || "[]");
-      return bookings.find(b => b.bookingId === bookingId) || null;
-    }
+    const bookings = JSON.parse(localStorage.getItem("gb_bookings_db") || "[]");
+    return bookings.find(b => b.bookingId === bookingId) || null;
   }
 
   /**
@@ -561,11 +534,7 @@ class GharBijliFirebaseService {
         this.saveToLocalCache(apiResp.booking);
         return apiResp.booking;
       }
-    } catch (apiErr) {
-      if (apiErr.message && apiErr.message.includes("Cannot cancel")) {
-        throw apiErr;
-      }
-    }
+    } catch (apiErr) { throw apiErr; }
 
     const booking = await this.getBookingById(bookingId);
     if (!booking) throw new Error("Booking not found");
@@ -581,15 +550,6 @@ class GharBijliFirebaseService {
       timestamp: nowIso,
       note: "Cancelled by customer. Reason: " + (reason || "Customer request")
     };
-
-    if (this.isLiveFirebase) {
-      await this.db.collection("bookings").doc(bookingId).update({
-        bookingStatus: "CANCELLED",
-        cancelledAt: firebase.firestore.FieldValue.serverTimestamp(),
-        cancellationReason: reason || "Customer request",
-        statusHistory: firebase.firestore.FieldValue.arrayUnion(historyEntry)
-      });
-    }
 
     const bookings = JSON.parse(localStorage.getItem("gb_bookings_db") || "[]");
     const idx = bookings.findIndex(b => b.bookingId === bookingId);
@@ -624,7 +584,7 @@ class GharBijliFirebaseService {
         this.saveToLocalCache(apiResp.booking);
         return apiResp.booking;
       }
-    } catch (apiErr) {}
+    } catch (apiErr) { throw apiErr; }
 
     const nowIso = new Date().toISOString();
     const historyEntry = {
@@ -647,16 +607,12 @@ class GharBijliFirebaseService {
       updates.paymentStatus = "COLLECTED";
     }
 
-    if (this.isLiveFirebase) {
-      await this.db.collection("bookings").doc(bookingId).update(updates);
-    } else {
-      const bookings = JSON.parse(localStorage.getItem("gb_bookings_db") || "[]");
-      const idx = bookings.findIndex(b => b.bookingId === bookingId);
-      if (idx !== -1) {
-        Object.assign(bookings[idx], updates);
-        bookings[idx].statusHistory.push(historyEntry);
-        localStorage.setItem("gb_bookings_db", JSON.stringify(bookings));
-      }
+    const bookings = JSON.parse(localStorage.getItem("gb_bookings_db") || "[]");
+    const idx = bookings.findIndex(b => b.bookingId === bookingId);
+    if (idx !== -1) {
+      Object.assign(bookings[idx], updates);
+      bookings[idx].statusHistory.push(historyEntry);
+      localStorage.setItem("gb_bookings_db", JSON.stringify(bookings));
     }
   }
 
@@ -664,23 +620,10 @@ class GharBijliFirebaseService {
    * Submit Emergency SOS
    */
   async submitEmergencySos(payload) {
-    try {
-      const res = await this.apiRequest('/api/emergency', {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
-      return res;
-    } catch (e) {
-      console.warn("Emergency API fallback:", e.message);
-      return {
-        success: true,
-        message: "Emergency request recorded locally",
-        ticket: {
-          ticketId: "GB-SOS-" + Math.floor(1000 + Math.random() * 9000),
-          status: "DISPATCHED_PRIORITY"
-        }
-      };
-    }
+    return this.apiRequest('/api/emergency', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
   }
 }
 

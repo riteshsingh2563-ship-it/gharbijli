@@ -184,13 +184,14 @@ class BackendStore {
     try {
       if (!mongoDb) return;
       const remoteData = await mongoDb.loadAllFromMongo();
-      if (remoteData && (remoteData.appConfig || remoteData.services)) {
+      if (remoteData && (remoteData.appConfig || remoteData.services || remoteData.users)) {
         if (remoteData.appConfig) this.data.appConfig = remoteData.appConfig;
         if (remoteData.categories && remoteData.categories.length) this.data.categories = remoteData.categories;
         if (remoteData.services && remoteData.services.length) this.data.services = remoteData.services;
         if (remoteData.technicians && remoteData.technicians.length) this.data.technicians = remoteData.technicians;
         if (remoteData.bookings && remoteData.bookings.length) this.data.bookings = remoteData.bookings;
         if (remoteData.emergencyTickets && remoteData.emergencyTickets.length) this.data.emergencyTickets = remoteData.emergencyTickets;
+        if (remoteData.users) this.data.users = remoteData.users;
         console.log('[BackendStore] Hydrated in-memory cache from MongoDB Atlas cloud!');
       } else {
         console.log('[BackendStore] MongoDB empty, syncing baseline data to Atlas...');
@@ -782,14 +783,13 @@ class BackendStore {
       console.warn('[BackendStore] getBookings fallback:', err.message);
     }
     let result = this.data.bookings;
-    if (filter.customerUid && filter.customerPhone) {
-      const cleanPhone = filter.customerPhone.replace(/\D/g, '').slice(-10);
-      result = result.filter(b => b.customerUid === filter.customerUid || (b.customerPhone || '').includes(cleanPhone));
-    } else if (filter.customerUid) {
-      result = result.filter(b => b.customerUid === filter.customerUid);
-    } else if (filter.customerPhone) {
-      const cleanPhone = filter.customerPhone.replace(/\D/g, '').slice(-10);
-      result = result.filter(b => (b.customerPhone || '').includes(cleanPhone));
+    if (filter.customerUid || filter.customerPhone || filter.customerEmail) {
+      const cleanPhone = (filter.customerPhone || '').replace(/\D/g, '').slice(-10);
+      result = result.filter(b =>
+        (filter.customerUid && b.customerUid === filter.customerUid) ||
+        (filter.customerEmail && (b.customerEmail || '').toLowerCase() === filter.customerEmail.toLowerCase()) ||
+        (cleanPhone && (b.customerPhone || '').replace(/\D/g, '').endsWith(cleanPhone))
+      );
     }
     if (filter.bookingStatus) {
       result = result.filter(b => b.bookingStatus === filter.bookingStatus);
@@ -921,7 +921,6 @@ class BackendStore {
   async createEmergencyTicket(payload) {
     const nowIso = new Date().toISOString();
     const ticketId = "GB-SOS-" + Math.floor(1000 + Math.random() * 9000);
-    const tech = this.matchTechnician(payload.address || "Bhilai", payload.area || "");
 
     const ticket = {
       ticketId: ticketId,
@@ -929,16 +928,8 @@ class BackendStore {
       customerName: payload.name || "Emergency Customer",
       location: payload.address || "Bhilai, Chhattisgarh",
       issueType: payload.issueType || "Short Circuit / Spark / Fire Hazard",
-      status: "DISPATCHED_PRIORITY",
+      status: "RECEIVED",
       priority: "CRITICAL",
-      dispatchedTechnician: {
-        id: tech.id,
-        name: tech.name,
-        phone: tech.phone,
-        rating: tech.rating,
-        vehicle: tech.vehicle
-      },
-      targetSlaMinutes: 15,
       createdAt: nowIso
     };
 
@@ -1121,28 +1112,23 @@ class BackendStore {
   async upsertGoogleUser({ email, name, picture, sub, googleId }) {
     if (!email) throw new Error("Google email is required");
     const idKey = sub || googleId || email.replace(/[^a-zA-Z0-9]/g, '_');
-    const uid = "gb_google_" + idKey;
+    const uid = idKey;
+    const existing = this.data.users[uid] || Object.values(this.data.users).find(user => user && user.email && user.email.toLowerCase() === email.toLowerCase());
 
-    if (!this.data.users[uid]) {
-      this.data.users[uid] = {
-        uid: uid,
-        authProvider: "google",
-        email: email,
-        displayName: name || email.split('@')[0],
-        photoURL: picture || "",
-        phoneNumber: "",
-        role: "customer",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-    } else {
-      Object.assign(this.data.users[uid], {
-        email: email,
-        displayName: name || this.data.users[uid].displayName,
-        photoURL: picture || this.data.users[uid].photoURL,
-        updatedAt: new Date().toISOString()
-      });
-    }
+    if (existing && existing.uid !== uid) delete this.data.users[existing.uid];
+    this.data.users[uid] = {
+      ...(existing || {}),
+      uid,
+      authProvider: 'google',
+      email,
+      displayName: (existing && existing.displayName) || name || email.split('@')[0],
+      photoURL: picture || (existing && existing.photoURL) || '',
+      phoneNumber: (existing && existing.phoneNumber) || '',
+      role: 'customer',
+      profileCompleted: !!(existing && existing.profileCompleted),
+      createdAt: (existing && existing.createdAt) || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
 
     if (mongoDb && typeof mongoDb.syncUserToMongo === 'function') {
       await mongoDb.syncUserToMongo(this.data.users[uid]);

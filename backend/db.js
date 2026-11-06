@@ -7,20 +7,26 @@ const { MongoClient } = require('mongodb');
 const path = require('path');
 const fs = require('fs');
 
-// Automatically load .env if present
+// Load local environment settings without requiring a separate dotenv package.
 try {
-  if (typeof process.loadEnvFile === 'function') {
-    const envPath = path.join(__dirname, '..', '.env');
-    if (fs.existsSync(envPath)) {
+  const envPath = path.join(__dirname, '..', '.env');
+  if (fs.existsSync(envPath)) {
+    if (typeof process.loadEnvFile === 'function') {
       process.loadEnvFile(envPath);
+    } else {
+      const contents = fs.readFileSync(envPath, 'utf8');
+      for (const line of contents.split(/\r?\n/)) {
+        const match = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/);
+        if (!match || process.env[match[1]] !== undefined) continue;
+        let value = match[2];
+        if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1);
+        process.env[match[1]] = value;
+      }
     }
   }
-} catch (e) {
-  // Ignore env load errors in non-file environments
-}
+} catch (_) {}
 
-const MONGODB_URI = process.env.MONGODB_URI || 
-  'mongodb+srv://riteshsingh2563_db_user:L2WIPeTUl44lzfvp@ghar-bijli.xmuka3y.mongodb.net/gharbijli?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 let client = null;
 let db = null;
@@ -28,6 +34,10 @@ let isConnected = false;
 let connectPromise = null;
 
 async function getDb() {
+  if (!MONGODB_URI) {
+    console.error('[MongoDB] MONGODB_URI is not configured.');
+    return null;
+  }
   if (db && isConnected) return db;
   if (connectPromise) return connectPromise;
 
@@ -212,7 +222,7 @@ async function syncUserToMongo(user) {
     const database = await getDb();
     if (!database || !user || !user.uid) return;
     await database.collection('users').updateOne(
-      { uid: user.uid },
+      user.email ? { $or: [{ uid: user.uid }, { email: user.email }] } : { uid: user.uid },
       { $set: user },
       { upsert: true }
     );

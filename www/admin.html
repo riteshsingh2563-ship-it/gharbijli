@@ -860,7 +860,7 @@
           <label class="form-label">Security PIN or Password:</label>
           <input type="password" id="input-admin-pass" class="form-control" placeholder="Enter security PIN / Password" required style="font-size: 16px; letter-spacing: 0.1em; text-align: center;" />
           <div style="font-size: 11.5px; color: var(--ink-muted); margin-top: 6px; text-align: center;">
-            Default Master Key: <code>2026</code> or <code>gharbijli@2026</code>
+            Admin access is configured by the deployment administrator.
           </div>
         </div>
         <div id="admin-login-error" style="color: #dc2626; font-size: 12.5px; font-weight: 700; margin-bottom: 12px; display: none;">
@@ -881,6 +881,22 @@
     const API_BASE = (typeof window !== 'undefined' && window.location.hostname && window.location.hostname.endsWith('vercel.app'))
       ? ''
       : 'https://gharbijli-fwnz.vercel.app';
+
+    const fetchWithoutAdminAuth = window.fetch.bind(window);
+    window.fetch = (input, options = {}) => {
+      const url = String(input);
+      const headers = new Headers(options.headers || {});
+      const token = sessionStorage.getItem('gb_admin_token');
+      if (token && !url.includes('/api/admin/auth')) headers.set('Authorization', `Bearer ${token}`);
+      return fetchWithoutAdminAuth(input, { ...options, headers }).then(response => {
+        if (response.status === 401 && token && !url.includes('/api/admin/auth')) {
+          sessionStorage.removeItem('gb_admin_auth');
+          sessionStorage.removeItem('gb_admin_token');
+          if (typeof checkAdminSecurity === 'function') checkAdminSecurity();
+        }
+        return response;
+      });
+    };
 
     async function checkMongoHealth(notify = false) {
       const pill = document.getElementById('mongo-status-pill');
@@ -1489,7 +1505,7 @@
 
     // --- ADMIN SECURITY GATE ---
     function checkAdminSecurity() {
-      const isAuth = sessionStorage.getItem("gb_admin_auth") === "true";
+      const isAuth = sessionStorage.getItem("gb_admin_auth") === "true" && !!sessionStorage.getItem('gb_admin_token');
       const overlay = document.getElementById("modal-admin-auth");
       if (!isAuth) {
         if (overlay) overlay.classList.add("active");
@@ -1510,6 +1526,7 @@
         });
         const data = await res.json();
         if (data.success) {
+          sessionStorage.setItem('gb_admin_token', data.token);
           sessionStorage.setItem("gb_admin_auth", "true");
           document.getElementById("modal-admin-auth").classList.remove("active");
           showToast("🔒 Admin console unlocked");
@@ -1518,18 +1535,13 @@
           errEl.style.display = "block";
         }
       } catch (err) {
-        if (pass === "2026" || pass === "gharbijli@2026") {
-          sessionStorage.setItem("gb_admin_auth", "true");
-          document.getElementById("modal-admin-auth").classList.remove("active");
-          showToast("🔒 Admin console unlocked");
-        } else {
-          errEl.style.display = "block";
-        }
+        errEl.style.display = "block";
       }
     }
 
     function adminLogout() {
       sessionStorage.removeItem("gb_admin_auth");
+      sessionStorage.removeItem('gb_admin_token');
       checkAdminSecurity();
       showToast("Console locked");
     }
@@ -1644,6 +1656,7 @@
 
     async function initAll() {
       checkAdminSecurity();
+      if (!sessionStorage.getItem('gb_admin_token')) return;
       await Promise.all([
         fetchStats(),
         fetchAppConfig(),
@@ -1665,6 +1678,7 @@
     initAll();
     // Auto-refresh every 6 seconds for live operations
     setInterval(async () => {
+      if (!sessionStorage.getItem('gb_admin_token')) return;
       await checkMongoHealth(); fetchStats();
       await fetchBookings();
       await fetchEmergencies();

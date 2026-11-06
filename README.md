@@ -20,9 +20,9 @@ GharBijli connects households with reliable local electrical repair and installa
 ### Technology Stack
 - **Native Android Layer**: Capacitor 8.6 with Android Studio native project (`/android`), Java runtime, Gradle wrapper, AndroidX.
 - **Frontend Layer**: Google Stitch brand-inspired mobile UI (`#ff6500`, `#ffc400`, `#111827`, Inter & system typography, responsive layout).
-- **Native Android Bridge**: `@capacitor/app` (hardware back button), `@capacitor/status-bar`, `@capacitor/splash-screen`, `@capacitor/network`.
-- **Backend / Auth**: Firebase Phone Authentication with SMS OTP verification & Cloud Firestore.
-- **Security**: Strict Firestore Security Rules (`firestore.rules`) enforcing owner isolation, no payment manipulation, and privileged status restrictions.
+- **Native Android Bridge**: `@capacitor/app`, `@capacitor/status-bar`, `@capacitor/splash-screen`, `@capacitor/network`, and native Firebase Google Authentication.
+- **Backend / Auth**: Node.js REST API on Vercel, Firebase Authentication with Google, and MongoDB Atlas persistence.
+- **Legacy files**: Firestore rules and OTP adapters are retained for reference, but are not used for customer sign-in or persistence.
 
 ---
 
@@ -196,3 +196,8 @@ node test_app_integrity.js
 - `✓` Android launcher icons generated for all 5 densities (mdpi, hdpi, xhdpi, xxhdpi, xxxhdpi) from the original square logo asset
 - `✓` 10 electrical services loaded with Hindi descriptions
 - `✓` `firestore.rules` verified: Restrictive production rules with owner isolation, payment status lock, and technician boundaries
+# Deployment configuration
+
+The API reads `MONGODB_URI` and `ADMIN_PASSWORD` from environment variables. Set both in the local runtime (for `server.js`) and in the Vercel project settings before using database-backed bookings, profiles, or the admin console. No default database credential or admin password is embedded in the application.
+
+Google sign-in uses the existing Firebase project and Android package `me.gharbijli.app`. The Android Google provider must be enabled and the signing certificate SHA-1 for each distributed build must be registered in that Firebase project. After changing credentials in Firebase, download the updated Android configuration file and synchronize the Capacitor project.

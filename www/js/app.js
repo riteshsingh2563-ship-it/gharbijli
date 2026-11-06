@@ -1,14 +1,6 @@
 
   window.onGoogleLoginSuccess = function(user) {
-    const bottomNav = document.querySelector(".bottom-nav");
-    const floatMenu = document.getElementById("btn-floating-menu");
-    const backLoginBtn = document.getElementById("btn-back-login");
-    if (bottomNav) bottomNav.style.display = "flex";
-    if (floatMenu) floatMenu.style.display = "inline-flex";
-    if (backLoginBtn) backLoginBtn.style.display = "flex";
-    updateUserNavIndicator();
-    showToast(`Welcome ${user.displayName}! Signed in with Google`, "success");
-    navigateTo("home", false);
+    window.dispatchEvent(new CustomEvent('gharbijli:auth-success', { detail: user }));
   };
 
 /**
@@ -93,7 +85,7 @@
     // Update bottom nav active indicator & visibility (hide ONLY on login)
     const bottomNav = document.querySelector(".bottom-nav");
     if (bottomNav) {
-      bottomNav.style.display = screenId === "login" ? "none" : "flex";
+      bottomNav.style.display = (screenId === "login" || screenId === "profileSetup") ? "none" : "flex";
     }
     const floatMenu = document.getElementById("btn-floating-menu");
     const stickyDiscount = document.getElementById("sticky-bottom-discount");
@@ -120,6 +112,28 @@
       renderTrackingScreen();
     }
   }
+
+  window.addEventListener('gharbijli:auth-success', (event) => {
+    const user = event.detail;
+    if (!user) return;
+    if (!user.profileCompleted) {
+      const nameInput = document.getElementById('setup-name');
+      const emailInput = document.getElementById('setup-email');
+      if (nameInput && !nameInput.value) nameInput.value = user.displayName || '';
+      if (emailInput) emailInput.value = user.email || '';
+      navigateTo('profileSetup', false);
+      return;
+    }
+    const bottomNav = document.querySelector('.bottom-nav');
+    const floatMenu = document.getElementById('btn-floating-menu');
+    const backLoginBtn = document.getElementById('btn-back-login');
+    if (bottomNav) bottomNav.style.display = 'flex';
+    if (floatMenu) floatMenu.style.display = 'inline-flex';
+    if (backLoginBtn) backLoginBtn.style.display = 'flex';
+    updateUserNavIndicator();
+    showToast(`Welcome ${user.displayName || user.email || 'to GharBijli'}!`, 'success');
+    navigateTo('home', false);
+  });
 
   function goBack() {
     // If a modal bottom sheet is open, close it first
@@ -745,6 +759,11 @@
       navigateTo("login");
       return;
     }
+    if (!window.GharBijliFirebase.currentUser.profileCompleted) {
+      showToast('Complete your profile before creating a booking.', 'error');
+      navigateTo('profileSetup');
+      return;
+    }
 
     const customerName = document.getElementById("booking-customer-name").value.trim();
     const houseNo = document.getElementById("address-house").value.trim();
@@ -845,49 +864,7 @@
 
   async function handlePhoneSubmit(e) {
     e.preventDefault();
-    const phoneInput = document.getElementById("login-phone-number") || document.getElementById("input-phone");
-    const rawDigits = phoneInput.value.replace(/\D/g, "");
-
-    if (rawDigits.length !== 10) {
-      showToast("Please enter a valid 10-digit mobile number.", "error");
-      return;
-    }
-
-    const fullPhoneNumber = `+91${rawDigits}`;
-    const sendBtn = document.getElementById("btn-send-otp");
-    sendBtn.disabled = true;
-    sendBtn.textContent = "Logging in...";
-
-    try {
-      const baseUrl = (window.GharBijliConfig && window.GharBijliConfig.api && window.GharBijliConfig.api.baseUrl) || '';
-      const res = await fetch(`${baseUrl}/api/auth/phone-direct`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: fullPhoneNumber })
-      });
-      const data = await res.json();
-      if (data.success && data.user) {
-        window.GharBijliFirebase.currentUser = data.user;
-        localStorage.setItem("gb_current_user", JSON.stringify(data.user));
-        showToast(`Welcome! Verified as ${fullPhoneNumber}`, "success");
-        navigateTo("home", false);
-      } else {
-        throw new Error(data.error || "Login failed");
-      }
-    } catch (err) {
-      const user = {
-        uid: "gb_user_" + rawDigits,
-        phoneNumber: fullPhoneNumber,
-        displayName: "Bhilai Customer"
-      };
-      window.GharBijliFirebase.currentUser = user;
-      localStorage.setItem("gb_current_user", JSON.stringify(user));
-      showToast("Logged in successfully!", "success");
-      navigateTo("home", false);
-    } finally {
-      sendBtn.disabled = false;
-      sendBtn.textContent = "Continue to Book →";
-    }
+    showToast('Please use Google sign-in. Mobile login is disabled.', 'error');
   }
 
   function openGoogleAuthModal() {
@@ -901,65 +878,17 @@
   }
 
   async function performGoogleLogin(userEmail, userName) {
-    if (!userEmail) return;
-    const modal = document.getElementById("modal-google-auth");
     try {
-      showToast("Connecting with Google...", "info");
-      const name = userName || userEmail.split("@")[0].replace(/[._]/g, " ").replace(/\b\w/g, l => l.toUpperCase());
-      const baseUrl = (window.GharBijliConfig && window.GharBijliConfig.api && window.GharBijliConfig.api.baseUrl) || '';
-      
-      let safeSub = "g_" + btoa(encodeURIComponent(userEmail)).replace(/[^a-zA-Z0-9]/g, '');
-
-      const res = await fetch(`${baseUrl}/api/auth/google`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: userEmail,
-          name: name,
-          sub: safeSub
-        })
-      });
-      const data = await res.json();
-      if (data.success && data.user) {
-        const loggedUser = data.user;
-        window.GharBijliFirebase.currentUser = loggedUser;
-        localStorage.setItem("gb_current_user", JSON.stringify(loggedUser));
-        if (modal) modal.classList.remove("active");
-        updateUserNavIndicator();
-
-        const isProfileComplete = loggedUser.profileCompleted || (loggedUser.phoneNumber && (loggedUser.address || loggedUser.defaultAddress));
-        if (isProfileComplete) {
-          showToast(`Welcome back, ${loggedUser.displayName || name}!`, "success");
-          navigateTo("home", false);
-        } else {
-          // First-time customer: navigate to Profile Setup
-          const setupName = document.getElementById("setup-name");
-          const setupEmail = document.getElementById("setup-email");
-          const setupP1 = document.getElementById("setup-phone-1");
-          const setupP2 = document.getElementById("setup-phone-2");
-          const setupP3 = document.getElementById("setup-phone-3");
-          const setupAddr = document.getElementById("setup-address");
-
-          if (setupName) setupName.value = loggedUser.displayName || name;
-          if (setupEmail) setupEmail.value = userEmail;
-          if (setupP1) setupP1.value = loggedUser.phoneNumber ? loggedUser.phoneNumber.replace(/\D/g, '').slice(-10) : "";
-          if (setupP2) setupP2.value = "";
-          if (setupP3) setupP3.value = "";
-          if (setupAddr) setupAddr.value = loggedUser.address || loggedUser.defaultAddress || "";
-
-          showToast("Please complete your profile to finish setup", "info");
-          navigateTo("profileSetup", false);
-        }
-      } else {
-        throw new Error(data.error || "Authentication failed on server");
-      }
+      showToast('Connecting to Google…', 'info');
+      const user = await window.GharBijliFirebase.signInWithGoogle();
+      window.onGoogleLoginSuccess(user);
     } catch (e) {
-      showToast(`Sign in failed: ${e.message || "Please check your network and retry."}`, "error");
+      showToast(`Google sign-in failed: ${e.message || 'Please try again.'}`, 'error');
     }
   }
 
   async function handleGoogleSignIn() {
-    openGoogleAuthModal();
+    return performGoogleLogin();
   }
 
   async function handleOtpSubmit(e) {
@@ -1832,24 +1761,21 @@
     // Direct Google Sign-In on Login Screen
     const mainGoogleBtn = document.getElementById("btn-submit-main-google");
     if (mainGoogleBtn) {
-      mainGoogleBtn.addEventListener("click", () => {
-        const emailInput = document.getElementById("input-main-google-email");
-        const nameInput = document.getElementById("input-main-google-name");
-        const email = (emailInput?.value || "").trim();
-        const name = (nameInput?.value || "").trim();
-        if (!email || !email.includes("@")) {
-          showToast("Please enter a valid Google email address", "error");
-          return;
-        }
-        performGoogleLogin(email, name || email.split("@")[0]);
-      });
+      mainGoogleBtn.addEventListener("click", () => performGoogleLogin());
     }
 
     // Google Sign-In Trigger & Modal Listeners
     const googleBtn = document.getElementById("btn-google-signin");
     if (googleBtn) {
-      googleBtn.addEventListener("click", () => {
-        openGoogleAuthModal();
+      googleBtn.addEventListener("click", async () => {
+        googleBtn.disabled = true;
+        const label = googleBtn.querySelector('span');
+        if (label) label.textContent = 'Connecting to Google…';
+        try { await handleGoogleSignIn(); }
+        finally {
+          googleBtn.disabled = false;
+          if (label) label.textContent = 'Continue with Google';
+        }
       });
     }
 
@@ -1869,24 +1795,16 @@
     const googleAccountItems = document.querySelectorAll(".google-auth-account-item");
     googleAccountItems.forEach((item) => {
       item.addEventListener("click", () => {
-        const email = item.dataset.email;
-        const name = item.dataset.name;
-        performGoogleLogin(email, name);
+        closeGoogleAuthModal();
+        performGoogleLogin();
       });
     });
 
     const customGoogleBtn = document.getElementById("btn-submit-google-custom");
     if (customGoogleBtn) {
       customGoogleBtn.addEventListener("click", () => {
-        const emailInput = document.getElementById("input-google-email");
-        const nameInput = document.getElementById("input-google-name");
-        const email = (emailInput?.value || "").trim();
-        const name = (nameInput?.value || "").trim();
-        if (!email || !email.includes("@")) {
-          showToast("Please enter a valid Google email address", "error");
-          return;
-        }
-        performGoogleLogin(email, name || email.split("@")[0]);
+        closeGoogleAuthModal();
+        performGoogleLogin();
       });
     }
 
@@ -1902,6 +1820,57 @@
     if (phoneForm) {
       phoneForm.addEventListener("submit", handlePhoneSubmit);
     }
+
+    const profileForm = document.getElementById('form-profile-setup');
+    if (profileForm) {
+      profileForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const user = window.GharBijliFirebase.currentUser;
+        if (!user || !user.uid) {
+          showToast('Sign in with Google before completing your profile.', 'error');
+          navigateTo('login');
+          return;
+        }
+        const name = document.getElementById('setup-name').value.trim();
+        const email = document.getElementById('setup-email').value.trim();
+        const address = document.getElementById('setup-address').value.trim();
+        const area = document.getElementById('setup-area').value;
+        const phones = ['setup-phone-1', 'setup-phone-2', 'setup-phone-3']
+          .map(id => document.getElementById(id).value.trim());
+        const error = document.getElementById('setup-phone-error');
+        const submit = document.getElementById('btn-save-profile-setup');
+        const validPhones = phones.every(phone => /^\d{10}$/.test(phone)) && phones.every(phone => phone === phones[0]);
+        if (!validPhones) {
+          if (error) { error.textContent = 'Enter the same valid 10-digit mobile number in all three fields.'; error.style.display = 'block'; }
+          return;
+        }
+        if (error) error.style.display = 'none';
+        if (!name || !address || !area) {
+          showToast('Enter your name, complete address, and area.', 'error');
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'Saving profile…';
+        try {
+          const updated = await window.GharBijliFirebase.updateUserProfile({
+            uid: user.uid,
+            name,
+            email,
+            phoneNumber: `+91${phones[0]}`,
+            address: `${address}, ${area}, Bhilai & Durg`
+          });
+          showToast('Profile saved. You can now book a service.', 'success');
+          window.onGoogleLoginSuccess(updated);
+        } catch (err) {
+          showToast(`Could not save profile: ${err.message}`, 'error');
+        } finally {
+          submit.disabled = false;
+          submit.textContent = 'Complete Profile & Start Booking';
+        }
+      });
+    }
+    const backProfileSetup = document.getElementById('btn-back-profile-setup');
+    if (backProfileSetup) backProfileSetup.addEventListener('click', () => navigateTo('login'));
 
     // OTP Verify Form
     const otpForm = document.getElementById("form-otp-verify");
@@ -2109,35 +2078,29 @@
     }
 
     // Emergency SOS Trigger
-    const emergencySosBtn = document.getElementById("btn-trigger-emergency-sos");
-    if (emergencySosBtn) {
+    document.querySelectorAll("#btn-trigger-emergency-sos").forEach((emergencySosBtn) => {
       emergencySosBtn.addEventListener("click", async () => {
         try {
           emergencySosBtn.disabled = true;
-          emergencySosBtn.textContent = "Dispatched Priority Operator...";
+          emergencySosBtn.textContent = "Sending emergency request…";
           const user = window.GharBijliFirebase.currentUser;
-          const userPhone = user ? user.phoneNumber : "+919876543210";
-          const userName = user ? (user.displayName || "Emergency Customer") : "Bhilai Resident";
-          
+          if (!user || !user.phoneNumber) throw new Error('Complete your profile and add a mobile number first.');
           const result = await window.GharBijliFirebase.submitEmergencySos({
-            name: userName,
-            phone: userPhone,
-            address: currentSelectedArea || "Civic Centre, Bhilai",
+            name: user.displayName || 'Customer',
+            phone: user.phoneNumber,
+            address: user.defaultAddress || user.address || 'Bhilai, Chhattisgarh',
             issueType: "Urgent Electrical Breakdown / Spark / MCB Failure"
           });
-
-          const techName = result && result.ticket && result.ticket.dispatchedTechnician ? result.ticket.dispatchedTechnician.name : "Manoj Kumar";
-          const techPhone = result && result.ticket && result.ticket.dispatchedTechnician ? result.ticket.dispatchedTechnician.phone : "+919876543210";
-          
-          showToast(`🚨 SOS Dispatched! Partner ${techName} allocated (15-Min SLA). Operator is calling your phone!`, "success");
+          if (!result || !result.success || !result.ticket?.ticketId) throw new Error('The server did not confirm the request. Please call support.');
+          showToast(`Emergency request recorded (${result.ticket.ticketId}). Call support to confirm dispatch.`, 'success');
         } catch (sosErr) {
           showToast("Failed to dispatch SOS: " + sosErr.message, "error");
         } finally {
           emergencySosBtn.disabled = false;
-          emergencySosBtn.textContent = "⚡ Dispatch Emergency Electrician Now";
+          emergencySosBtn.textContent = "⚡ Send Emergency Request";
         }
       });
-    }
+    });
   }
 
   // ====================================================
@@ -2217,17 +2180,25 @@
 
     // Check if user is already genuinely authenticated with Google
     const user = window.GharBijliFirebase ? window.GharBijliFirebase.currentUser : null;
-    const isAuthenticUser = user && user.email && !user.uid.startsWith("gb_demo_") && !user.uid.startsWith("test-user-");
+    const isAuthenticUser = user && user.email && user.authProvider === 'google';
 
     if (isAuthenticUser) {
       if (bottomNav) bottomNav.style.display = "flex";
       if (floatMenu) floatMenu.style.display = "inline-flex";
       if (stickyDiscount) stickyDiscount.style.display = "none";
       if (backLoginBtn) backLoginBtn.style.display = "flex";
-      renderHomeScreen();
-      loadServicesFromBackend();
-      loadAppConfigFromBackend();
-      navigateTo("home", false);
+      if (user.profileCompleted) {
+        renderHomeScreen();
+        loadServicesFromBackend();
+        loadAppConfigFromBackend();
+        navigateTo('home', false);
+      } else {
+        const name = document.getElementById('setup-name');
+        const email = document.getElementById('setup-email');
+        if (name) name.value = user.displayName || '';
+        if (email) email.value = user.email || '';
+        navigateTo('profileSetup', false);
+      }
     } else {
       // DEFAULT SCREEN IS LOGIN!
       if (bottomNav) bottomNav.style.display = "none";
@@ -2237,15 +2208,7 @@
       navigateTo("login", false);
     }
 
-    // Query parameter triggers for automated testing
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has("loginAsTest") && window.GharBijliFirebase) {
-      window.GharBijliFirebase.currentUser = {
-        uid: "test-user-bhilai-123",
-        phoneNumber: "+919876543210"
-      };
-      updateUserNavIndicator();
-    }
     if (urlParams.has("search") || urlParams.has("q")) {
       const q = urlParams.get("search") || urlParams.get("q");
       const searchInput = document.getElementById("search-services-input");
@@ -2254,52 +2217,6 @@
       currentSearchQuery = q;
       if (clearSearchBtn) clearSearchBtn.style.display = "flex";
       renderServicesGrid();
-    }
-    if (urlParams.has("trackStatus")) {
-      const targetStatus = urlParams.get("trackStatus");
-      const testUser = {
-        uid: "test-user-bhilai-123",
-        phoneNumber: "+919876543210"
-      };
-      if (window.GharBijliFirebase) {
-        window.GharBijliFirebase.currentUser = testUser;
-      }
-      const mockBooking = {
-        bookingId: "GB-2026-BHL-108",
-        customerUid: "test-user-bhilai-123",
-        serviceId: "regular-fan-installation",
-        serviceNameSnapshot: "Regular Ceiling Fan Installation",
-        bookingStatus: targetStatus,
-        customerName: "Ritesh Singh",
-        customerPhone: "+919876543210",
-        preferredDate: "2026-11-05",
-        preferredTimeSlot: "12:00 PM – 03:00 PM",
-        addressSnapshot: {
-          fullAddress: "Flat 302, Green Enclave, Civic Centre, Bhilai",
-          area: "Civic Centre, Bhilai"
-        },
-        technicianName: "Manoj Kumar",
-        technicianRating: "4.9 ★ (142 repairs)",
-        technicianPhone: "+919876543210"
-      };
-      try {
-        const existing = JSON.parse(localStorage.getItem("gb_bookings_db") || "[]");
-        const idx = existing.findIndex(b => b.bookingId === mockBooking.bookingId);
-        if (idx >= 0) existing[idx] = mockBooking;
-        else existing.unshift(mockBooking);
-        localStorage.setItem("gb_bookings_db", JSON.stringify(existing));
-      } catch (e) {}
-
-      activeTrackingBookingId = mockBooking.bookingId;
-      navigateTo("tracking", false);
-    }
-    if (urlParams.has("stepOtp")) {
-      const pStep = document.getElementById("auth-step-phone");
-      const oStep = document.getElementById("auth-step-otp");
-      const numEl = document.getElementById("otp-sent-to-number");
-      if (pStep) pStep.style.display = "none";
-      if (oStep) oStep.style.display = "block";
-      if (numEl) numEl.textContent = "+91 99999 99999";
     }
     if (urlParams.has("screen")) {
       const scr = urlParams.get("screen");

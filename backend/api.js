@@ -4,7 +4,30 @@
  */
 
 const url = require('url');
+const crypto = require('crypto');
 const store = require('./store');
+
+function createAdminToken() {
+  const payload = Buffer.from(JSON.stringify({ role: 'admin', expiresAt: Date.now() + 12 * 60 * 60 * 1000 })).toString('base64url');
+  const signature = crypto.createHmac('sha256', process.env.ADMIN_PASSWORD).update(payload).digest('base64url');
+  return `${payload}.${signature}`;
+}
+
+function hasAdminAccess(req) {
+  if (!process.env.ADMIN_PASSWORD) return false;
+  const header = req.headers && (req.headers.authorization || req.headers.Authorization);
+  if (typeof header !== 'string' || !header.startsWith('Bearer ')) return false;
+  const [payload, signature] = header.slice(7).split('.');
+  if (!payload || !signature) return false;
+  const expected = crypto.createHmac('sha256', process.env.ADMIN_PASSWORD).update(payload).digest();
+  let supplied;
+  try { supplied = Buffer.from(signature, 'base64url'); } catch (_) { return false; }
+  if (supplied.length !== expected.length || !crypto.timingSafeEqual(supplied, expected)) return false;
+  try {
+    const claims = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+    return claims.role === 'admin' && claims.expiresAt > Date.now();
+  } catch (_) { return false; }
+}
 
 function parseJsonBody(req) {
   return new Promise((resolve, reject) => {
@@ -35,10 +58,26 @@ function sendJson(res, statusCode, data) {
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, X-Firebase-Api-Key',
     'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0'
   });
   res.end(JSON.stringify(data));
+}
+
+async function verifyFirebaseToken(req, apiKey) {
+  apiKey = apiKey || (req.headers && req.headers['x-firebase-api-key']);
+  const header = req.headers && (req.headers.authorization || req.headers.Authorization);
+  const token = typeof header === 'string' && header.startsWith('Bearer ') ? header.slice(7) : '';
+  if (!token || !apiKey) return null;
+  const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(apiKey)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ idToken: token })
+  });
+  if (!response.ok) return null;
+  const data = await response.json();
+  const user = data.users && data.users[0];
+  return user ? { uid: user.localId, email: user.email || '', emailVerified: user.emailVerified === true } : null;
 }
 
 async function handleApiRequest(req, res) {
@@ -47,7 +86,7 @@ async function handleApiRequest(req, res) {
     res.writeHead(204, {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With'
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, X-Firebase-Api-Key'
     });
     res.end();
     return true;
@@ -58,6 +97,18 @@ async function handleApiRequest(req, res) {
   const query = parsedUrl.query;
   const method = req.method;
 
+  if (pathname.startsWith('/api/auth/session/')) {
+    sendJson(res, 410, { error: 'The legacy mobile login bridge is disabled. Sign in with Google instead.' });
+    return true;
+  }
+
+  const adminProtected = pathname === '/api/test-mongo' || pathname.startsWith('/api/admin/') ||
+    /^\/api\/bookings\/[A-Za-z0-9_-]+\/(status|assign)$/.test(pathname);
+  if (adminProtected && pathname !== '/api/admin/auth' && !hasAdminAccess(req)) {
+    sendJson(res, 401, { error: 'Admin authentication required' });
+    return true;
+  }
+
   // Only handle /api paths
   if (!pathname.startsWith('/api')) {
     return false;
@@ -65,6 +116,13 @@ async function handleApiRequest(req, res) {
 
   // Ensure database sync from MongoDB Atlas is fully hydrated
   await store.ensureInitialized();
+  if (process.env.VERCEL) {
+    const database = await require('./db').getDb();
+    if (!database) {
+      sendJson(res, 503, { error: 'MongoDB is unavailable. Configure MONGODB_URI and check the Atlas connection.' });
+      return true;
+    }
+  }
 
   try {
     // 1. Health check
@@ -90,7 +148,8 @@ async function handleApiRequest(req, res) {
     if (pathname === '/api/test-mongo') {
       try {
         const { MongoClient } = require('mongodb');
-        const uri = process.env.MONGODB_URI || 'mongodb+srv://riteshsingh2563_db_user:L2WIPeTUl44lzfvp@ghar-bijli.xmuka3y.mongodb.net/gharbijli?retryWrites=true&w=majority';
+        const uri = process.env.MONGODB_URI;
+        if (!uri) throw new Error('MONGODB_URI is not configured');
         const client = new MongoClient(uri, { serverSelectionTimeoutMS: 6000 });
         await client.connect();
         const d = client.db('gharbijli');
@@ -107,8 +166,8 @@ async function handleApiRequest(req, res) {
     if (pathname === '/api/admin/auth' && method === 'POST') {
       const body = await parseJsonBody(req);
       const password = (body.password || body.pin || '').trim();
-      if (password === 'gharbijli@2026' || password === '2026' || password === 'admin') {
-        sendJson(res, 200, { success: true, token: 'gb_adm_' + Date.now(), message: 'Admin authenticated' });
+      if (process.env.ADMIN_PASSWORD && password === process.env.ADMIN_PASSWORD) {
+        sendJson(res, 200, { success: true, token: createAdminToken(), message: 'Admin authenticated' });
       } else {
         sendJson(res, 401, { error: 'Invalid Admin Password / Security PIN' });
       }
@@ -133,6 +192,10 @@ async function handleApiRequest(req, res) {
     // 4. Services Catalog: List
     if (pathname === '/api/services' && method === 'GET') {
       const all = query.all === 'true' || query.all === '1';
+      if (all && !hasAdminAccess(req)) {
+        sendJson(res, 401, { error: 'Admin authentication required' });
+        return true;
+      }
       const services = await store.getServices(all);
       sendJson(res, 200, { success: true, count: services.length, services });
       return true;
@@ -198,25 +261,13 @@ async function handleApiRequest(req, res) {
 
     // 9. Auth: Send OTP
     if (pathname === '/api/auth/send-otp' && method === 'POST') {
-      const body = await parseJsonBody(req);
-      if (!body.phone) {
-        sendJson(res, 400, { error: 'Phone number is required' });
-        return true;
-      }
-      const result = store.sendOtp(body.phone);
-      sendJson(res, 200, result);
+      sendJson(res, 410, { error: 'Phone login is disabled. Sign in with Google instead.' });
       return true;
     }
 
     // 10. Auth: Verify OTP
     if (pathname === '/api/auth/verify-otp' && method === 'POST') {
-      const body = await parseJsonBody(req);
-      if (!body.phone || !body.code) {
-        sendJson(res, 400, { error: 'Both phone and code are required' });
-        return true;
-      }
-      const user = store.verifyOtp(body.phone, body.code);
-      sendJson(res, 200, { success: true, user });
+      sendJson(res, 410, { error: 'Phone login is disabled. Sign in with Google instead.' });
       return true;
     }
 
@@ -224,6 +275,11 @@ async function handleApiRequest(req, res) {
     if (pathname === '/api/auth/profile' && method === 'GET') {
       const uid = query.uid;
       const email = query.email;
+      const identity = await verifyFirebaseToken(req);
+      if (!identity || (uid && identity.uid !== uid) || (!uid && identity.email !== email)) {
+        sendJson(res, 401, { error: 'A valid Firebase session is required to view this profile' });
+        return true;
+      }
       let user = null;
       if (uid) {
         user = await store.getUser(uid);
@@ -238,6 +294,11 @@ async function handleApiRequest(req, res) {
       const body = await parseJsonBody(req);
       if (!body.uid) {
         sendJson(res, 400, { error: 'User uid is required' });
+        return true;
+      }
+      const identity = await verifyFirebaseToken(req, body.apiKey);
+      if (!identity || identity.uid !== body.uid) {
+        sendJson(res, 401, { error: 'A valid Firebase session is required to update this profile' });
         return true;
       }
       const profileUpdates = {
@@ -262,16 +323,27 @@ async function handleApiRequest(req, res) {
     // 11b. Auth: Google One-Tap / Google Sign-In (Direct MongoDB Atlas Sync)
     if (pathname === '/api/auth/google' && method === 'POST') {
       const body = await parseJsonBody(req);
-      if (!body.email) {
-        sendJson(res, 400, { error: 'Email is required for Google Sign-In' });
+      if (!body.idToken || !body.apiKey) {
+        sendJson(res, 400, { error: 'A Firebase ID token is required for Google Sign-In' });
         return true;
       }
       try {
+        const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(body.apiKey)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken: body.idToken })
+        });
+        const verified = response.ok ? await response.json() : null;
+        const identity = verified && verified.users && verified.users[0];
+        if (!identity || identity.emailVerified !== true || !Array.isArray(identity.providerUserInfo) || !identity.providerUserInfo.some(provider => provider.providerId === 'google.com')) {
+          sendJson(res, 401, { error: 'Google account could not be verified by Firebase' });
+          return true;
+        }
         const user = await store.upsertGoogleUser({
-          email: body.email,
-          name: body.name || body.displayName,
-          picture: body.picture || body.photoURL,
-          sub: body.sub || body.googleId
+          email: identity.email,
+          name: identity.displayName,
+          picture: identity.photoUrl,
+          sub: identity.localId
         });
         sendJson(res, 200, { success: true, user });
       } catch (err) {
@@ -322,21 +394,7 @@ async function handleApiRequest(req, res) {
 
     // 11c. Auth: Direct Phone Login (Zero OTP hassle, stored directly in MongoDB Atlas)
     if (pathname === '/api/auth/phone-direct' && method === 'POST') {
-      const body = await parseJsonBody(req);
-      if (!body.phone) {
-        sendJson(res, 400, { error: 'Phone number is required' });
-        return true;
-      }
-      try {
-        const user = await store.upsertPhoneDirect({
-          phone: body.phone,
-          name: body.name,
-          address: body.address
-        });
-        sendJson(res, 200, { success: true, user });
-      } catch (err) {
-        sendJson(res, 400, { error: err.message });
-      }
+      sendJson(res, 410, { error: 'Direct phone login is disabled. Sign in with Google instead.' });
       return true;
     }
 
@@ -397,6 +455,16 @@ async function handleApiRequest(req, res) {
 
     // 14. Bookings: List
     if (pathname === '/api/bookings' && method === 'GET') {
+      if (query.customerUid) {
+        const identity = await verifyFirebaseToken(req);
+        if (!identity || identity.uid !== query.customerUid) {
+          sendJson(res, 401, { error: 'A valid Firebase session is required to view these bookings' });
+          return true;
+        }
+      } else if (!hasAdminAccess(req)) {
+        sendJson(res, 401, { error: 'Customer identity or admin authentication is required' });
+        return true;
+      }
       const bookings = await store.getBookings({
         customerUid: query.customerUid,
         customerPhone: query.customerPhone,
@@ -410,6 +478,11 @@ async function handleApiRequest(req, res) {
     // 15. Bookings: Create New
     if (pathname === '/api/bookings' && method === 'POST') {
       const body = await parseJsonBody(req);
+      const identity = await verifyFirebaseToken(req);
+      if (!identity || identity.uid !== body.customerUid) {
+        sendJson(res, 401, { error: 'A valid Firebase session is required to create a booking' });
+        return true;
+      }
       if (!body.serviceId) {
         sendJson(res, 400, { error: 'Service ID is required' });
         return true;
@@ -460,6 +533,24 @@ async function handleApiRequest(req, res) {
     if (bookingMatch) {
       const bookingId = bookingMatch[1];
       const subAction = bookingMatch[2];
+      if ((!subAction && method === 'GET') || subAction === 'cancel' || subAction === 'review') {
+        if (!hasAdminAccess(req)) {
+          const identity = await verifyFirebaseToken(req);
+          if (!identity) {
+            sendJson(res, 401, { error: 'A valid Firebase session is required' });
+            return true;
+          }
+          const ownedBooking = await store.getBookingById(bookingId);
+          if (!ownedBooking) {
+            sendJson(res, 404, { error: 'Booking not found' });
+            return true;
+          }
+          if (ownedBooking.customerUid !== identity.uid && ownedBooking.customerEmail !== identity.email) {
+            sendJson(res, 403, { error: 'This booking belongs to another customer' });
+            return true;
+          }
+        }
+      }
 
       // GET /api/bookings/:id
       if (!subAction && method === 'GET') {
@@ -537,10 +628,16 @@ async function handleApiRequest(req, res) {
     // 21. Emergency SOS (Bhilai)
     if (pathname === '/api/emergency' && method === 'POST') {
       const body = await parseJsonBody(req);
+      const identity = await verifyFirebaseToken(req);
+      const customer = identity ? store.getUser(identity.uid) : null;
+      if (!identity || !customer || !customer.profileCompleted || customer.phoneNumber !== body.phone) {
+        sendJson(res, 401, { error: 'A completed, authenticated customer profile is required for emergency requests' });
+        return true;
+      }
       const ticket = await store.createEmergencyTicket(body);
-      sendJson(res, 201, {
+        sendJson(res, 201, {
         success: true,
-        message: 'Emergency Bhilai Electrician dispatched on high-priority SLA',
+        message: 'Emergency request received. Contact the operator to confirm dispatch.',
         ticket
       });
       return true;
