@@ -220,17 +220,41 @@ async function handleApiRequest(req, res) {
       return true;
     }
 
-    // 11. Auth: Update User Profile
+    // 11. Auth: User Profile (GET & POST)
+    if (pathname === '/api/auth/profile' && method === 'GET') {
+      const uid = query.uid;
+      const email = query.email;
+      let user = null;
+      if (uid) {
+        user = await store.getUser(uid);
+      }
+      if (!user && email) {
+        user = await store.getUserByEmail(email);
+      }
+      sendJson(res, 200, { success: true, user: user || null });
+      return true;
+    }
     if (pathname === '/api/auth/profile' && method === 'POST') {
       const body = await parseJsonBody(req);
       if (!body.uid) {
         sendJson(res, 400, { error: 'User uid is required' });
         return true;
       }
-      const updated = await store.updateUser(body.uid, {
-        displayName: body.displayName,
-        defaultAddress: body.defaultAddress
-      });
+      const profileUpdates = {
+        profileCompleted: true
+      };
+      if (body.displayName) profileUpdates.displayName = body.displayName;
+      if (body.name) profileUpdates.displayName = body.name;
+      if (body.email) profileUpdates.email = body.email;
+      if (body.phoneNumber) profileUpdates.phoneNumber = body.phoneNumber;
+      if (body.phone) profileUpdates.phoneNumber = body.phone;
+      if (body.address) {
+        profileUpdates.address = body.address;
+        profileUpdates.defaultAddress = body.address;
+      }
+      if (body.defaultAddress) profileUpdates.defaultAddress = body.defaultAddress;
+
+      const updated = await store.updateUser(body.uid, profileUpdates);
       sendJson(res, 200, { success: true, user: updated });
       return true;
     }
@@ -376,6 +400,7 @@ async function handleApiRequest(req, res) {
       const bookings = await store.getBookings({
         customerUid: query.customerUid,
         customerPhone: query.customerPhone,
+        customerEmail: query.customerEmail,
         bookingStatus: query.status
       });
       sendJson(res, 200, { success: true, count: bookings.length, bookings });

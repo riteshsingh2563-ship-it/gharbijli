@@ -761,6 +761,7 @@ class BackendStore {
       if (db) {
         const conditions = [];
         if (filter.customerUid) conditions.push({ customerUid: filter.customerUid });
+        if (filter.customerEmail) conditions.push({ customerEmail: filter.customerEmail });
         if (filter.customerPhone) {
           const cleanPhone = filter.customerPhone.replace(/\D/g, '').slice(-10);
           if (cleanPhone) conditions.push({ customerPhone: { $regex: cleanPhone } });
@@ -1078,6 +1079,26 @@ class BackendStore {
 
     delete this.data.otpSessions[normalized];
     return this.data.users[uid];
+  }
+
+  async getUserByEmail(email) {
+    if (!email) return null;
+    try {
+      const db = await mongoDb.getDb();
+      if (db) {
+        const u = await db.collection('users').findOne({ email });
+        if (u) {
+          const { _id, ...clean } = u;
+          return clean;
+        }
+      }
+    } catch (e) {}
+    for (const key of Object.keys(this.data.users)) {
+      if (this.data.users[key] && this.data.users[key].email === email) {
+        return this.data.users[key];
+      }
+    }
+    return null;
   }
 
   getUser(uid) {

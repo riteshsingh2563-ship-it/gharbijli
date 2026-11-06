@@ -449,6 +449,30 @@ class GharBijliFirebaseService {
   /**
    * Load Bookings for Authenticated Customer
    */
+  /**
+   * Update Customer Profile in MongoDB Atlas & Local Session
+   */
+  async updateUserProfile(profileData) {
+    if (!profileData || !profileData.uid) {
+      throw new Error("User identifier is required");
+    }
+    const res = await this.apiRequest('/api/auth/profile', {
+      method: 'POST',
+      body: JSON.stringify(profileData)
+    });
+    if (res && res.success && res.user) {
+      this.currentUser = { ...this.currentUser, ...res.user, profileCompleted: true };
+      localStorage.setItem("gb_current_user", JSON.stringify(this.currentUser));
+      this.notifyAuthListeners();
+      return this.currentUser;
+    }
+    // Local fallback
+    this.currentUser = { ...this.currentUser, ...profileData, profileCompleted: true };
+    localStorage.setItem("gb_current_user", JSON.stringify(this.currentUser));
+    this.notifyAuthListeners();
+    return this.currentUser;
+  }
+
   async getCustomerBookings() {
     if (!this.currentUser) return [];
 
@@ -456,6 +480,7 @@ class GharBijliFirebaseService {
     try {
       let queryUrl = '/api/bookings?';
       if (this.currentUser.uid) queryUrl += `customerUid=${encodeURIComponent(this.currentUser.uid)}&`;
+      if (this.currentUser.email) queryUrl += `customerEmail=${encodeURIComponent(this.currentUser.email)}&`;
       if (this.currentUser.phoneNumber) queryUrl += `customerPhone=${encodeURIComponent(this.currentUser.phoneNumber)}&`;
       const apiResp = await this.apiRequest(queryUrl);
       if (apiResp && apiResp.success && Array.isArray(apiResp.bookings)) {

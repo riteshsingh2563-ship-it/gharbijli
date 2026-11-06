@@ -42,7 +42,9 @@
     myBookings: document.getElementById("screen-my-bookings"),
     tracking: document.getElementById("screen-tracking"),
     profile: document.getElementById("screen-profile"),
-    help: document.getElementById("screen-help")
+    help: document.getElementById("screen-help"),
+    emergency: document.getElementById("screen-help"),
+    profileSetup: document.getElementById("screen-profile-setup")
   };
 
   const navItems = document.querySelectorAll(".bottom-nav .nav-item");
@@ -919,12 +921,35 @@
       });
       const data = await res.json();
       if (data.success && data.user) {
-        window.GharBijliFirebase.currentUser = data.user;
-        localStorage.setItem("gb_current_user", JSON.stringify(data.user));
+        const loggedUser = data.user;
+        window.GharBijliFirebase.currentUser = loggedUser;
+        localStorage.setItem("gb_current_user", JSON.stringify(loggedUser));
         if (modal) modal.classList.remove("active");
         updateUserNavIndicator();
-        showToast(`Welcome ${name}! Signed in via Google`, "success");
-        navigateTo("home", false);
+
+        const isProfileComplete = loggedUser.profileCompleted || (loggedUser.phoneNumber && (loggedUser.address || loggedUser.defaultAddress));
+        if (isProfileComplete) {
+          showToast(`Welcome back, ${loggedUser.displayName || name}!`, "success");
+          navigateTo("home", false);
+        } else {
+          // First-time customer: navigate to Profile Setup
+          const setupName = document.getElementById("setup-name");
+          const setupEmail = document.getElementById("setup-email");
+          const setupP1 = document.getElementById("setup-phone-1");
+          const setupP2 = document.getElementById("setup-phone-2");
+          const setupP3 = document.getElementById("setup-phone-3");
+          const setupAddr = document.getElementById("setup-address");
+
+          if (setupName) setupName.value = loggedUser.displayName || name;
+          if (setupEmail) setupEmail.value = userEmail;
+          if (setupP1) setupP1.value = loggedUser.phoneNumber ? loggedUser.phoneNumber.replace(/\D/g, '').slice(-10) : "";
+          if (setupP2) setupP2.value = "";
+          if (setupP3) setupP3.value = "";
+          if (setupAddr) setupAddr.value = loggedUser.address || loggedUser.defaultAddress || "";
+
+          showToast("Please complete your profile to finish setup", "info");
+          navigateTo("profileSetup", false);
+        }
       } else {
         throw new Error(data.error || "Authentication failed on server");
       }
@@ -1061,8 +1086,8 @@
         <div style="text-align: center; padding: 40px 16px; background: #ffffff; border-radius: var(--radius-lg); border: 1.5px solid var(--border);">
           <div style="font-size: 40px; margin-bottom: 12px;">📱</div>
           <h4 style="font-size: 16px; font-weight: 850; color: var(--ink);">Log In to View Bookings</h4>
-          <p style="font-size: 12.5px; color: var(--ink-muted); margin: 6px 0 16px;">Enter your phone number to track live status and technician dispatch.</p>
-          <button class="btn uc-auth-btn-primary" id="btn-login-from-bookings" style="width: auto !important; margin: 0 auto; padding: 12px 28px !important; font-size: 14px !important;">Log In with Mobile →</button>
+          <p style="font-size: 12.5px; color: var(--ink-muted); margin: 6px 0 16px;">Sign in with Google to track live status and technician dispatch.</p>
+          <button class="btn uc-auth-btn-primary" id="btn-login-from-bookings" style="width: auto !important; margin: 0 auto; padding: 12px 28px !important; font-size: 14px !important;">Continue with Google →</button>
         </div>
       `;
       document.getElementById("btn-login-from-bookings").addEventListener("click", () => navigateTo("login"));
@@ -1313,16 +1338,30 @@
     const loggedInView = document.getElementById("profile-logged-in-view");
     const guestView = document.getElementById("profile-guest-view");
     const phoneEl = document.getElementById("profile-display-phone");
+    const nameEl = document.getElementById("profile-display-name");
+    const emailEl = document.getElementById("profile-display-email");
+    const addrEl = document.getElementById("profile-display-address");
+    const avatarEl = document.getElementById("profile-display-avatar");
 
     if (user) {
       if (loggedInView) loggedInView.style.display = "block";
       if (guestView) guestView.style.display = "none";
+      if (nameEl) nameEl.textContent = user.displayName || "GharBijli Customer";
+      if (emailEl) emailEl.textContent = user.email || "";
       if (phoneEl) {
-        let phone = user.phoneNumber || user.email || user.displayName || "+91 99999 99999";
-        if (phone.startsWith("+91") && phone.length === 13) {
-          phone = `+91 ${phone.slice(3, 8)} ${phone.slice(8)}`;
+        const raw = (user.phoneNumber || user.phone || "").replace(/\D/g, '').slice(-10);
+        phoneEl.textContent = raw ? `+91 ${raw.slice(0, 5)} ${raw.slice(5)}` : "Add Mobile Number";
+      }
+      if (addrEl) {
+        addrEl.textContent = user.address || user.defaultAddress || "No address added yet";
+      }
+      if (avatarEl) {
+        if (user.photoURL) {
+          avatarEl.innerHTML = `<img src="${user.photoURL}" alt="User" style="width: 100%; height: 100%; object-fit: cover;" />`;
+        } else {
+          const initial = (user.displayName || user.email || "U")[0].toUpperCase();
+          avatarEl.textContent = initial;
         }
-        phoneEl.textContent = phone;
       }
     } else {
       if (loggedInView) loggedInView.style.display = "none";
