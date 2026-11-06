@@ -1130,6 +1130,74 @@ class BackendStore {
     return this.data.users[uid];
   }
 
+  async createAuthSession() {
+    const sessionId = "gbsess_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
+    if (!this.data.authSessions) this.data.authSessions = {};
+    this.data.authSessions[sessionId] = {
+      sessionId,
+      createdAt: new Date().toISOString(),
+      authenticated: false,
+      user: null
+    };
+    if (mongoDb && typeof mongoDb.getDb === 'function') {
+      try {
+        const database = await mongoDb.getDb();
+        if (database) {
+          await database.collection("auth_sessions").insertOne({
+            sessionId,
+            createdAt: new Date(),
+            authenticated: false,
+            user: null
+          });
+        }
+      } catch (e) {}
+    }
+    await this.save();
+    return sessionId;
+  }
+
+  async saveAuthSession(sessionId, user) {
+    if (!this.data.authSessions) this.data.authSessions = {};
+    this.data.authSessions[sessionId] = {
+      sessionId,
+      authenticated: true,
+      user,
+      updatedAt: new Date().toISOString()
+    };
+    if (mongoDb && typeof mongoDb.getDb === 'function') {
+      try {
+        const database = await mongoDb.getDb();
+        if (database) {
+          await database.collection("auth_sessions").updateOne(
+            { sessionId },
+            { $set: { authenticated: true, user, updatedAt: new Date() } },
+            { upsert: true }
+          );
+        }
+      } catch (e) {}
+    }
+    await this.save();
+    return true;
+  }
+
+  async checkAuthSession(sessionId) {
+    if (mongoDb && typeof mongoDb.getDb === 'function') {
+      try {
+        const database = await mongoDb.getDb();
+        if (database) {
+          const doc = await database.collection("auth_sessions").findOne({ sessionId });
+          if (doc && doc.authenticated) {
+            return { authenticated: true, user: doc.user };
+          }
+        }
+      } catch (e) {}
+    }
+    if (this.data.authSessions && this.data.authSessions[sessionId] && this.data.authSessions[sessionId].authenticated) {
+      return { authenticated: true, user: this.data.authSessions[sessionId].user };
+    }
+    return { authenticated: false };
+  }
+
   async upsertPhoneDirect({ phone, name, address }) {
     if (!phone) throw new Error("Phone number is required");
     const cleaned = phone.replace(/\D/g, '');

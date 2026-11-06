@@ -14,7 +14,7 @@
     },
     "defaultArea": "Civic Centre, Bhilai",
     "hero": {
-      "title": "Bhilai Electricians & Repair",
+      "title": "Electricians in Bhilai",
       "subtitle": "Doorstep electrical repairs & installations in Bhilai",
       "ratingText": "4.88 (12,400+ Bhilai Homes Serviced)",
       "earliestSlot": "Today, 30–45m"
@@ -75,7 +75,7 @@
         "active": true
       }
     ],
-    "updatedAt": "2026-11-05T15:18:18.056Z",
+    "updatedAt": "2026-11-05T16:57:51.417Z",
     "visitationPromo": {
       "title": "Get visitation fee off",
       "subtext": "On orders above ₹499 (Tap for details)",
@@ -299,8 +299,8 @@
       ],
       "mrp": "₹149",
       "name": "Regular ceiling fan installation",
-      "priceNumber": 155,
-      "priceTag": "Starts at ₹155",
+      "priceNumber": 89,
+      "priceTag": "Starts at ₹89",
       "pricingType": "standard",
       "rating": 4.85,
       "reviews": "108K reviews",
@@ -489,7 +489,7 @@
       "category": "Distribution",
       "categoryId": "mcb-submeter",
       "categoryLabel": "MCB & submeter",
-      "description": "Digital energy submeter installation for tenant rooms, rental flats, or commercial shops in Patna.",
+      "description": "Digital energy submeter installation for tenant rooms, rental flats, or commercial shops in Bhilai & Durg.",
       "discountBadge": "34% OFF",
       "estimatedDuration": "60 mins",
       "excluded": [
@@ -654,7 +654,7 @@
       "priceTag": "Visitation ₹99",
       "pricingType": "inspection_based",
       "rating": 4.89,
-      "reviews": "2.1k bookings in Patna",
+      "reviews": "2.1k bookings in Bhilai",
       "warranty": "Satisfaction Guaranteed"
     }
   ],
@@ -811,6 +811,330 @@
   ],
   "bookings": [
     {
+      "bookingId": "GB-2026-BHL-108",
+      "addressSnapshot": {
+        "houseNo": "Plot 42",
+        "street": "Near Civic Centre Park, Sector 6",
+        "landmark": "Opposite Kala Mandir",
+        "pincode": "490006",
+        "city": "Bhilai, Chhattisgarh",
+        "fullAddress": "Plot 42, Near Civic Centre Park, Sector 6, Bhilai, Chhattisgarh - 490006"
+      },
+      "assignedAt": "2026-11-05T16:57:04.662Z",
+      "assignedTechnician": {
+        "id": "GB-TECH-01",
+        "name": "Manoj Kumar",
+        "phone": "+919876543210",
+        "rating": "4.92 ★ (142 repairs)",
+        "vehicle": "Honda Activa (CG-07-XX-1234)"
+      },
+      "bookingStatus": "TECHNICIAN_ASSIGNED",
+      "cancellationReason": null,
+      "cancelledAt": null,
+      "completedAt": null,
+      "confirmedAt": "2026-11-05T16:57:04.662Z",
+      "createdAt": "2026-11-05T16:57:04.662Z",
+      "customerName": "Ritesh Singh",
+      "customerNotes": "Please bring ladder",
+      "customerPhone": "+919876543210",
+      "customerUid": "gb_user_919876543210",
+      "estimatedEta": "30-45 mins",
+      "finalAmount": null,
+      "issueDescription": "Fan speed regulation and blade balancing",
+      "paymentMethod": "CASH_ON_DELIVERY",
+      "paymentStatus": "PENDING",
+      "preferredDate": "2026-11-05",
+      "preferredTimeSlot": "12:00 PM – 03:00 PM",
+      "pricingTypeSnapshot": "inspection_based",
+      "serviceId": "regular-fan-installation",
+      "serviceNameSnapshot": "Regular Ceiling Fan Installation",
+      "statusHistory": [
+        {
+          "status": "PENDING_CONFIRMATION",
+          "timestamp": "2026-11-05T16:57:04.662Z",
+          "note": "Booking submitted by customer"
+        },
+        {
+          "status": "CONFIRMED",
+          "timestamp": "2026-11-05T16:57:04.662Z",
+          "note": "Verified by Bhilai Operations"
+        },
+        {
+          "status": "TECHNICIAN_ASSIGNED",
+          "timestamp": "2026-11-05T16:57:04.662Z",
+          "note": "Manoj Kumar assigned"
+        }
+      ],
+      "technicianName": "Manoj Kumar",
+      "technicianPhone": "+919876543210",
+      "technicianRating": "4.92 ★ (142 repairs)",
+      "technicianVehicle": "Honda Activa (CG-07-XX-1234)",
+      "updatedAt": "2026-11-05T16:57:04.662Z"
+    },
+    {
+      "bookingId": "GB-2026-BHL-109",
+      "addressSnapshot": {
+        "houseNo": "B-12, Surya Enclave",
+        "street": "Nehru Nagar West",
+        "landmark": "Near Apollo Hospital",
+        "pincode": "490020",
+        "city": "Bhilai, Chhattisgarh",
+        "fullAddress": "B-12, Surya Enclave, Nehru Nagar West, Bhilai - 490020"
+      },
+      "assignedAt": null,
+      "assignedTechnician": null,
+      "bookingStatus": "PENDING_CONFIRMATION",
+      "cancellationReason": null,
+      "cancelledAt": null,
+      "completedAt": null,
+      "confirmedAt": null,
+      "createdAt": "2026-11-05T16:57:04.662Z",
+      "customerName": "Pooja Verma",
+      "customerNotes": "",
+      "customerPhone": "+919999999999",
+      "customerUid": "gb_user_919999999999",
+      "estimatedEta": "30-45 mins",
+      "finalAmount": null,
+      "issueDescription": "Installing 2 Atomberg smart fans with remote",
+      "paymentMethod": "CASH_ON_DELIVERY",
+      "paymentStatus": "PENDING",
+      "preferredDate": "2026-11-05",
+      "preferredTimeSlot": "09:00 AM – 12:00 PM",
+      "pricingTypeSnapshot": "fixed_quote",
+      "serviceId": "smart-bldc-fan",
+      "serviceNameSnapshot": "Smart/BLDC ceiling fan replace/install",
+      "statusHistory": [
+        {
+          "status": "PENDING_CONFIRMATION",
+          "timestamp": "2026-11-05T16:57:04.662Z",
+          "note": "Booking received online"
+        }
+      ],
+      "technicianName": "Amit Verma",
+      "technicianPhone": "+919876543211",
+      "technicianRating": "4.87 ★ (210 repairs)",
+      "technicianVehicle": "Hero Splendor (CG-07-YY-5678)",
+      "updatedAt": "2026-11-05T16:57:04.662Z"
+    },
+    {
+      "bookingId": "GB-2026-BHL-467",
+      "addressSnapshot": {
+        "fullAddress": {
+          "houseNo": "Plot 12",
+          "street": "Civic Centre",
+          "landmark": "Near Nehru Art Gallery",
+          "city": "Bhilai",
+          "state": "Chhattisgarh",
+          "pincode": "490006"
+        }
+      },
+      "assignedAt": "2026-11-05T16:44:00.219Z",
+      "assignedTechnician": {
+        "id": "GB-TECH-06",
+        "name": "Vikash Singh",
+        "phone": "+919876543215",
+        "rating": "4.96 ★ (410 repairs)",
+        "vehicle": "Hero Passion (CG-07-EF-2345)"
+      },
+      "bookingStatus": "ON_THE_WAY",
+      "cancellationReason": null,
+      "cancelledAt": null,
+      "completedAt": null,
+      "confirmedAt": "2026-11-05T16:42:47.520Z",
+      "createdAt": "2026-11-05T16:42:39.120Z",
+      "customerName": "Ritesh Singh",
+      "customerNotes": "",
+      "customerPhone": "+919876543210",
+      "customerUid": "gb_google_test_sub_123",
+      "estimatedEta": "30-45 mins",
+      "finalAmount": null,
+      "issueDescription": "",
+      "paymentMethod": "CASH_ON_DELIVERY",
+      "paymentStatus": "PENDING",
+      "preferredDate": "2026-11-05",
+      "preferredTimeSlot": "Today (30-45 mins)",
+      "pricingTypeSnapshot": "inspection_based",
+      "serviceId": "regular-fan-installation",
+      "serviceNameSnapshot": "Electrical Service Visit",
+      "statusHistory": [
+        {
+          "status": "PENDING_CONFIRMATION",
+          "timestamp": "2026-11-05T16:42:39.120Z",
+          "note": "Booking submitted. Bhilai operator confirmation call will arrive shortly."
+        },
+        {
+          "status": "CONFIRMED",
+          "timestamp": "2026-11-05T16:42:47.520Z",
+          "note": "Bhilai Operations verified booking with customer"
+        },
+        {
+          "status": "TECHNICIAN_ASSIGNED",
+          "timestamp": "2026-11-05T16:44:00.219Z",
+          "note": "Assigned verified Bhilai partner Vikash Singh (4.96 ★ (410 repairs))"
+        },
+        {
+          "status": "ON_THE_WAY",
+          "timestamp": "2026-11-05T16:44:49.580Z",
+          "note": "Vikash Singh has departed and is en route on Hero Passion (CG-07-EF-2345)"
+        }
+      ],
+      "technicianName": "Vikash Singh",
+      "technicianPhone": "+919876543215",
+      "technicianRating": "4.96 ★ (410 repairs)",
+      "technicianVehicle": "Hero Passion (CG-07-EF-2345)",
+      "updatedAt": "2026-11-05T16:44:49.580Z"
+    },
+    {
+      "bookingId": "GB-2026-BHL-431",
+      "addressSnapshot": {
+        "houseNo": "sdfghjkl;",
+        "street": "dfghjkl;",
+        "landmark": "",
+        "pincode": "800001",
+        "city": "Bhilai, Chhattisgarh",
+        "fullAddress": "sdfghjkl;, dfghjkl;, Bhilai, Chhattisgarh - 800001",
+        "coordinates": {
+          "lat": 25.6093,
+          "lng": 85.1235
+        }
+      },
+      "assignedAt": "2026-11-05T16:17:22.858Z",
+      "assignedTechnician": {
+        "id": "GB-TECH-03",
+        "name": "Rajesh Sharma",
+        "phone": "+919876543212",
+        "rating": "4.94 ★ (320 repairs)",
+        "vehicle": "TVS Jupiter (CG-07-ZZ-9012)"
+      },
+      "bookingStatus": "ON_THE_WAY",
+      "cancellationReason": null,
+      "cancelledAt": null,
+      "completedAt": null,
+      "confirmedAt": "2026-11-05T16:16:57.604Z",
+      "createdAt": "2026-11-05T16:16:47.981Z",
+      "customerName": "Ritesh Singh",
+      "customerNotes": "",
+      "customerPhone": "+919876543210",
+      "customerUid": "gb_google_cml0ZXNoLnNpbmdoLmJoaWxhaSU0MGdtYWlsLmNvbQ",
+      "estimatedEta": "30-45 mins",
+      "finalAmount": null,
+      "issueDescription": "",
+      "paymentMethod": "CASH_ON_DELIVERY",
+      "paymentStatus": "PENDING",
+      "preferredDate": "2026-11-05",
+      "preferredTimeSlot": "09:00 AM – 12:00 PM",
+      "pricingTypeSnapshot": "standard",
+      "serviceId": "switchboard-install-repair",
+      "serviceNameSnapshot": "Full switchboard repair/replace",
+      "statusHistory": [
+        {
+          "status": "PENDING_CONFIRMATION",
+          "timestamp": "2026-11-05T16:16:47.981Z",
+          "note": "Booking submitted. Bhilai operator confirmation call will arrive shortly."
+        },
+        {
+          "status": "CONFIRMED",
+          "timestamp": "2026-11-05T16:16:57.604Z",
+          "note": "Bhilai Operations verified booking with customer"
+        },
+        {
+          "status": "TECHNICIAN_ASSIGNED",
+          "timestamp": "2026-11-05T16:17:22.858Z",
+          "note": "Assigned verified Bhilai partner Rajesh Sharma (4.94 ★ (320 repairs))"
+        },
+        {
+          "status": "ON_THE_WAY",
+          "timestamp": "2026-11-05T16:18:05.917Z",
+          "note": "Rajesh Sharma has departed and is en route on TVS Jupiter (CG-07-ZZ-9012)"
+        }
+      ],
+      "technicianName": "Rajesh Sharma",
+      "technicianPhone": "+919876543212",
+      "technicianRating": "4.94 ★ (320 repairs)",
+      "technicianVehicle": "TVS Jupiter (CG-07-ZZ-9012)",
+      "updatedAt": "2026-11-05T16:18:05.917Z"
+    },
+    {
+      "bookingId": "GB-2026-BHL-597",
+      "addressSnapshot": {
+        "houseNo": "fs.,.fdsdfghjkl;",
+        "street": "dsfghjkl;'",
+        "landmark": "",
+        "pincode": "800001",
+        "city": "Bhilai, Chhattisgarh",
+        "fullAddress": "fs.,.fdsdfghjkl;, dsfghjkl;', Bhilai, Chhattisgarh - 800001",
+        "coordinates": {
+          "lat": 25.6093,
+          "lng": 85.1235
+        }
+      },
+      "assignedAt": "2026-11-05T16:13:42.918Z",
+      "assignedTechnician": {
+        "id": "GB-TECH-01",
+        "name": "Manoj Kumar",
+        "phone": "+919876543210",
+        "rating": "4.92 ★ (142 repairs)",
+        "vehicle": "Honda Activa (CG-07-XX-1234)"
+      },
+      "bookingStatus": "CANCELLED",
+      "cancellationReason": "booked_by_mistake",
+      "cancelledAt": "2026-11-05T16:14:58.044Z",
+      "completedAt": null,
+      "confirmedAt": "2026-11-05T16:12:59.897Z",
+      "createdAt": "2026-11-05T16:12:42.519Z",
+      "customerName": "Ritesh Singh",
+      "customerNotes": "",
+      "customerPhone": "+919876543210",
+      "customerUid": "gb_google_cml0ZXNoLnNpbmdoLmJoaWxhaSU0MGdtYWlsLmNvbQ",
+      "estimatedEta": "30-45 mins",
+      "finalAmount": null,
+      "issueDescription": "",
+      "paymentMethod": "CASH_ON_DELIVERY",
+      "paymentStatus": "PENDING",
+      "preferredDate": "2026-11-05",
+      "preferredTimeSlot": "09:00 AM – 12:00 PM",
+      "pricingTypeSnapshot": "standard",
+      "serviceId": "inverter-services",
+      "serviceNameSnapshot": "Inverter installation/uninstallation",
+      "statusHistory": [
+        {
+          "status": "PENDING_CONFIRMATION",
+          "timestamp": "2026-11-05T16:12:42.519Z",
+          "note": "Booking submitted. Bhilai operator confirmation call will arrive shortly."
+        },
+        {
+          "status": "CONFIRMED",
+          "timestamp": "2026-11-05T16:12:59.897Z",
+          "note": "Bhilai Operations verified booking with customer"
+        },
+        {
+          "status": "TECHNICIAN_ASSIGNED",
+          "timestamp": "2026-11-05T16:13:09.953Z",
+          "note": "Assigned verified Bhilai partner Manoj Kumar (4.92 ★ (142 repairs))"
+        },
+        {
+          "status": "TECHNICIAN_ASSIGNED",
+          "timestamp": "2026-11-05T16:13:10.192Z",
+          "note": "Admin assigned Manoj Kumar (4.92 ★ (142 repairs))"
+        },
+        {
+          "status": "TECHNICIAN_ASSIGNED",
+          "timestamp": "2026-11-05T16:13:43.137Z",
+          "note": "Admin assigned Manoj Kumar (4.92 ★ (142 repairs))"
+        },
+        {
+          "status": "CANCELLED",
+          "timestamp": "2026-11-05T16:14:58.044Z",
+          "note": "Customer cancellation: booked_by_mistake"
+        }
+      ],
+      "technicianName": "Manoj Kumar",
+      "technicianPhone": "+919876543210",
+      "technicianRating": "4.92 ★ (142 repairs)",
+      "technicianVehicle": "Honda Activa (CG-07-XX-1234)",
+      "updatedAt": "2026-11-05T16:14:58.044Z"
+    },
+    {
       "bookingId": "GB-2026-BHL-377",
       "addressSnapshot": {
         "fullAddress": "House 14, Street 7, Sector 6, Bhilai"
@@ -870,189 +1194,6 @@
       "technicianRating": "4.92 ★ (142 repairs)",
       "technicianVehicle": "Honda Activa (CG-07-XX-1234)",
       "updatedAt": "2026-11-05T15:44:21.627Z"
-    },
-    {
-      "bookingId": "GB-2026-BHL-540",
-      "addressSnapshot": {
-        "fullAddress": "House 14, Street 7, Sector 6, Bhilai"
-      },
-      "assignedAt": "2026-11-05T15:37:27.353Z",
-      "assignedTechnician": {
-        "id": "GB-TECH-01",
-        "name": "Manoj Kumar",
-        "phone": "+919876543210",
-        "rating": "4.92 ★ (142 repairs)",
-        "vehicle": "Honda Activa (CG-07-XX-1234)"
-      },
-      "bookingStatus": "ON_THE_WAY",
-      "cancellationReason": null,
-      "cancelledAt": null,
-      "completedAt": null,
-      "confirmedAt": "2026-11-05T15:37:17.342Z",
-      "createdAt": "2026-11-05T15:37:09.228Z",
-      "customerName": "Ritesh Singh",
-      "customerNotes": "",
-      "customerPhone": "+919876543210",
-      "customerUid": "gb_user_919876543210",
-      "estimatedEta": "30-45 mins",
-      "finalAmount": null,
-      "issueDescription": "",
-      "paymentMethod": "CASH_ON_DELIVERY",
-      "paymentStatus": "PENDING",
-      "preferredDate": "2026-11-05",
-      "preferredTimeSlot": "Today (30-45 mins)",
-      "pricingTypeSnapshot": "inspection_based",
-      "serviceId": "regular-fan-installation",
-      "serviceNameSnapshot": "Electrical Service Visit",
-      "statusHistory": [
-        {
-          "status": "PENDING_CONFIRMATION",
-          "timestamp": "2026-11-05T15:37:09.228Z",
-          "note": "Booking submitted. Bhilai operator confirmation call will arrive shortly."
-        },
-        {
-          "status": "CONFIRMED",
-          "timestamp": "2026-11-05T15:37:17.342Z",
-          "note": "Bhilai Operations verified booking with customer"
-        },
-        {
-          "status": "TECHNICIAN_ASSIGNED",
-          "timestamp": "2026-11-05T15:37:27.353Z",
-          "note": "Assigned verified Bhilai partner Manoj Kumar (4.92 ★ (142 repairs))"
-        },
-        {
-          "status": "ON_THE_WAY",
-          "timestamp": "2026-11-05T15:37:45.347Z",
-          "note": "Manoj Kumar has departed and is en route on Honda Activa (CG-07-XX-1234)"
-        }
-      ],
-      "technicianName": "Manoj Kumar",
-      "technicianPhone": "+919876543210",
-      "technicianRating": "4.92 ★ (142 repairs)",
-      "technicianVehicle": "Honda Activa (CG-07-XX-1234)",
-      "updatedAt": "2026-11-05T15:37:45.347Z"
-    },
-    {
-      "bookingId": "GB-2026-BHL-805",
-      "addressSnapshot": {
-        "fullAddress": "House 14, Street 7, Sector 6, Bhilai"
-      },
-      "assignedAt": "2026-11-05T15:24:14.381Z",
-      "assignedTechnician": {
-        "id": "GB-TECH-01",
-        "name": "Manoj Kumar",
-        "phone": "+919876543210",
-        "rating": "4.92 ★ (142 repairs)",
-        "vehicle": "Honda Activa (CG-07-XX-1234)"
-      },
-      "bookingStatus": "ON_THE_WAY",
-      "cancellationReason": null,
-      "cancelledAt": null,
-      "completedAt": null,
-      "confirmedAt": "2026-11-05T15:24:04.371Z",
-      "createdAt": "2026-11-05T15:23:56.254Z",
-      "customerName": "Ritesh Singh",
-      "customerNotes": "",
-      "customerPhone": "+919876543210",
-      "customerUid": "gb_user_919876543210",
-      "estimatedEta": "30-45 mins",
-      "finalAmount": null,
-      "issueDescription": "",
-      "paymentMethod": "CASH_ON_DELIVERY",
-      "paymentStatus": "PENDING",
-      "preferredDate": "2026-11-05",
-      "preferredTimeSlot": "Today (30-45 mins)",
-      "pricingTypeSnapshot": "inspection_based",
-      "serviceId": "regular-fan-installation",
-      "serviceNameSnapshot": "Electrical Service Visit",
-      "statusHistory": [
-        {
-          "status": "PENDING_CONFIRMATION",
-          "timestamp": "2026-11-05T15:23:56.254Z",
-          "note": "Booking submitted. Bhilai operator confirmation call will arrive shortly."
-        },
-        {
-          "status": "CONFIRMED",
-          "timestamp": "2026-11-05T15:24:04.371Z",
-          "note": "Bhilai Operations verified booking with customer"
-        },
-        {
-          "status": "TECHNICIAN_ASSIGNED",
-          "timestamp": "2026-11-05T15:24:14.381Z",
-          "note": "Assigned verified Bhilai partner Manoj Kumar (4.92 ★ (142 repairs))"
-        },
-        {
-          "status": "ON_THE_WAY",
-          "timestamp": "2026-11-05T15:24:32.726Z",
-          "note": "Manoj Kumar has departed and is en route on Honda Activa (CG-07-XX-1234)"
-        }
-      ],
-      "technicianName": "Manoj Kumar",
-      "technicianPhone": "+919876543210",
-      "technicianRating": "4.92 ★ (142 repairs)",
-      "technicianVehicle": "Honda Activa (CG-07-XX-1234)",
-      "updatedAt": "2026-11-05T15:24:32.726Z"
-    },
-    {
-      "bookingId": "GB-2026-BHL-458",
-      "addressSnapshot": {
-        "fullAddress": "Civic Centre, Bhilai"
-      },
-      "assignedAt": "2026-11-05T15:20:39.765Z",
-      "assignedTechnician": {
-        "id": "GB-TECH-01",
-        "name": "Manoj Kumar",
-        "phone": "+919876543210",
-        "rating": "4.92 ★ (142 repairs)",
-        "vehicle": "Honda Activa (CG-07-XX-1234)"
-      },
-      "bookingStatus": "ON_THE_WAY",
-      "cancellationReason": null,
-      "cancelledAt": null,
-      "completedAt": null,
-      "confirmedAt": "2026-11-05T15:20:29.754Z",
-      "createdAt": "2026-11-05T15:20:21.599Z",
-      "customerName": "Ritesh Singh",
-      "customerNotes": "",
-      "customerPhone": "+919876543210",
-      "customerUid": "guest",
-      "estimatedEta": "30-45 mins",
-      "finalAmount": null,
-      "issueDescription": "",
-      "paymentMethod": "CASH_ON_DELIVERY",
-      "paymentStatus": "PENDING",
-      "preferredDate": "2026-11-05",
-      "preferredTimeSlot": "Today (30-45 mins)",
-      "pricingTypeSnapshot": "inspection_based",
-      "serviceId": "regular-fan-installation",
-      "serviceNameSnapshot": "Electrical Service Visit",
-      "statusHistory": [
-        {
-          "status": "PENDING_CONFIRMATION",
-          "timestamp": "2026-11-05T15:20:21.599Z",
-          "note": "Booking submitted. Bhilai operator confirmation call will arrive shortly."
-        },
-        {
-          "status": "CONFIRMED",
-          "timestamp": "2026-11-05T15:20:29.754Z",
-          "note": "Bhilai Operations verified booking with customer"
-        },
-        {
-          "status": "TECHNICIAN_ASSIGNED",
-          "timestamp": "2026-11-05T15:20:39.765Z",
-          "note": "Assigned verified Bhilai partner Manoj Kumar (4.92 ★ (142 repairs))"
-        },
-        {
-          "status": "ON_THE_WAY",
-          "timestamp": "2026-11-05T15:20:58.016Z",
-          "note": "Manoj Kumar has departed and is en route on Honda Activa (CG-07-XX-1234)"
-        }
-      ],
-      "technicianName": "Manoj Kumar",
-      "technicianPhone": "+919876543210",
-      "technicianRating": "4.92 ★ (142 repairs)",
-      "technicianVehicle": "Honda Activa (CG-07-XX-1234)",
-      "updatedAt": "2026-11-05T15:20:58.016Z"
     },
     {
       "bookingId": "GB-2026-BHL-384",
@@ -1156,123 +1297,6 @@
       "technicianRating": "4.92 ★ (142 repairs)",
       "technicianVehicle": "Honda Activa (CG-07-XX-1234)",
       "updatedAt": "2026-11-05T13:49:44.747Z"
-    },
-    {
-      "bookingId": "GB-2026-BHL-108",
-      "addressSnapshot": {
-        "houseNo": "Plot 42",
-        "street": "Near Civic Centre Park, Sector 6",
-        "landmark": "Opposite Kala Mandir",
-        "pincode": "490006",
-        "city": "Bhilai, Chhattisgarh",
-        "fullAddress": "Plot 42, Near Civic Centre Park, Sector 6, Bhilai, Chhattisgarh - 490006"
-      },
-      "assignedAt": "2026-11-05T13:45:27.793Z",
-      "assignedTechnician": {
-        "id": "GB-TECH-01",
-        "name": "Manoj Kumar",
-        "phone": "+919876543210",
-        "rating": "4.92 ★ (142 repairs)",
-        "vehicle": "Honda Activa (CG-07-XX-1234)"
-      },
-      "bookingStatus": "TECHNICIAN_ASSIGNED",
-      "cancellationReason": null,
-      "cancelledAt": null,
-      "completedAt": null,
-      "confirmedAt": "2026-11-05T13:45:27.793Z",
-      "createdAt": "2026-11-05T13:45:27.793Z",
-      "customerName": "Ritesh Singh",
-      "customerNotes": "Please bring ladder",
-      "customerPhone": "+919876543210",
-      "customerUid": "gb_user_919876543210",
-      "estimatedEta": "30-45 mins",
-      "finalAmount": null,
-      "issueDescription": "Fan speed regulation and blade balancing",
-      "paymentMethod": "CASH_ON_DELIVERY",
-      "paymentStatus": "PENDING",
-      "preferredDate": "2026-11-05",
-      "preferredTimeSlot": "12:00 PM – 03:00 PM",
-      "pricingTypeSnapshot": "inspection_based",
-      "serviceId": "regular-fan-installation",
-      "serviceNameSnapshot": "Regular Ceiling Fan Installation",
-      "statusHistory": [
-        {
-          "status": "PENDING_CONFIRMATION",
-          "timestamp": "2026-11-05T13:45:27.793Z",
-          "note": "Booking submitted by customer"
-        },
-        {
-          "status": "CONFIRMED",
-          "timestamp": "2026-11-05T13:45:27.793Z",
-          "note": "Verified by Bhilai Operations"
-        },
-        {
-          "status": "TECHNICIAN_ASSIGNED",
-          "timestamp": "2026-11-05T13:45:27.793Z",
-          "note": "Manoj Kumar assigned"
-        }
-      ],
-      "technicianName": "Manoj Kumar",
-      "technicianPhone": "+919876543210",
-      "technicianRating": "4.92 ★ (142 repairs)",
-      "technicianVehicle": "Honda Activa (CG-07-XX-1234)",
-      "updatedAt": "2026-11-05T13:45:27.793Z"
-    },
-    {
-      "bookingId": "GB-2026-BHL-109",
-      "addressSnapshot": {
-        "houseNo": "B-12, Surya Enclave",
-        "street": "Nehru Nagar West",
-        "landmark": "Near Apollo Hospital",
-        "pincode": "490020",
-        "city": "Bhilai, Chhattisgarh",
-        "fullAddress": "B-12, Surya Enclave, Nehru Nagar West, Bhilai - 490020"
-      },
-      "assignedAt": "2026-11-05T14:12:32.503Z",
-      "assignedTechnician": {
-        "id": "GB-TECH-03",
-        "name": "Rajesh Sharma",
-        "phone": "+919876543212",
-        "rating": "4.94 ★ (320 repairs)",
-        "vehicle": "TVS Jupiter (CG-07-ZZ-9012)"
-      },
-      "bookingStatus": "TECHNICIAN_ASSIGNED",
-      "cancellationReason": null,
-      "cancelledAt": null,
-      "completedAt": null,
-      "confirmedAt": null,
-      "createdAt": "2026-11-05T13:45:27.793Z",
-      "customerName": "Pooja Verma",
-      "customerNotes": "",
-      "customerPhone": "+919999999999",
-      "customerUid": "gb_user_919999999999",
-      "estimatedEta": "30-45 mins",
-      "finalAmount": null,
-      "issueDescription": "Installing 2 Atomberg smart fans with remote",
-      "paymentMethod": "CASH_ON_DELIVERY",
-      "paymentStatus": "PENDING",
-      "preferredDate": "2026-11-05",
-      "preferredTimeSlot": "09:00 AM – 12:00 PM",
-      "pricingTypeSnapshot": "fixed_quote",
-      "serviceId": "smart-bldc-fan",
-      "serviceNameSnapshot": "Smart/BLDC ceiling fan replace/install",
-      "statusHistory": [
-        {
-          "status": "PENDING_CONFIRMATION",
-          "timestamp": "2026-11-05T13:45:27.793Z",
-          "note": "Booking received online"
-        },
-        {
-          "status": "TECHNICIAN_ASSIGNED",
-          "timestamp": "2026-11-05T14:12:32.503Z",
-          "note": "Admin assigned Rajesh Sharma (4.94 ★ (320 repairs))"
-        }
-      ],
-      "technicianName": "Rajesh Sharma",
-      "technicianPhone": "+919876543212",
-      "technicianRating": "4.94 ★ (320 repairs)",
-      "technicianVehicle": "TVS Jupiter (CG-07-ZZ-9012)",
-      "updatedAt": "2026-11-05T14:12:32.503Z"
     }
   ],
   "users": {

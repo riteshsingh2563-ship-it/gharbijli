@@ -157,10 +157,61 @@ class GharBijliFirebaseService {
     ));
 
     if (isMobileApp) {
-      // In mobile app WebView, use signInWithRedirect so it opens inside app without popup blocking
-      console.log("[GharBijli] Mobile environment: triggering in-app Google redirect...");
-      await this.auth.signInWithRedirect(provider);
-      return null;
+      console.log("[GharBijli] Mobile environment: triggering secure Google Auth bridge...");
+      const base = this.getApiBaseUrl();
+      let createRes = null;
+      try {
+        const res = await fetch(`${base}/api/auth/session/create`, { method: 'POST' });
+        createRes = await res.json();
+      } catch (err) {
+        console.warn("[GharBijli] Auth session creation failed:", err.message);
+      }
+
+      if (!createRes || !createRes.sessionId) {
+        throw new Error("Unable to establish secure authentication session. Please check your internet connection.");
+      }
+
+      const sessionId = createRes.sessionId;
+      const bridgeUrl = `${base}/auth-mobile.html?sessionId=${encodeURIComponent(sessionId)}`;
+
+      // Open in system browser (Chrome)
+      try {
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+          window.open(bridgeUrl, '_system');
+        } else {
+          window.open(bridgeUrl, '_blank') || (window.location.href = bridgeUrl);
+        }
+      } catch (e) {
+        window.location.href = bridgeUrl;
+      }
+
+      // Poll session status in background
+      return new Promise((resolve, reject) => {
+        let attempts = 0;
+        const maxAttempts = 120; // 3 minutes timeout
+        const pollInterval = setInterval(async () => {
+          attempts++;
+          try {
+            const checkRes = await fetch(`${base}/api/auth/session/check?id=${encodeURIComponent(sessionId)}`).then(r => r.json());
+            if (checkRes && checkRes.authenticated && checkRes.user) {
+              clearInterval(pollInterval);
+              console.log("[GharBijli] Bridge auth completed for:", checkRes.user.email);
+              const verified = await this.handleAuthSuccess(checkRes.user);
+              if (typeof window.onGoogleLoginSuccess === 'function') {
+                window.onGoogleLoginSuccess(verified);
+              }
+              resolve(verified);
+            }
+          } catch (pollErr) {
+            console.warn("[GharBijli] Session check poll warning:", pollErr.message);
+          }
+
+          if (attempts >= maxAttempts) {
+            clearInterval(pollInterval);
+            reject(new Error("Sign-in session timed out. Please tap Continue with Google again."));
+          }
+        }, 1500);
+      });
     } else {
       // Desktop web: use standard popup
       const result = await this.auth.signInWithPopup(provider);

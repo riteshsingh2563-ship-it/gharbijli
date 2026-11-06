@@ -256,6 +256,46 @@ async function handleApiRequest(req, res) {
       return true;
     }
 
+    // 11d. Auth: Create Mobile Login Bridge Session
+    if (pathname === '/api/auth/session/create' && (method === 'GET' || method === 'POST')) {
+      const sessionId = await store.createAuthSession();
+      sendJson(res, 200, { success: true, sessionId });
+      return true;
+    }
+
+    // 11e. Auth: Save Mobile Login Bridge Session
+    if (pathname === '/api/auth/session/save' && method === 'POST') {
+      const body = await parseJsonBody(req);
+      if (!body.sessionId || !body.user) {
+        sendJson(res, 400, { error: 'sessionId and user are required' });
+        return true;
+      }
+      await store.saveAuthSession(body.sessionId, body.user);
+      try {
+        await store.upsertGoogleUser({
+          email: body.user.email,
+          name: body.user.displayName,
+          picture: body.user.photoURL,
+          sub: body.user.uid
+        });
+      } catch (e) {}
+      sendJson(res, 200, { success: true });
+      return true;
+    }
+
+    // 11f. Auth: Check Mobile Login Bridge Session
+    if (pathname === '/api/auth/session/check' && method === 'GET') {
+      const parsedUrl = url.parse(req.url, true);
+      const sessionId = parsedUrl.query.id || parsedUrl.query.sessionId;
+      if (!sessionId) {
+        sendJson(res, 400, { error: 'Session ID is required' });
+        return true;
+      }
+      const status = await store.checkAuthSession(sessionId);
+      sendJson(res, 200, { success: true, ...status });
+      return true;
+    }
+
     // 11c. Auth: Direct Phone Login (Zero OTP hassle, stored directly in MongoDB Atlas)
     if (pathname === '/api/auth/phone-direct' && method === 'POST') {
       const body = await parseJsonBody(req);
