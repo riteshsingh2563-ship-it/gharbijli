@@ -1125,9 +1125,10 @@ class BackendStore {
           this.data.users[uid] = clean;
           return clean;
         }
-        return null;
+        if (process.env.VERCEL) return null;
+      } else if (process.env.VERCEL) {
+        throw new Error('MongoDB is unavailable while loading the customer profile');
       }
-      if (process.env.VERCEL) throw new Error('MongoDB is unavailable while loading the customer profile');
     } catch (err) {
       if (process.env.VERCEL) throw err;
       console.warn('[BackendStore] getUser fallback:', err.message);
