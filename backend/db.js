@@ -155,12 +155,22 @@ async function deleteServiceFromMongo(serviceId) {
 async function syncBookingToMongo(booking) {
   if (!booking || !booking.bookingId) throw new Error('A booking ID is required for MongoDB sync');
   const database = await getDb();
-  if (!database) throw new Error('MongoDB is unavailable while saving the booking');
-  await database.collection('bookings').updateOne(
-    { bookingId: booking.bookingId },
-    { $set: booking },
-    { upsert: true }
-  );
+  if (!database) {
+    if (process.env.VERCEL) throw new Error('MongoDB is unavailable while saving the booking');
+    return false;
+  }
+  try {
+    await database.collection('bookings').updateOne(
+      { bookingId: booking.bookingId },
+      { $set: booking },
+      { upsert: true }
+    );
+    return true;
+  } catch (err) {
+    if (process.env.VERCEL) throw err;
+    console.warn('[MongoDB] syncBooking error:', err.message);
+    return false;
+  }
 }
 
 async function syncEmergencyTicketToMongo(ticket) {
@@ -204,12 +214,22 @@ async function deleteTechnicianFromMongo(techId) {
 async function syncUserToMongo(user) {
   if (!user || !user.uid) throw new Error('A user ID is required for MongoDB sync');
   const database = await getDb();
-  if (!database) throw new Error('MongoDB is unavailable while saving the user');
-  await database.collection('users').updateOne(
-    { uid: user.uid },
-    { $set: user },
-    { upsert: true }
-  );
+  if (!database) {
+    if (process.env.VERCEL) throw new Error('MongoDB is unavailable while saving the user');
+    return false;
+  }
+  try {
+    await database.collection('users').updateOne(
+      { uid: user.uid },
+      { $set: user },
+      { upsert: true }
+    );
+    return true;
+  } catch (err) {
+    if (process.env.VERCEL) throw err;
+    console.warn('[MongoDB] syncUser error:', err.message);
+    return false;
+  }
 }
 
 async function syncAllToMongo(data) {
