@@ -147,14 +147,10 @@ async function handleApiRequest(req, res) {
     // MongoDB Atlas Live Diagnostic
     if (pathname === '/api/test-mongo') {
       try {
-        const { MongoClient } = require('mongodb');
-        const uri = process.env.MONGODB_URI;
-        if (!uri) throw new Error('MONGODB_URI is not configured');
-        const client = new MongoClient(uri, { serverSelectionTimeoutMS: 6000 });
-        await client.connect();
-        const d = client.db('gharbijli');
-        const colls = await d.listCollections().toArray();
-        await client.close();
+        const database = await require('./db').getDb();
+        if (!database) throw new Error('MongoDB is unavailable');
+        await database.command({ ping: 1 });
+        const colls = await database.listCollections().toArray();
         sendJson(res, 200, { success: true, collections: colls.map(c => c.name) });
       } catch (err) {
         sendJson(res, 500, { success: false, error: err.message });
