@@ -484,15 +484,16 @@ class GharBijliFirebaseService {
       method: 'POST',
       body: JSON.stringify(profileData)
     });
-    if (res && res.success && res.user) {
-      this.currentUser = { ...this.currentUser, ...res.user, profileCompleted: true };
-      localStorage.setItem("gb_current_user", JSON.stringify(this.currentUser));
-      this.notifyAuthListeners();
-      return this.currentUser;
+    if (!res || !res.success || !res.user) {
+      throw new Error("The server did not confirm that your profile was saved.");
     }
-    // Local fallback
-    this.currentUser = { ...this.currentUser, ...profileData, profileCompleted: true };
+    this.currentUser = { ...this.currentUser, ...res.user, profileCompleted: true };
     localStorage.setItem("gb_current_user", JSON.stringify(this.currentUser));
+    try {
+      const users = JSON.parse(localStorage.getItem('gb_users_db') || '{}');
+      users[this.currentUser.uid] = { ...(users[this.currentUser.uid] || {}), ...this.currentUser };
+      localStorage.setItem('gb_users_db', JSON.stringify(users));
+    } catch (_) {}
     this.notifyAuthListeners();
     return this.currentUser;
   }
