@@ -465,11 +465,6 @@
         row.innerHTML = `
           <div class="uc-service-left-col">
             <h3 class="uc-service-title">${service.name}</h3>
-            <div class="uc-service-rating-row">
-              <span class="uc-star">★</span>
-              <span>${service.rating || '4.83'}</span>
-              <span class="uc-service-reviews">(${service.reviews || '200K reviews'})</span>
-            </div>
             <div class="uc-service-price-time">
               <span>${service.priceTag || 'Starts at ₹49'}</span>
               <span class="uc-service-time-dot">•</span>
