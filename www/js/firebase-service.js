@@ -137,11 +137,11 @@ class GharBijliFirebaseService {
       if (!idToken) throw new Error('Google sign-in did not return an ID token.');
       const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
       const signedIn = await this.auth.signInWithCredential(credential);
-      return this.handleAuthSuccess(signedIn.user);
+      return signedIn.user;
     }
     const provider = new firebase.auth.GoogleAuthProvider();
     const signedIn = await this.auth.signInWithPopup(provider);
-    return this.handleAuthSuccess(signedIn.user);
+    return signedIn.user;
   }
 
   async handleAuthSuccess(u) {
