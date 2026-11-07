@@ -137,26 +137,42 @@ class GharBijliFirebaseService {
       if (!idToken) throw new Error('Google sign-in did not return an ID token.');
       const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
       const signedIn = await this.auth.signInWithCredential(credential);
-      return this.handleAuthSuccess(signedIn.user);
+      return signedIn.user;
     }
     const provider = new firebase.auth.GoogleAuthProvider();
     const signedIn = await this.auth.signInWithPopup(provider);
-    return this.handleAuthSuccess(signedIn.user);
+    return signedIn.user;
   }
 
   async handleAuthSuccess(u) {
+    if (this.authSuccessUid === u.uid && this.authSuccessPromise) return this.authSuccessPromise;
+    this.authSuccessUid = u.uid;
+    this.authSuccessPromise = this.completeAuthSuccess(u);
+    try {
+      return await this.authSuccessPromise;
+    } finally {
+      this.authSuccessPromise = null;
+    }
+  }
+
+  async completeAuthSuccess(u) {
+    const cachedUsers = (() => {
+      try { return JSON.parse(localStorage.getItem('gb_users_db') || '{}'); }
+      catch (_) { return {}; }
+    })();
+    const cachedProfile = cachedUsers[u.uid] || {};
     const verifiedUser = {
+      ...cachedProfile,
       uid: u.uid,
-      email: u.email,
-      displayName: u.displayName || (u.email ? u.email.split('@')[0] : "Customer"),
-      photoURL: u.photoURL || "",
-      phoneNumber: u.phoneNumber || "",
+      email: u.email || cachedProfile.email || '',
+      displayName: u.displayName || cachedProfile.displayName || (u.email ? u.email.split('@')[0] : "Customer"),
+      photoURL: u.photoURL || cachedProfile.photoURL || "",
+      phoneNumber: u.phoneNumber || cachedProfile.phoneNumber || "",
       authProvider: "google"
     };
     this.currentUser = verifiedUser;
     localStorage.setItem("gb_current_user", JSON.stringify(verifiedUser));
 
-    // Sync to MongoDB Atlas backend
     try {
       const idToken = this.auth && this.auth.currentUser ? await this.auth.currentUser.getIdToken() : null;
       if (!idToken) throw new Error('Missing Firebase ID token');
@@ -167,12 +183,33 @@ class GharBijliFirebaseService {
           apiKey: this.config.firebase.apiKey
         })
       });
-      if (sync.user) Object.assign(verifiedUser, sync.user, { uid: u.uid, authProvider: 'google' });
+      if (!sync || !sync.success || !sync.user) {
+        throw new Error('Backend did not return the saved customer profile');
+      }
+      Object.assign(verifiedUser, sync.user, {
+        uid: u.uid,
+        email: u.email || sync.user.email,
+        authProvider: 'google'
+      });
     } catch (syncErr) {
       console.warn("[GharBijli] Mongo auth sync note:", syncErr.message);
+      // A temporary sync error should not discard an already saved server profile.
+      try {
+        const params = new URLSearchParams({ uid: u.uid });
+        const profile = await this.apiRequest(`/api/auth/profile?${params.toString()}`);
+        if (profile && profile.success && profile.user) {
+          Object.assign(verifiedUser, profile.user, { uid: u.uid, authProvider: 'google' });
+        }
+      } catch (profileErr) {
+        console.warn("[GharBijli] Saved profile could not be reloaded:", profileErr.message);
+      }
     }
 
     localStorage.setItem("gb_current_user", JSON.stringify(verifiedUser));
+    try {
+      cachedUsers[u.uid] = { ...(cachedUsers[u.uid] || {}), ...verifiedUser };
+      localStorage.setItem('gb_users_db', JSON.stringify(cachedUsers));
+    } catch (_) {}
     this.notifyAuthListeners();
     return verifiedUser;
   }
@@ -447,15 +484,16 @@ class GharBijliFirebaseService {
       method: 'POST',
       body: JSON.stringify(profileData)
     });
-    if (res && res.success && res.user) {
-      this.currentUser = { ...this.currentUser, ...res.user, profileCompleted: true };
-      localStorage.setItem("gb_current_user", JSON.stringify(this.currentUser));
-      this.notifyAuthListeners();
-      return this.currentUser;
+    if (!res || !res.success || !res.user) {
+      throw new Error("The server did not confirm that your profile was saved.");
     }
-    // Local fallback
-    this.currentUser = { ...this.currentUser, ...profileData, profileCompleted: true };
+    this.currentUser = { ...this.currentUser, ...res.user, profileCompleted: true };
     localStorage.setItem("gb_current_user", JSON.stringify(this.currentUser));
+    try {
+      const users = JSON.parse(localStorage.getItem('gb_users_db') || '{}');
+      users[this.currentUser.uid] = { ...(users[this.currentUser.uid] || {}), ...this.currentUser };
+      localStorage.setItem('gb_users_db', JSON.stringify(users));
+    } catch (_) {}
     this.notifyAuthListeners();
     return this.currentUser;
   }

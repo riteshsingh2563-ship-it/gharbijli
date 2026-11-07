@@ -1309,8 +1309,7 @@
         const data = await res.json();
         if (data.success) {
           showToast(`Updated ${bookingId} to ${status}`);
-          await fetchBookings();
-          await checkMongoHealth(); fetchStats();
+          await Promise.all([fetchBookings(), fetchStats()]);
         } else {
           alert(data.error || "Status update failed");
         }
@@ -1676,13 +1675,17 @@
     }
 
     initAll();
-    // Auto-refresh every 6 seconds for live operations
+    // Keep the Mongo health check user-triggered; refresh operational feeds without reconnecting.
+    let refreshInProgress = false;
     setInterval(async () => {
-      if (!sessionStorage.getItem('gb_admin_token')) return;
-      await checkMongoHealth(); fetchStats();
-      await fetchBookings();
-      await fetchEmergencies();
-    }, 6000);
+      if (!sessionStorage.getItem('gb_admin_token') || refreshInProgress) return;
+      refreshInProgress = true;
+      try {
+        await Promise.all([fetchStats(), fetchBookings(), fetchEmergencies()]);
+      } finally {
+        refreshInProgress = false;
+      }
+    }, 10000);
   </script>
 </body>
 </html>

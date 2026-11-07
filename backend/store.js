@@ -757,6 +757,7 @@ class BackendStore {
   }
 
   async getBookings(filter = {}) {
+    const hasCustomerFilter = !!(filter.customerUid || filter.customerEmail || filter.customerPhone);
     try {
       const db = await mongoDb.getDb();
       if (db) {
@@ -768,20 +769,24 @@ class BackendStore {
           if (cleanPhone) conditions.push({ customerPhone: { $regex: cleanPhone } });
         }
         let q = {};
-        if (conditions.length > 1) {
-          q = { $or: conditions };
-        } else if (conditions.length === 1) {
-          q = conditions[0];
-        }
+        if (conditions.length > 1) q = { $or: conditions };
+        else if (conditions.length === 1) q = conditions[0];
         if (filter.bookingStatus) q.bookingStatus = filter.bookingStatus;
-        const bookings = await db.collection('bookings').find(q).sort({ createdAt: -1 }).toArray();
-        if (bookings && bookings.length) {
-          return bookings.map(b => { const { _id, ...r } = b; return r; });
-        }
+
+        const limit = Math.max(1, Math.min(Number(filter.limit) || (hasCustomerFilter ? 100 : 500), 500));
+        const bookings = await db.collection('bookings')
+          .find(q)
+          .sort({ createdAt: -1 })
+          .limit(limit)
+          .toArray();
+        return bookings.map(({ _id, ...booking }) => booking);
       }
+      if (process.env.VERCEL) throw new Error('MongoDB is unavailable while loading bookings');
     } catch (err) {
+      if (process.env.VERCEL) throw err;
       console.warn('[BackendStore] getBookings fallback:', err.message);
     }
+
     let result = this.data.bookings;
     if (filter.customerUid || filter.customerPhone || filter.customerEmail) {
       const cleanPhone = (filter.customerPhone || '').replace(/\D/g, '').slice(-10);
@@ -791,10 +796,8 @@ class BackendStore {
         (cleanPhone && (b.customerPhone || '').replace(/\D/g, '').endsWith(cleanPhone))
       );
     }
-    if (filter.bookingStatus) {
-      result = result.filter(b => b.bookingStatus === filter.bookingStatus);
-    }
-    return result;
+    if (filter.bookingStatus) result = result.filter(b => b.bookingStatus === filter.bookingStatus);
+    return result.slice(0, Math.max(1, Math.min(Number(filter.limit) || (hasCustomerFilter ? 100 : 500), 500)));
   }
 
   async getBookingById(bookingId) {
@@ -939,6 +942,25 @@ class BackendStore {
     }
     this.saveLocal();
     return ticket;
+  }
+
+  async getEmergencyTickets() {
+    try {
+      const db = await mongoDb.getDb();
+      if (db) {
+        const tickets = await db.collection('emergency_tickets')
+          .find({})
+          .sort({ createdAt: -1 })
+          .limit(100)
+          .toArray();
+        return tickets.map(({ _id, ...ticket }) => ticket);
+      }
+      if (process.env.VERCEL) throw new Error('MongoDB is unavailable while loading emergency tickets');
+    } catch (err) {
+      if (process.env.VERCEL) throw err;
+      console.warn('[BackendStore] getEmergencyTickets fallback:', err.message);
+    }
+    return this.data.emergencyTickets.slice(0, 100);
   }
 
   async getAdminStats() {
@@ -1092,49 +1114,81 @@ class BackendStore {
     return null;
   }
 
-  getUser(uid) {
+  async getUser(uid) {
+    if (!uid) return null;
+    try {
+      const db = await mongoDb.getDb();
+      if (db) {
+        const user = await db.collection('users').findOne({ uid });
+        if (user) {
+          const { _id, ...clean } = user;
+          this.data.users[uid] = clean;
+          return clean;
+        }
+        if (process.env.VERCEL) return null;
+      } else if (process.env.VERCEL) {
+        throw new Error('MongoDB is unavailable while loading the customer profile');
+      }
+    } catch (err) {
+      if (process.env.VERCEL) throw err;
+      console.warn('[BackendStore] getUser fallback:', err.message);
+    }
     return this.data.users[uid] || null;
   }
 
   async updateUser(uid, updates) {
-    if (!this.data.users[uid]) {
-      this.data.users[uid] = { uid, ...updates, updatedAt: new Date().toISOString() };
-    } else {
-      Object.assign(this.data.users[uid], updates, { updatedAt: new Date().toISOString() });
-    }
+    if (!uid) throw new Error('User ID is required');
+    const existing = await this.getUser(uid);
+    const user = {
+      ...(existing || {}),
+      ...updates,
+      uid,
+      updatedAt: new Date().toISOString()
+    };
     if (mongoDb && typeof mongoDb.syncUserToMongo === 'function') {
-      await mongoDb.syncUserToMongo(this.data.users[uid]);
+      await mongoDb.syncUserToMongo(user);
     }
+    this.data.users[uid] = user;
     await this.save();
-    return this.data.users[uid];
+    return user;
   }
 
   async upsertGoogleUser({ email, name, picture, sub, googleId }) {
     if (!email) throw new Error("Google email is required");
-    const idKey = sub || googleId || email.replace(/[^a-zA-Z0-9]/g, '_');
-    const uid = idKey;
-    const existing = this.data.users[uid] || Object.values(this.data.users).find(user => user && user.email && user.email.toLowerCase() === email.toLowerCase());
+    const uid = sub || googleId;
+    if (!uid) throw new Error("Firebase user ID is required");
 
-    if (existing && existing.uid !== uid) delete this.data.users[existing.uid];
-    this.data.users[uid] = {
-      ...(existing || {}),
+    const database = await mongoDb.getDb();
+    if (!database && process.env.VERCEL) throw new Error('MongoDB is unavailable while saving the Google account');
+    const users = database && database.collection('users');
+    const existingDoc = users ? (await users.findOne({ uid }) || await users.findOne({ email })) : null;
+    const existing = existingDoc
+      ? (({ _id, ...clean }) => clean)(existingDoc)
+      : (this.data.users[uid] || Object.values(this.data.users).find(user =>
+        user && user.email && user.email.toLowerCase() === email.toLowerCase()) || {});
+    const user = {
+      ...existing,
       uid,
       authProvider: 'google',
       email,
-      displayName: (existing && existing.displayName) || name || email.split('@')[0],
-      photoURL: picture || (existing && existing.photoURL) || '',
-      phoneNumber: (existing && existing.phoneNumber) || '',
-      role: 'customer',
-      profileCompleted: !!(existing && existing.profileCompleted),
-      createdAt: (existing && existing.createdAt) || new Date().toISOString(),
+      displayName: existing.displayName || name || email.split('@')[0],
+      photoURL: picture || existing.photoURL || '',
+      phoneNumber: existing.phoneNumber || '',
+      role: existing.role || 'customer',
+      profileCompleted: !!existing.profileCompleted,
+      createdAt: existing.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
 
-    if (mongoDb && typeof mongoDb.syncUserToMongo === 'function') {
-      await mongoDb.syncUserToMongo(this.data.users[uid]);
+    if (existingDoc) {
+      await users.updateOne({ _id: existingDoc._id }, { $set: user });
+    } else if (database) {
+      await mongoDb.syncUserToMongo(user);
     }
+    if (existing.uid && existing.uid !== uid) delete this.data.users[existing.uid];
+    this.data.users[uid] = user;
     await this.save();
-    return this.data.users[uid];
+    return user;
   }
 
   async createAuthSession() {

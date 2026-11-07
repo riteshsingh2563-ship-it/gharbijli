@@ -71,39 +71,26 @@ async function loadAllFromMongo() {
     const database = await getDb();
     if (!database) return null;
 
-    const [appConfigDoc, categories, services, technicians, bookings, emergencyTickets, users] = await Promise.all([
+    // Keep cold-start hydration to small reference data. Operational collections
+    // (bookings, emergencies, users) are queried on demand by BackendStore.
+    const [appConfigDoc, categories, services, technicians] = await Promise.all([
       database.collection('app_config').findOne({ _id: 'global_config' }),
       database.collection('categories').find({}).sort({ order: 1 }).toArray(),
       database.collection('services').find({}).toArray(),
-      database.collection('technicians').find({}).toArray(),
-      database.collection('bookings').find({}).sort({ createdAt: -1 }).toArray(),
-      database.collection('emergency_tickets').find({}).sort({ createdAt: -1 }).toArray(),
-      database.collection('users').find({}).toArray()
+      database.collection('technicians').find({}).toArray()
     ]);
 
-    // Clean internal mongo _id fields for clean json delivery if needed
     const cleanDoc = (d) => {
       if (!d) return d;
       const { _id, ...rest } = d;
       return rest;
     };
 
-    const usersMap = {};
-    if (users && users.length) {
-      users.forEach(u => {
-        const cleaned = cleanDoc(u);
-        if (cleaned.uid) usersMap[cleaned.uid] = cleaned;
-      });
-    }
-
     return {
       appConfig: appConfigDoc ? cleanDoc(appConfigDoc) : null,
       categories: categories && categories.length ? categories.map(cleanDoc) : null,
       services: services && services.length ? services.map(cleanDoc) : null,
-      technicians: technicians && technicians.length ? technicians.map(cleanDoc) : null,
-      bookings: bookings ? bookings.map(cleanDoc) : [],
-      emergencyTickets: emergencyTickets ? emergencyTickets.map(cleanDoc) : [],
-      users: usersMap
+      technicians: technicians && technicians.length ? technicians.map(cleanDoc) : null
     };
   } catch (err) {
     console.error('[MongoDB] loadAllFromMongo failed:', err.message);
@@ -166,16 +153,23 @@ async function deleteServiceFromMongo(serviceId) {
 }
 
 async function syncBookingToMongo(booking) {
+  if (!booking || !booking.bookingId) throw new Error('A booking ID is required for MongoDB sync');
+  const database = await getDb();
+  if (!database) {
+    if (process.env.VERCEL) throw new Error('MongoDB is unavailable while saving the booking');
+    return false;
+  }
   try {
-    const database = await getDb();
-    if (!database || !booking || !booking.bookingId) return;
     await database.collection('bookings').updateOne(
       { bookingId: booking.bookingId },
       { $set: booking },
       { upsert: true }
     );
+    return true;
   } catch (err) {
+    if (process.env.VERCEL) throw err;
     console.warn('[MongoDB] syncBooking error:', err.message);
+    return false;
   }
 }
 
@@ -218,16 +212,23 @@ async function deleteTechnicianFromMongo(techId) {
 }
 
 async function syncUserToMongo(user) {
+  if (!user || !user.uid) throw new Error('A user ID is required for MongoDB sync');
+  const database = await getDb();
+  if (!database) {
+    if (process.env.VERCEL) throw new Error('MongoDB is unavailable while saving the user');
+    return false;
+  }
   try {
-    const database = await getDb();
-    if (!database || !user || !user.uid) return;
     await database.collection('users').updateOne(
-      user.email ? { $or: [{ uid: user.uid }, { email: user.email }] } : { uid: user.uid },
+      { uid: user.uid },
       { $set: user },
       { upsert: true }
     );
+    return true;
   } catch (err) {
+    if (process.env.VERCEL) throw err;
     console.warn('[MongoDB] syncUser error:', err.message);
+    return false;
   }
 }
 

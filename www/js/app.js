@@ -17,6 +17,7 @@
   let selectedService = null;
   let activeTrackingBookingId = null;
   let trackingPollTimer = null;
+  let trackingPollInFlight = false;
   let lastObservedTrackingStatus = null;
   let activeTab = "active";
   let isSubmitting = false;
@@ -464,11 +465,6 @@
         row.innerHTML = `
           <div class="uc-service-left-col">
             <h3 class="uc-service-title">${service.name}</h3>
-            <div class="uc-service-rating-row">
-              <span class="uc-star">★</span>
-              <span>${service.rating || '4.83'}</span>
-              <span class="uc-service-reviews">(${service.reviews || '200K reviews'})</span>
-            </div>
             <div class="uc-service-price-time">
               <span>${service.priceTag || 'Starts at ₹49'}</span>
               <span class="uc-service-time-dot">•</span>
@@ -880,8 +876,7 @@
   async function performGoogleLogin(userEmail, userName) {
     try {
       showToast('Connecting to Google…', 'info');
-      const user = await window.GharBijliFirebase.signInWithGoogle();
-      window.onGoogleLoginSuccess(user);
+      await window.GharBijliFirebase.signInWithGoogle();
     } catch (e) {
       showToast(`Google sign-in failed: ${e.message || 'Please try again.'}`, 'error');
     }
@@ -1106,10 +1101,11 @@
 
     if (!trackingPollTimer) {
       trackingPollTimer = setInterval(() => {
-        if (currentScreen === "tracking" && activeTrackingBookingId) {
-          renderTrackingScreen(true);
+        if (currentScreen === "tracking" && activeTrackingBookingId && !trackingPollInFlight) {
+          trackingPollInFlight = true;
+          renderTrackingScreen(true).finally(() => { trackingPollInFlight = false; });
         }
-      }, 3000);
+      }, 5000);
     }
 
     try {
