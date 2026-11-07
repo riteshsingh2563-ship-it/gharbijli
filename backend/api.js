@@ -625,7 +625,7 @@ async function handleApiRequest(req, res) {
     if (pathname === '/api/emergency' && method === 'POST') {
       const body = await parseJsonBody(req);
       const identity = await verifyFirebaseToken(req);
-      const customer = identity ? store.getUser(identity.uid) : null;
+      const customer = identity ? await store.getUser(identity.uid) : null;
       if (!identity || !customer || !customer.profileCompleted || customer.phoneNumber !== body.phone) {
         sendJson(res, 401, { error: 'A completed, authenticated customer profile is required for emergency requests' });
         return true;
