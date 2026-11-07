@@ -17,6 +17,7 @@
   let selectedService = null;
   let activeTrackingBookingId = null;
   let trackingPollTimer = null;
+  let trackingPollInFlight = false;
   let lastObservedTrackingStatus = null;
   let activeTab = "active";
   let isSubmitting = false;
@@ -880,8 +881,7 @@
   async function performGoogleLogin(userEmail, userName) {
     try {
       showToast('Connecting to Google…', 'info');
-      const user = await window.GharBijliFirebase.signInWithGoogle();
-      window.onGoogleLoginSuccess(user);
+      await window.GharBijliFirebase.signInWithGoogle();
     } catch (e) {
       showToast(`Google sign-in failed: ${e.message || 'Please try again.'}`, 'error');
     }
@@ -1106,10 +1106,11 @@
 
     if (!trackingPollTimer) {
       trackingPollTimer = setInterval(() => {
-        if (currentScreen === "tracking" && activeTrackingBookingId) {
-          renderTrackingScreen(true);
+        if (currentScreen === "tracking" && activeTrackingBookingId && !trackingPollInFlight) {
+          trackingPollInFlight = true;
+          renderTrackingScreen(true).finally(() => { trackingPollInFlight = false; });
         }
-      }, 3000);
+      }, 5000);
     }
 
     try {
