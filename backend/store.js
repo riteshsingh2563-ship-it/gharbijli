@@ -1158,11 +1158,13 @@ class BackendStore {
     if (!uid) throw new Error("Firebase user ID is required");
 
     const database = await mongoDb.getDb();
-    if (!database) throw new Error('MongoDB is unavailable while saving the Google account');
-    const users = database.collection('users');
-    const existingDoc = await users.findOne({ uid }) || await users.findOne({ email });
-    const { _id, ...existing } = existingDoc || {};
-
+    if (!database && process.env.VERCEL) throw new Error('MongoDB is unavailable while saving the Google account');
+    const users = database && database.collection('users');
+    const existingDoc = users ? (await users.findOne({ uid }) || await users.findOne({ email })) : null;
+    const existing = existingDoc
+      ? (({ _id, ...clean }) => clean)(existingDoc)
+      : (this.data.users[uid] || Object.values(this.data.users).find(user =>
+        user && user.email && user.email.toLowerCase() === email.toLowerCase()) || {});
     const user = {
       ...existing,
       uid,
@@ -1178,8 +1180,8 @@ class BackendStore {
     };
 
     if (existingDoc) {
-      await users.updateOne({ _id }, { $set: user });
-    } else {
+      await users.updateOne({ _id: existingDoc._id }, { $set: user });
+    } else if (database) {
       await mongoDb.syncUserToMongo(user);
     }
     if (existing.uid && existing.uid !== uid) delete this.data.users[existing.uid];
